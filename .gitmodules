@@ -1,3 +1,0 @@
-[submodule "external/DIFT"]
-	path = external/DIFT
-	url = git@github.com:Tsingularity/dift.git
