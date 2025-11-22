@@ -41,34 +41,102 @@ def run_dift_extractor(img_path, ft_path, shared_args):
 
 # ---- helpers reused from before (same as previous message) ----
 
-def compute_matches(ft1, ft2, max_points=2000):
+def compute_matches(
+    ft1,
+    ft2,
+    max_points=2000,
+    use_mutual=False,
+    ratio_thresh=None,
+):
+    """
+    Match DIFT feature maps using cosine similarity.
+
+    Args:
+        ft1, ft2: feature maps [C, H, W]
+        max_points: max number of points sampled from image 1
+        use_mutual: if True, apply mutual nearest neighbor filtering
+        ratio_thresh: if not None, apply a Lowe-style ratio test on similarities.
+                      (e.g. 1.05 or 1.1 for sim-based ratio)
+
+    Returns:
+        x1, y1, x2, y2: numpy arrays of matched coordinates in feature space
+        (H, W): spatial size of feature maps
+    """
     assert ft1.shape == ft2.shape, "Feature maps must have the same shape"
     C, H, W = ft1.shape
     N = H * W
 
-    ft1_flat = ft1.view(C, -1).t()
-    ft2_flat = ft2.view(C, -1).t()
+    # Flatten to [N, C]
+    ft1_flat = ft1.view(C, -1).t()   # [N, C]
+    ft2_flat = ft2.view(C, -1).t()   # [N, C]
 
+    # L2-normalize (cosine similarity)
     ft1_flat = ft1_flat / (ft1_flat.norm(dim=1, keepdim=True) + 1e-8)
     ft2_flat = ft2_flat / (ft2_flat.norm(dim=1, keepdim=True) + 1e-8)
 
+    # Sample points in image 1
     if N > max_points:
-        idx1 = torch.randperm(N)[:max_points]
+        idx1_full = torch.randperm(N)[:max_points]  # indices in ft1_flat
     else:
-        idx1 = torch.arange(N)
+        idx1_full = torch.arange(N)
 
-    desc1 = ft1_flat[idx1]
-    desc2 = ft2_flat
+    desc1 = ft1_flat[idx1_full]      # [M, C], M <= max_points
+    desc2 = ft2_flat                 # [N, C]
 
+    # Similarity matrix: [M, N]
     sim = desc1 @ desc2.t()
-    idx2 = sim.argmax(dim=1)
 
-    y1 = (idx1 // W).cpu().numpy()
-    x1 = (idx1 % W).cpu().numpy()
-    y2 = (idx2 // W).cpu().numpy()
-    x2 = (idx2 % W).cpu().numpy()
+    # Base: best match in image 2 for each sampled point in image 1
+    best_sim, best_j = sim.max(dim=1)   # [M], indices in desc2 (0..N-1)
+
+    # Track row indices of desc1 (0..M-1)
+    rows = torch.arange(desc1.shape[0])
+
+    # ---------------- Ratio test (optional) ----------------
+    if ratio_thresh is not None:
+        # top-2 similarities for each row
+        top2_sim, top2_idx = sim.topk(2, dim=1)   # [M, 2]
+        best = top2_sim[:, 0]
+        second = top2_sim[:, 1]
+
+        # similarity-based ratio: we want best significantly larger than second
+        ratio = best / (second + 1e-8)
+        good = ratio >= ratio_thresh
+
+        rows = rows[good]
+        best_j = best_j[good]
+
+        # If everything got filtered, bail out early
+        if rows.numel() == 0:
+            return np.array([]), np.array([]), np.array([]), np.array([]), (H, W)
+
+    # ---------------- Mutual NN (optional) ----------------
+    if use_mutual:
+        # Best match in image 1 for each point in image 2
+        # (full reverse mapping over ALL desc1 rows)
+        rev_best_i = sim.argmax(dim=0)       # [N], indices in 0..M-1
+
+        # Enforce: for match (i -> j) we require rev_best_i[j] == i
+        mutual_mask = rev_best_i[best_j] == rows
+        rows = rows[mutual_mask]
+        best_j = best_j[mutual_mask]
+
+        if rows.numel() == 0:
+            return np.array([]), np.array([]), np.array([]), np.array([]), (H, W)
+
+    # ---------------- Convert to (x, y) coords ----------------
+    # rows: indices in desc1 (0..M-1)
+    # idx1_full: corresponding flat indices in ft1_flat (0..N-1)
+    flat1 = idx1_full[rows]          # [K], K = #matches
+    flat2 = best_j                   # [K]
+
+    y1 = (flat1 // W).cpu().numpy()
+    x1 = (flat1 % W).cpu().numpy()
+    y2 = (flat2 // W).cpu().numpy()
+    x2 = (flat2 % W).cpu().numpy()
 
     return x1, y1, x2, y2, (H, W)
+
 
 
 def load_and_resize(img_path, img_size):
@@ -201,14 +269,14 @@ def main():
     # outputs go to datasets/ (you can change this if you prefer)
     ft1_path = datasets_dir / f"{img1_path.stem}_dift.pt"
     ft2_path = datasets_dir / f"{img2_path.stem}_dift.pt"
-    vis_path = datasets_dir / f"matches_{img1_path.stem}_{img2_path.stem}.png"
+    vis_path = datasets_dir / f"dift_matches_{img1_path.stem}_{img2_path.stem}_improved_NN.png"
 
     # 1) extract features with original script
     ft1 = run_dift_extractor(img1_path, ft1_path, args)
     ft2 = run_dift_extractor(img2_path, ft2_path, args)
 
     # 2) compute NN matches
-    x1, y1, x2, y2, feat_hw = compute_matches(ft1, ft2, max_points=args.max_points)
+    x1, y1, x2, y2, feat_hw = compute_matches(ft1, ft2, max_points=args.max_points, use_mutual=True, ratio_thresh=1.1)
 
     # 3) load images for viz (using the exact paths you gave)
     img1_np = load_and_resize(img1_path, args.img_size)
