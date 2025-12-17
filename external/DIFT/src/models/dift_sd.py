@@ -188,18 +188,19 @@ class OneStepSDPipeline(StableDiffusionPipeline):
 
 
 class SDFeaturizer:
-    def __init__(self, sd_id='stable-diffusion-v1-5/stable-diffusion-v1-5', null_prompt=''):
+    def __init__(self, sd_id='stable-diffusion-v1-5/stable-diffusion-v1-5', null_prompt='', device='cuda'):
+        self.device = device
         unet = MyUNet2DConditionModel.from_pretrained(sd_id, subfolder="unet")
         onestep_pipe = OneStepSDPipeline.from_pretrained(sd_id, unet=unet, safety_checker=None)
         onestep_pipe.vae.decoder = None
         onestep_pipe.scheduler = DDIMScheduler.from_pretrained(sd_id, subfolder="scheduler")
         gc.collect()
-        onestep_pipe = onestep_pipe.to("cuda")
+        onestep_pipe = onestep_pipe.to(device)
         onestep_pipe.enable_attention_slicing()
         # onestep_pipe.enable_xformers_memory_efficient_attention()
         null_prompt_embeds = onestep_pipe._encode_prompt(
             prompt=null_prompt,
-            device='cuda',
+            device=device,
             num_images_per_prompt=1,
             do_classifier_free_guidance=False) # [1, 77, dim]
 
@@ -221,16 +222,15 @@ class SDFeaturizer:
             t: the time step to use, should be an int in the range of [0, 1000]
             up_ft_index: which upsampling block of the U-Net to extract feature, you can choose [0, 1, 2, 3]
             ensemble_size: the number of repeated images used in the batch to extract features
-        Return:
-            unet_ft: a torch tensor in the shape of [1, c, h, w]
+        unet_ft: a torch tensor in the shape of [1, c, h, w]
         '''
-        img_tensor = img_tensor.repeat(ensemble_size, 1, 1, 1).cuda() # ensem, c, h, w
+        img_tensor = img_tensor.repeat(ensemble_size, 1, 1, 1).to(self.device) # ensem, c, h, w
         if prompt == self.null_prompt:
             prompt_embeds = self.null_prompt_embeds
         else:
             prompt_embeds = self.pipe._encode_prompt(
                 prompt=prompt,
-                device='cuda',
+                device=self.device,
                 num_images_per_prompt=1,
                 do_classifier_free_guidance=False) # [1, 77, dim]
         prompt_embeds = prompt_embeds.repeat(ensemble_size, 1, 1)
@@ -245,15 +245,15 @@ class SDFeaturizer:
 
 
 class SDFeaturizer4Eval(SDFeaturizer):
-    def __init__(self, sd_id='stabilityai/stable-diffusion-2-1', null_prompt='', cat_list=[]):
-        super().__init__(sd_id, null_prompt)
+    def __init__(self, sd_id='stabilityai/stable-diffusion-2-1', null_prompt='', cat_list=[], device='cuda'):
+        super().__init__(sd_id, null_prompt, device=device)
         with torch.no_grad():
             cat2prompt_embeds = {}
             for cat in cat_list:
                 prompt = f"a photo of a {cat}"
                 prompt_embeds = self.pipe._encode_prompt(
                     prompt=prompt,
-                    device='cuda',
+                    device=self.device,
                     num_images_per_prompt=1,
                     do_classifier_free_guidance=False) # [1, 77, dim]
                 cat2prompt_embeds[cat] = prompt_embeds
@@ -276,12 +276,12 @@ class SDFeaturizer4Eval(SDFeaturizer):
         if img_size is not None:
             img = img.resize(img_size)
         img_tensor = (PILToTensor()(img) / 255.0 - 0.5) * 2
-        img_tensor = img_tensor.unsqueeze(0).repeat(ensemble_size, 1, 1, 1).cuda() # ensem, c, h, w
+        img_tensor = img_tensor.unsqueeze(0).repeat(ensemble_size, 1, 1, 1).to(self.device) # ensem, c, h, w
         if category in self.cat2prompt_embeds:
             prompt_embeds = self.cat2prompt_embeds[category]
         else:
             prompt_embeds = self.null_prompt_embeds
-        prompt_embeds = prompt_embeds.repeat(ensemble_size, 1, 1).cuda()
+        prompt_embeds = prompt_embeds.repeat(ensemble_size, 1, 1).to(self.device)
         unet_ft_all = self.pipe(
             img_tensor=img_tensor,
             t=t,

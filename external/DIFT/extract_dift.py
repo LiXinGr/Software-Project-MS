@@ -5,7 +5,7 @@ from torchvision.transforms import PILToTensor
 from src.models.dift_sd import SDFeaturizer
 
 def main(args):
-    dift = SDFeaturizer(args.model_id)
+    dift = SDFeaturizer(args.model_id, device=args.device)
     img = Image.open(args.input_path).convert('RGB')
     if args.img_size[0] > 0:
         img = img.resize(args.img_size)
@@ -42,5 +42,7 @@ if __name__ == '__main__':
                         help='path to the input image file')
     parser.add_argument('--output_path', type=str, default='dift.pt',
                         help='path to save the output features as torch tensor')
+    parser.add_argument('--device', type=str, default='cuda',
+                        help='device to use, e.g. cuda or cuda:3')
     args = parser.parse_args()
     main(args)
