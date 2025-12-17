@@ -1,3 +1,20 @@
+"""
+Script accepts all the flags required for the DIFT model. It also
+doesn't requires the paths for the 2 images on which it will perform
+matching. In case they were processed before and it already has it
+features, it just reuses it.
+
+For now, resizing is made only inside the DIFT itself. For convinience
+it depict both images with the same width (the biggest between two) but keeping the aspect ratio.
+You can also manage the NN process by setting ration_tresh value
+(default: None) and use_mutal (default: False) for mutual NN. You can
+use them separatly of together.
+
+We may need to write an own code for resizing dut to the fact that DIFT resizing doesn't preserve aspect ratio and not use padding.
+It just stretches/squeashed the image to exactly [width, height]
+"""
+
+
 import argparse
 from pathlib import Path
 
@@ -24,6 +41,11 @@ def run_dift_extractor(img_path, ft_path, shared_args):
     Call the original extract_dift.py main(args) for one image
     using exactly the same parameters style as the CLI.
     """
+    # Check if features already exist
+    if Path(ft_path).exists():
+        print(f"[DIFT] Found existing features at {ft_path}, skipping extraction.")
+        return torch.load(ft_path)
+
     dift_args = argparse.Namespace(
         img_size=shared_args.img_size,          # e.g. [768, 768]
         model_id=shared_args.model_id,          # e.g. "stable-diffusion-v1-5/stable-diffusion-v1-5"
@@ -33,6 +55,7 @@ def run_dift_extractor(img_path, ft_path, shared_args):
         ensemble_size=shared_args.ensemble_size,# e.g. 8
         input_path=str(img_path),
         output_path=str(ft_path),
+        device=shared_args.device,              # e.g. "cuda:3"
     )
     dift_extract_main(dift_args)               # runs your original script
     ft = torch.load(ft_path)                   # [C, H, W]
@@ -49,93 +72,98 @@ def compute_matches(
     ratio_thresh=None,
 ):
     """
-    Match DIFT feature maps using cosine similarity.
+    Match feature maps using cosine similarity (dot product after L2 norm).
 
     Args:
         ft1, ft2: feature maps [C, H, W]
         max_points: max number of points sampled from image 1
         use_mutual: if True, apply mutual nearest neighbor filtering
-        ratio_thresh: if not None, apply a Lowe-style ratio test on similarities.
-                      (e.g. 1.05 or 1.1 for sim-based ratio)
+        ratio_thresh: if not None, apply a Lowe-style ratio test on similarities
+                     (e.g. 1.05 or 1.1 for sim-based ratio)
 
     Returns:
         x1, y1, x2, y2: numpy arrays of matched coordinates in feature space
         (H, W): spatial size of feature maps
     """
-    assert ft1.shape == ft2.shape, "Feature maps must have the same shape"
-    C, H, W = ft1.shape
-    N = H * W
+    device = ft1.device
+
+    C, H1, W1 = ft1.shape
+    assert C == ft2.shape[0], "Feature maps must have the same channel dimension"
+    
+    C2, H2, W2 = ft2.shape
+    N1 = H1 * W1
+    N2 = H2 * W2
 
     # Flatten to [N, C]
-    ft1_flat = ft1.view(C, -1).t()   # [N, C]
-    ft2_flat = ft2.view(C, -1).t()   # [N, C]
+    ft1_flat = ft1.view(C, -1).t()   # [N1, C]
+    ft2_flat = ft2.view(C, -1).t()   # [N2, C]
 
-    # L2-normalize (cosine similarity)
+    # L2-normalize (so dot product == cosine similarity)
     ft1_flat = ft1_flat / (ft1_flat.norm(dim=1, keepdim=True) + 1e-8)
     ft2_flat = ft2_flat / (ft2_flat.norm(dim=1, keepdim=True) + 1e-8)
 
     # Sample points in image 1
-    if N > max_points:
-        idx1_full = torch.randperm(N)[:max_points]  # indices in ft1_flat
+    # Sample points in image 1
+    if N1 > max_points:
+        idx1_full = torch.randperm(N1, device=device)[:max_points]
     else:
-        idx1_full = torch.arange(N)
+        idx1_full = torch.arange(N1, device=device)
 
-    desc1 = ft1_flat[idx1_full]      # [M, C], M <= max_points
+    desc1 = ft1_flat[idx1_full]      # [M, C]
     desc2 = ft2_flat                 # [N, C]
+    M = desc1.shape[0]
 
     # Similarity matrix: [M, N]
     sim = desc1 @ desc2.t()
 
-    # Base: best match in image 2 for each sampled point in image 1
-    best_sim, best_j = sim.max(dim=1)   # [M], indices in desc2 (0..N-1)
-
-    # Track row indices of desc1 (0..M-1)
-    rows = torch.arange(desc1.shape[0])
-
-    # ---------------- Ratio test (optional) ----------------
-    if ratio_thresh is not None:
-        # top-2 similarities for each row
-        top2_sim, top2_idx = sim.topk(2, dim=1)   # [M, 2]
-        best = top2_sim[:, 0]
-        second = top2_sim[:, 1]
-
-        # similarity-based ratio: we want best significantly larger than second
-        ratio = best / (second + 1e-8)
-        good = ratio >= ratio_thresh
-
-        rows = rows[good]
-        best_j = best_j[good]
-
-        # If everything got filtered, bail out early
-        if rows.numel() == 0:
-            return np.array([]), np.array([]), np.array([]), np.array([]), (H, W)
+    # 1->2 best matches
+    best_sim, best_j = sim.max(dim=1)          # [M]
+    rows_all = torch.arange(M, device=device)  # [M]
 
     # ---------------- Mutual NN (optional) ----------------
+    # IMPORTANT: do this BEFORE ratio test, so reverse NN is computed on the same candidate set.
+    rows = rows_all
     if use_mutual:
-        # Best match in image 1 for each point in image 2
-        # (full reverse mapping over ALL desc1 rows)
-        rev_best_i = sim.argmax(dim=0)       # [N], indices in 0..M-1
+        rev_best_i = sim.argmax(dim=0)  # [N], for each j in image2: best i in image1 (0..M-1)
+        mutual_mask = rev_best_i[best_j] == rows_all
 
-        # Enforce: for match (i -> j) we require rev_best_i[j] == i
-        mutual_mask = rev_best_i[best_j] == rows
-        rows = rows[mutual_mask]
+        rows = rows_all[mutual_mask]
         best_j = best_j[mutual_mask]
+        best_sim = best_sim[mutual_mask]
 
         if rows.numel() == 0:
             return np.array([]), np.array([]), np.array([]), np.array([]), (H, W)
 
+    # ---------------- Ratio test (optional) ----------------
+    # Apply ratio only to rows that survived mutual (if mutual is enabled).
+    if ratio_thresh is not None:
+        if N2 < 2:
+            # Not enough candidates for a top-2 ratio test; keep what we have.
+            pass
+        else:
+            top2_sim, _ = sim.topk(2, dim=1)  # [M, 2]
+            best = top2_sim[:, 0]
+            second = top2_sim[:, 1]
+            ratio = best / (second + 1e-8)
+
+            good = ratio[rows] >= ratio_thresh
+            rows = rows[good]
+            best_j = best_j[good]
+            best_sim = best_sim[good]
+
+            if rows.numel() == 0:
+                return np.array([]), np.array([]), np.array([]), np.array([]), (H1, W1), (H2, W2)
+
     # ---------------- Convert to (x, y) coords ----------------
-    # rows: indices in desc1 (0..M-1)
-    # idx1_full: corresponding flat indices in ft1_flat (0..N-1)
-    flat1 = idx1_full[rows]          # [K], K = #matches
-    flat2 = best_j                   # [K]
+    flat1 = idx1_full[rows]   # [K] indices into ft1_flat (0..N-1)
+    flat2 = best_j            # [K] indices into ft2_flat (0..N-1)
 
-    y1 = (flat1 // W).cpu().numpy()
-    x1 = (flat1 % W).cpu().numpy()
-    y2 = (flat2 // W).cpu().numpy()
-    x2 = (flat2 % W).cpu().numpy()
+    y1 = (flat1 // W1).cpu().numpy()
+    x1 = (flat1 % W1).cpu().numpy()
+    y2 = (flat2 // W2).cpu().numpy()
+    x2 = (flat2 % W2).cpu().numpy()
 
-    return x1, y1, x2, y2, (H, W)
+    return x1, y1, x2, y2, (H1, W1), (H2, W2)
 
 
 
@@ -147,22 +175,58 @@ def load_and_resize(img_path, img_size):
 
 
 def visualize_matches(img1_np, img2_np, x1, y1, x2, y2,
-                      feat_hw, out_path=None, max_lines=200):
-    H_feat, W_feat = feat_hw
-    h, w, _ = img1_np.shape
-    assert img2_np.shape[0] == h and img2_np.shape[1] == w
+                      feat_hw1, feat_hw2, out_path=None, max_lines=200):
+    H_feat1, W_feat1 = feat_hw1
+    H_feat2, W_feat2 = feat_hw2
+    
+    h1, w1, _ = img1_np.shape
+    h2, w2, _ = img2_np.shape
+    
+    # Resize so axis 0 (height) is the same for the biggest image (max height)
+    # This implies stacking horizontally (concatenating on axis 1)
+    target_h = max(h1, h2)
+    
+    scale1 = target_h / h1
+    scale2 = target_h / h2
+    
+    # Resize images using PIL, maintaining aspect ratio
+    i1 = Image.fromarray(img1_np).resize((int(w1 * scale1), int(h1 * scale1)))
+    i2 = Image.fromarray(img2_np).resize((int(w2 * scale2), int(h2 * scale2)))
+    
+    img1_viz = np.array(i1)
+    img2_viz = np.array(i2)
+    
+    # Ensure exact height match for concatenation due to potential rounding
+    if img1_viz.shape[0] != target_h:
+        img1_viz = np.array(i1.resize((img1_viz.shape[1], target_h)))
+    if img2_viz.shape[0] != target_h:
+        img2_viz = np.array(i2.resize((img2_viz.shape[1], target_h)))
 
-    canvas = np.concatenate([img1_np, img2_np], axis=1)
+    canvas = np.concatenate([img1_viz, img2_viz], axis=1)
 
-    scale_x = w / W_feat
-    scale_y = h / H_feat
-
-    x1_img = (x1 + 0.5) * scale_x
-    y1_img = (y1 + 0.5) * scale_y
-    x2_img = (x2 + 0.5) * scale_x + w
-    y2_img = (y2 + 0.5) * scale_y
+    # Transform coordinates
+    # 1. Feature Map -> Original Image
+    scale_x1_orig = w1 / W_feat1
+    scale_y1_orig = h1 / H_feat1
+    x1_orig = (x1 + 0.5) * scale_x1_orig
+    y1_orig = (y1 + 0.5) * scale_y1_orig
+    
+    scale_x2_orig = w2 / W_feat2
+    scale_y2_orig = h2 / H_feat2
+    x2_orig = (x2 + 0.5) * scale_x2_orig
+    y2_orig = (y2 + 0.5) * scale_y2_orig
+    
+    # 2. Original Image -> Visualization Image
+    x1_img = x1_orig * scale1
+    y1_img = y1_orig * scale1
+    
+    # Image 2 is stacked to the right of Image 1
+    x_offset = img1_viz.shape[1]
+    x2_img = x2_orig * scale2 + x_offset
+    y2_img = y2_orig * scale2
 
     num_matches = len(x1)
+    # TODO: do i really need to limit lines
     if num_matches > max_lines:
         idx = np.random.choice(num_matches, size=max_lines, replace=False)
         x1_img = x1_img[idx]
@@ -253,6 +317,23 @@ def main():
         default=8,
         help="Number of repeated images in each batch (same as extract_dift.py)",
     )
+    parser.add_argument(
+        "--device",
+        type=str,
+        default="cuda",
+        help="Device to use (e.g. cuda, cuda:3, cuda:4)",
+    )
+    parser.add_argument(
+        "--use_mutual",
+        action="store_true",
+        help="Enable mutual nearest neighbor filtering",
+    )
+    parser.add_argument(
+        "--ratio_thresh",
+        type=float,
+        default=None,
+        help="Lowe-style ratio test threshold (e.g. 1.05 or 1.1). None disables the test.",
+    )
 
     args = parser.parse_args()
 
@@ -276,7 +357,12 @@ def main():
     ft2 = run_dift_extractor(img2_path, ft2_path, args)
 
     # 2) compute NN matches
-    x1, y1, x2, y2, feat_hw = compute_matches(ft1, ft2, max_points=args.max_points, use_mutual=True, ratio_thresh=1.1)
+    x1, y1, x2, y2, feat_hw1, feat_hw2 = compute_matches(
+        ft1, ft2,
+        max_points=args.max_points,
+        use_mutual=args.use_mutual,
+        ratio_thresh=args.ratio_thresh
+    )
 
     # 3) load images for viz (using the exact paths you gave)
     img1_np = load_and_resize(img1_path, args.img_size)
@@ -285,7 +371,7 @@ def main():
     # 4) visualize & save
     visualize_matches(
         img1_np, img2_np, x1, y1, x2, y2,
-        feat_hw, out_path=vis_path, max_lines=args.max_lines
+        feat_hw1, feat_hw2, out_path=vis_path, max_lines=args.max_lines
     )
 
     print(f"[DIFT] Saved feature maps to:\n  {ft1_path}\n  {ft2_path}")
@@ -304,3 +390,21 @@ if __name__ == "__main__":
 #   --up_ft_index 1 \
 #   --prompt "a photo of a cat" \
 #   --ensemble_size 8
+
+
+# python scripts/DIFT_two_image_correspondence.py \
+#   --img1 datasets/bran1.jpg \
+#   --img2 datasets/bran2.jpg
+
+# python scripts/DIFT_two_image_correspondence.py \
+#   --img1 datasets/bran1.jpg \
+#   --img2 datasets/bran2.jpg \
+#   --img_size 768 768 \
+#   --max_points 2000 \
+#   --max_lines 200 \
+#   --prompt "a photo of a cat" \
+#   --model_id "stable-diffusion-v1-5/stable-diffusion-v1-5" \
+#   --t 261 \
+#   --up_ft_index 1 \
+#   --ensemble_size 8
+
