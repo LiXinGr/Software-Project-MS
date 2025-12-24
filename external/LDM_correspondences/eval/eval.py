@@ -86,6 +86,8 @@ if __name__ == "__main__":
                         help='Pseudo-RNG seed')
     parser.add_argument('--ablate', action='store_true',
                         help='evaluate over a smaller number of points')
+    parser.add_argument('--src_path', type=str, default=None, help='path to source image')
+    parser.add_argument('--trg_path', type=str, default=None, help='path to target image')
     
     
 
@@ -113,10 +115,10 @@ if __name__ == "__main__":
     if args.mode == "optimize":
         
         test_dataset = download.load_dataset(args.benchmark, args.datapath, args.thres, device,
-                                            args.split, False, 16, sub_class=args.sub_class, item_index=args.item_index)
+                                            args.split, False, 16, sub_class=args.sub_class, item_index=args.item_index, src_path=args.src_path, trg_path=args.trg_path)
     else:
         test_dataset = download.load_dataset(args.benchmark, args.datapath, args.thres, device,
-                                            args.split, False, 16, sub_class=args.sub_class, item_index=-1)
+                                            args.split, False, 16, sub_class=args.sub_class, item_index=-1, src_path=args.src_path, trg_path=args.trg_path)
     test_dataloader = DataLoader(test_dataset,
                                  batch_size=args.batch_size,
                                  num_workers=0,

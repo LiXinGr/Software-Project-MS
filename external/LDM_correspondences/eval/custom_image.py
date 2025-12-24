@@ -13,13 +13,18 @@ class CustomDataset(Dataset):
     This class is used to create a custom dataset for training and testing the model.
     """
     def __init__(self, *args, **kwargs):
-        pass
+        self.src_path = kwargs.get('src_path')
+        self.trg_path = kwargs.get('trg_path')
+
     def __len__(self):
         return 1
 
     def __getitem__(self, idx):
-        source_img = self.load_image("example_images/source_cat.png")
-        target_img = self.load_image("example_images/target_cat.jpeg")
+        src_path = self.src_path if self.src_path else "example_images/source_cat.png"
+        trg_path = self.trg_path if self.trg_path else "example_images/target_cat.jpeg"
+        
+        source_img = self.load_image(src_path)
+        target_img = self.load_image(trg_path)
         src_kps = torch.tensor([[0.4, 0.9]])
         trg_kps = torch.tensor([[0.54, 0.92]])
         n_points = torch.tensor([1])
