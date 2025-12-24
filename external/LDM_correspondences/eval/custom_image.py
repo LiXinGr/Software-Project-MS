@@ -15,6 +15,8 @@ class CustomDataset(Dataset):
     def __init__(self, *args, **kwargs):
         self.src_path = kwargs.get('src_path')
         self.trg_path = kwargs.get('trg_path')
+        self.src_x = kwargs.get('src_x', -1)
+        self.src_y = kwargs.get('src_y', -1)
 
     def __len__(self):
         return 1
@@ -25,8 +27,18 @@ class CustomDataset(Dataset):
         
         source_img = self.load_image(src_path)
         target_img = self.load_image(trg_path)
-        src_kps = torch.tensor([[0.4, 0.9]])
-        trg_kps = torch.tensor([[0.54, 0.92]])
+
+        if self.src_x != -1 and self.src_y != -1:
+            # Load original image size to normalize pixel coordinates
+            orig_img = Image.open(src_path)
+            w, h = orig_img.size
+            norm_x = self.src_x / w
+            norm_y = self.src_y / h
+            src_kps = torch.tensor([[norm_x, norm_y]])
+        else:
+            src_kps = torch.tensor([[0.4, 0.9]])
+            
+        trg_kps = torch.tensor([[-1.0, -1.0]]) # Dummy target
         n_points = torch.tensor([1])
         
         src_kps = src_kps.permute(1, 0)*512.0

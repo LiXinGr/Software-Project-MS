@@ -88,6 +88,8 @@ if __name__ == "__main__":
                         help='evaluate over a smaller number of points')
     parser.add_argument('--src_path', type=str, default=None, help='path to source image')
     parser.add_argument('--trg_path', type=str, default=None, help='path to target image')
+    parser.add_argument('--src_x', type=int, default=-1, help='source x coordinate (pixel)')
+    parser.add_argument('--src_y', type=int, default=-1, help='source y coordinate (pixel)')
     
     
 
@@ -115,10 +117,10 @@ if __name__ == "__main__":
     if args.mode == "optimize":
         
         test_dataset = download.load_dataset(args.benchmark, args.datapath, args.thres, device,
-                                            args.split, False, 16, sub_class=args.sub_class, item_index=args.item_index, src_path=args.src_path, trg_path=args.trg_path)
+                                            args.split, False, 16, sub_class=args.sub_class, item_index=args.item_index, src_path=args.src_path, trg_path=args.trg_path, src_x=args.src_x, src_y=args.src_y)
     else:
         test_dataset = download.load_dataset(args.benchmark, args.datapath, args.thres, device,
-                                            args.split, False, 16, sub_class=args.sub_class, item_index=-1, src_path=args.src_path, trg_path=args.trg_path)
+                                            args.split, False, 16, sub_class=args.sub_class, item_index=-1, src_path=args.src_path, trg_path=args.trg_path, src_x=args.src_x, src_y=args.src_y)
     test_dataloader = DataLoader(test_dataset,
                                  batch_size=args.batch_size,
                                  num_workers=0,
