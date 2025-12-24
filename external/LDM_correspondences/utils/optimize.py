@@ -43,8 +43,9 @@ def validate_epoch(ldm,
                 break
             
             if visualize:
-                visualize_image_with_points(mini_batch['src_img'][0], mini_batch['src_kps'][0, :, j], f"{i:03d}_initial_point_{j:02d}", save_folder=save_folder)
-                visualize_image_with_points(mini_batch['trg_img'][0], mini_batch['trg_kps'][0, :, j], f"{i:03d}_target_point_{j:02d}", save_folder=save_folder)
+                pass
+                # visualize_image_with_points(mini_batch['src_img'][0], mini_batch['src_kps'][0, :, j], f"{i:03d}_initial_point_{j:02d}", save_folder=save_folder)
+                # visualize_image_with_points(mini_batch['trg_img'][0], mini_batch['trg_kps'][0, :, j], f"{i:03d}_target_point_{j:02d}", save_folder=save_folder)
         
             # Find the text embeddings for the source point
             contexts = []
@@ -72,9 +73,10 @@ def validate_epoch(ldm,
             
             # Visualize the attention maps for the target image
             if visualize:
-                for k in range(all_maps.shape[0]):
-                    visualize_image_with_points(all_maps[k, None], mini_batch['trg_kps'][0, :, j]/512*upsample_res, f"{i:03d}_largest_loc_trg_{j:02d}_{k:02d}", save_folder=save_folder)
-                visualize_image_with_points(torch.mean(all_maps, dim=0)[None], None, f"{i:03d}_largest_loc_trg_{j:02d}_mean", save_folder=save_folder)
+                pass
+                # for k in range(all_maps.shape[0]):
+                #     visualize_image_with_points(all_maps[k, None], mini_batch['trg_kps'][0, :, j]/512*upsample_res, f"{i:03d}_largest_loc_trg_{j:02d}_{k:02d}", save_folder=save_folder)
+                # visualize_image_with_points(torch.mean(all_maps, dim=0)[None], None, f"{i:03d}_largest_loc_trg_{j:02d}_mean", save_folder=save_folder)
             
             # Take the argmax to find the corresponding location for the target image
             all_maps = torch.mean(all_maps, dim=0)
@@ -85,21 +87,21 @@ def validate_epoch(ldm,
             # Find the attention maps for the source image
             if visualize:
                 all_maps = []
-                for context in contexts:
-                    attn_map_src, _ = run_image_with_tokens_cropped(ldm, mini_batch['src_img'][0], context, index=0, upsample_res=upsample_res, noise_level=noise_level, layers=layers, device=device, crop_percent=crop_percent, num_iterations=num_iterations, image_mask = None if 'bool_img_src' not in mini_batch else mini_batch['bool_img_src'][0])
-                    maps = []
-                    for k in range(attn_map_src.shape[0]):
-                        avg = torch.mean(attn_map_src[k], dim=0, keepdim=True)
-                        maps.append(avg)
-                    maps = torch.stack(maps, dim=0)
-                    all_maps.append(maps)
-                all_maps = torch.stack(all_maps, dim=0)
-                all_maps = torch.mean(all_maps, dim=0)
-                all_maps = torch.nn.Softmax(dim=-1)(all_maps.reshape(len(layers), upsample_res*upsample_res))
-                all_maps = all_maps.reshape(len(layers), upsample_res, upsample_res)
-                for k in range(all_maps.shape[0]):  
-                    visualize_image_with_points(all_maps[k, None], mini_batch['src_kps'][0, :, j]/512*upsample_res, f"{i:03d}_largest_loc_src_{j:02d}_{k:02d}", save_folder=save_folder)
-                visualize_image_with_points(torch.mean(all_maps, dim=0)[None], None, f"{i:03d}_largest_loc_src_{j:02d}_mean", save_folder=save_folder)
+                # for context in contexts:
+                #     attn_map_src, _ = run_image_with_tokens_cropped(ldm, mini_batch['src_img'][0], context, index=0, upsample_res=upsample_res, noise_level=noise_level, layers=layers, device=device, crop_percent=crop_percent, num_iterations=num_iterations, image_mask = None if 'bool_img_src' not in mini_batch else mini_batch['bool_img_src'][0])
+                #     maps = []
+                #     for k in range(attn_map_src.shape[0]):
+                #         avg = torch.mean(attn_map_src[k], dim=0, keepdim=True)
+                #         maps.append(avg)
+                #     maps = torch.stack(maps, dim=0)
+                #     all_maps.append(maps)
+                # all_maps = torch.stack(all_maps, dim=0)
+                # all_maps = torch.mean(all_maps, dim=0)
+                # all_maps = torch.nn.Softmax(dim=-1)(all_maps.reshape(len(layers), upsample_res*upsample_res))
+                # all_maps = all_maps.reshape(len(layers), upsample_res, upsample_res)
+                # for k in range(all_maps.shape[0]):  
+                #     visualize_image_with_points(all_maps[k, None], mini_batch['src_kps'][0, :, j]/512*upsample_res, f"{i:03d}_largest_loc_src_{j:02d}_{k:02d}", save_folder=save_folder)
+                # visualize_image_with_points(torch.mean(all_maps, dim=0)[None], None, f"{i:03d}_largest_loc_src_{j:02d}_mean", save_folder=save_folder)
 
         # Evaluate the performance of the individual layers
         for k in range(len(pck_array_ind_layers)):
@@ -113,8 +115,12 @@ def validate_epoch(ldm,
         
         # Visualize correspondence
         if visualize:
-            visualie_correspondences(mini_batch['src_img'][0], mini_batch['trg_img'][0], mini_batch['src_kps'], est_keypoints, f"correspondences_estimated_{i:03d}", correct_ids = eval_result['correct_ids'], save_folder=save_folder)
-            visualie_correspondences(mini_batch['src_img'][0], mini_batch['trg_img'][0], mini_batch['src_kps'], mini_batch['trg_kps'], f"correspondences_gt_{i:03d}", correct_ids = eval_result['correct_ids'], save_folder=save_folder)
+            # visualie_correspondences(mini_batch['src_img'][0], mini_batch['trg_img'][0], mini_batch['src_kps'], est_keypoints, f"correspondences_estimated_{i:03d}", correct_ids = eval_result['correct_ids'], save_folder=save_folder)
+            # visualie_correspondences(mini_batch['src_img'][0], mini_batch['trg_img'][0], mini_batch['src_kps'], mini_batch['trg_kps'], f"correspondences_gt_{i:03d}", correct_ids = eval_result['correct_ids'], save_folder=save_folder)
+            
+            # Visualize source and target images with red dot points
+            visualize_image_with_points(mini_batch['src_img'][0], mini_batch['src_kps'][0, :, 0], f"source_with_point_{i:03d}", save_folder=save_folder)
+            visualize_image_with_points(mini_batch['trg_img'][0], est_keypoints[0, :, 0], f"target_with_estimated_point_{i:03d}", save_folder=save_folder)
             
         dict = {"est_keypoints": est_keypoints, "correct_ids": eval_result['correct_ids'], "src_kps": mini_batch['src_kps'], "trg_kps": mini_batch['trg_kps'], "idx": mini_batch['idx'] if item_index == -1 else item_index, "contexts": torch.stack(all_contexts), 'pck': eval_result['pck']}
         # save dict 

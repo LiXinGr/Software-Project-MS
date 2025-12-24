@@ -12,7 +12,7 @@ from . import cub2011
 from . import custom_image
 
 
-def load_dataset(benchmark, datapath, thres, device, split='test', augmentation=False, feature_size=16, sub_class = "all", item_index=-1):
+def load_dataset(benchmark, datapath, thres, device, split='test', augmentation=False, feature_size=16, sub_class = "all", item_index=-1, src_path=None, trg_path=None):
     r"""Instantiates desired correspondence dataset"""
     correspondence_benchmark = {
         # 'pfpascal': pfpascal.PFPascalDataset,
@@ -27,7 +27,7 @@ def load_dataset(benchmark, datapath, thres, device, split='test', augmentation=
     if dataset is None:
         raise Exception('Invalid benchmark dataset %s.' % benchmark)
 
-    return dataset(benchmark=benchmark, datapath=datapath, thres=thres, device=device, split=split, augmentation=augmentation, feature_size=feature_size, sub_class=sub_class, item_index=item_index)
+    return dataset(benchmark=benchmark, datapath=datapath, thres=thres, device=device, split=split, augmentation=augmentation, feature_size=feature_size, sub_class=sub_class, item_index=item_index, src_path=src_path, trg_path=trg_path)
 
 
 def download_from_google(token_id, filename):
