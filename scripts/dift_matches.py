@@ -214,11 +214,11 @@ if __name__ == "__main__":
 #   --ensemble_size 8
 
 
-# python scripts/DIFT_two_image_correspondence.py \
+# python scripts/dift_matches.py \
 #   --img1 datasets/bran1.jpg \
 #   --img2 datasets/bran2.jpg
 
-# python scripts/DIFT_two_image_correspondence.py \
+# python scripts/dift_matches.py \
 #   --img1 datasets/bran1.jpg \
 #   --img2 datasets/bran2.jpg \
 #   --img_size 768 768 \
