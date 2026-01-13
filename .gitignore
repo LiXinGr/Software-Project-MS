@@ -9,3 +9,4 @@ datasets/phototourism
 *.tar.gz
 *.npy
 *.h5
+output/
