@@ -106,6 +106,100 @@ def compute_matches(
     return x1, y1, x2, y2, (H1, W1), (H2, W2)
 
 
+def match_dense_features(
+    ft1,
+    ft2,
+    img_size1,
+    img_size2,
+    max_points=2000,
+    use_mutual=True,
+    ratio_thresh=0.8,
+):
+    """
+    Match dense feature maps and return pixel-space keypoint matches.
+    
+    This is the standard interface for benchmarking - returns matches in 
+    original image pixel coordinates.
+    
+    Args:
+        ft1, ft2: feature maps [C, H, W] (torch tensors)
+        img_size1: (height, width) of original image 1
+        img_size2: (height, width) of original image 2
+        max_points: max number of points to sample from image 1
+        use_mutual: if True, apply mutual nearest neighbor filtering (recommended)
+        ratio_thresh: Lowe's ratio test threshold (lower = stricter, None = disabled)
+                     For similarity-based ratio, use values > 1.0 (e.g. 1.1)
+                     For distance-based (inverted), use values < 1.0 (e.g. 0.8)
+    
+    Returns:
+        mkpts0: [N, 2] numpy array of (x, y) pixel coordinates in image 1
+        mkpts1: [N, 2] numpy array of (x, y) pixel coordinates in image 2
+    """
+    # Convert ratio threshold: our compute_matches uses similarity (higher = better)
+    # so ratio_thresh should be > 1.0 for sim-based. If user passes < 1, invert it.
+    sim_ratio_thresh = ratio_thresh
+    if ratio_thresh is not None and ratio_thresh < 1.0:
+        # User passed distance-based ratio (0.8 means best/second < 0.8)
+        # Convert to similarity-based: best/second > 1/0.8 = 1.25
+        sim_ratio_thresh = 1.0 / ratio_thresh
+    
+    x1, y1, x2, y2, feat_hw1, feat_hw2 = compute_matches(
+        ft1, ft2,
+        max_points=max_points,
+        use_mutual=use_mutual,
+        ratio_thresh=sim_ratio_thresh,
+    )
+    
+    if len(x1) == 0:
+        return np.zeros((0, 2)), np.zeros((0, 2))
+    
+    H_feat1, W_feat1 = feat_hw1
+    H_feat2, W_feat2 = feat_hw2
+    h1, w1 = img_size1
+    h2, w2 = img_size2
+    
+    # Convert feature-space coords to pixel coords
+    # Feature cell center to pixel: (feat_coord + 0.5) * scale
+    scale_x1 = w1 / W_feat1
+    scale_y1 = h1 / H_feat1
+    scale_x2 = w2 / W_feat2
+    scale_y2 = h2 / H_feat2
+    
+    px1 = (x1 + 0.5) * scale_x1
+    py1 = (y1 + 0.5) * scale_y1
+    px2 = (x2 + 0.5) * scale_x2
+    py2 = (y2 + 0.5) * scale_y2
+    
+    mkpts0 = np.stack([px1, py1], axis=1)  # [N, 2]
+    mkpts1 = np.stack([px2, py2], axis=1)  # [N, 2]
+    
+    return mkpts0, mkpts1
+
+
+def save_matches(output_path, mkpts0, mkpts1):
+    """
+    Save matches in standardized .npz format.
+    
+    Args:
+        output_path: path to save .npz file
+        mkpts0: [N, 2] numpy array of keypoints in image 1
+        mkpts1: [N, 2] numpy array of keypoints in image 2
+    """
+    np.savez(output_path, mkpts0=mkpts0, mkpts1=mkpts1)
+
+
+def load_matches(input_path):
+    """
+    Load matches from standardized .npz format.
+    
+    Returns:
+        mkpts0: [N, 2] numpy array of keypoints in image 1
+        mkpts1: [N, 2] numpy array of keypoints in image 2
+    """
+    data = np.load(input_path)
+    return data['mkpts0'], data['mkpts1']
+
+
 def visualize_matches(img1_np, img2_np, x1, y1, x2, y2,
                       feat_hw1, feat_hw2, out_path=None, max_lines=200):
     H_feat1, W_feat1 = feat_hw1
