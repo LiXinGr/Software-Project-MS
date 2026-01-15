@@ -22,6 +22,7 @@ import h5py
 import sys
 from tqdm import tqdm
 from scipy.spatial.transform import Rotation
+from functools import lru_cache
 
 # Add path to RePoseD utils
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -94,9 +95,15 @@ def get_relative_pose(img1_data, img2_data):
     return R_rel, t_rel
 
 
+@lru_cache(maxsize=500)
+def load_depth_cached(depth_path: str):
+    """Load depth map with LRU caching to avoid redundant disk reads."""
+    return np.load(depth_path)
+
+
 def sample_depth_at_keypoints(depth_map, keypoints):
     """
-    Sample depth values at keypoint locations.
+    Sample depth values at keypoint locations (vectorized).
     
     Args:
         depth_map: [H, W] depth array
@@ -105,21 +112,16 @@ def sample_depth_at_keypoints(depth_map, keypoints):
     Returns:
         depths: [N] array of depth values
     """
+    if depth_map.ndim != 2:
+        raise ValueError(f"Expected 2D depth map, got shape {depth_map.shape}")
+        
     H, W = depth_map.shape
-    depths = np.zeros(len(keypoints))
     
-    for i, (x, y) in enumerate(keypoints):
-        # Round to nearest pixel
-        px = int(round(x))
-        py = int(round(y))
-        
-        # Clamp to valid range
-        px = max(0, min(W - 1, px))
-        py = max(0, min(H - 1, py))
-        
-        depths[i] = depth_map[py, px]
+    # Vectorized: round, clip, and index
+    px = np.clip(np.round(keypoints[:, 0]).astype(int), 0, W - 1)
+    py = np.clip(np.round(keypoints[:, 1]).astype(int), 0, H - 1)
     
-    return depths
+    return depth_map[py, px]
 
 
 def generate_pairs_from_colmap(images, min_common_points=100):
@@ -241,12 +243,19 @@ def main():
                 skipped += 1
                 continue
             
-            depth0_map = np.load(depth0_file)
-            depth1_map = np.load(depth1_file)
-            
-            # Sample depth at keypoints
-            depths0 = sample_depth_at_keypoints(depth0_map, mkpts0)
-            depths1 = sample_depth_at_keypoints(depth1_map, mkpts1)
+            try:
+                depth0_map = load_depth_cached(str(depth0_file))
+                depth1_map = load_depth_cached(str(depth1_file))
+                
+                # Sample depth at keypoints
+                depths0 = sample_depth_at_keypoints(depth0_map, mkpts0)
+                depths1 = sample_depth_at_keypoints(depth1_map, mkpts1)
+            except Exception as e:
+                print(f"Error processing depth maps for pair {img1_name}, {img2_name}: {e}")
+                print(f"  depth0: {depth0_file}")
+                print(f"  depth1: {depth1_file}")
+                skipped += 1
+                continue
             
             # Get intrinsics and relative pose
             K0 = get_camera_intrinsics(name_to_camera[img1_name])

@@ -74,6 +74,8 @@ def main():
     parser.add_argument("--max_points", type=int, default=2000)
     parser.add_argument("--max_lines", type=int, default=200)
     parser.add_argument("--device", type=str, default="cuda")
+    parser.add_argument("--limit", type=int, default=None,
+                        help="Limit number of pairs to process")
     parser.add_argument("--visualize", action="store_true")
 
     args = parser.parse_args()
@@ -96,11 +98,22 @@ def main():
         with open(args.pairs_file, 'r') as f:
             pairs = [line.strip().split() for line in f if line.strip()]
         
+        # Apply limit if specified
+        if args.limit:
+            pairs = pairs[:args.limit]
+        
         print(f"[RoMa] Processing {len(pairs)} pairs...")
         
         for img1_name, img2_name in tqdm(pairs, desc="Matching"):
             img1_path = images_dir / img1_name
             img2_path = images_dir / img2_name
+            
+            # Check if output already exists
+            pair_name = f"{Path(img1_name).stem}__{Path(img2_name).stem}"
+            output_path = output_dir / f"{pair_name}.npz"
+            
+            if output_path.exists():
+                continue
             
             if not img1_path.exists() or not img2_path.exists():
                 print(f"[RoMa] Skipping pair: {img1_name}, {img2_name}")
@@ -111,8 +124,7 @@ def main():
                     img1_path, img2_path, roma_model, args, device
                 )
                 
-                pair_name = f"{Path(img1_name).stem}__{Path(img2_name).stem}"
-                save_matches(output_dir / f"{pair_name}.npz", mkpts0, mkpts1)
+                save_matches(output_path, mkpts0, mkpts1)
             except Exception as e:
                 print(f"[RoMa] Error processing {img1_name}, {img2_name}: {e}")
         

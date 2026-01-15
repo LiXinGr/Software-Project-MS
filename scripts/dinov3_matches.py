@@ -160,6 +160,13 @@ def main():
             img1_path = images_dir / img1_name
             img2_path = images_dir / img2_name
             
+            # Check if output already exists
+            pair_name = f"{Path(img1_name).stem}__{Path(img2_name).stem}"
+            output_path = output_dir / f"{pair_name}.npz"
+            
+            if output_path.exists():
+                continue
+            
             if not img1_path.exists() or not img2_path.exists():
                 print(f"[DINOv3] Skipping pair: {img1_name}, {img2_name} (file not found)")
                 continue
@@ -170,8 +177,6 @@ def main():
             )
             
             # Save matches
-            pair_name = f"{Path(img1_name).stem}__{Path(img2_name).stem}"
-            output_path = output_dir / f"{pair_name}.npz"
             save_matches(output_path, mkpts0, mkpts1)
         
         print(f"[DINOv3] Saved matches to {output_dir}")

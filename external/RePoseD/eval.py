@@ -39,6 +39,7 @@ def parse_args():
     parser.add_argument('--nmad', action='store_true', default=False)
     parser.add_argument('--madours', action='store_true', default=False)
     parser.add_argument('--madonly', action='store_true', default=False)
+    parser.add_argument('--thesis', action='store_true', default=False, help='Run only 3PTsuv and 3PTsoo with UniDepth')
     parser.add_argument('--ppbug', action='store_true', default=False)
     parser.add_argument('--iters', type=int, default=None)
     parser.add_argument('dataset_path')
@@ -274,6 +275,14 @@ def eval(args):
         experiments.extend([f'madpose+{i}' for i in mdepths])
         experiments.extend([f'madpose_ours_scale_shift+{i}' for i in mdepths])
         experiments.extend([f'madpose_noshift_ours_scale+{i}' for i in mdepths])
+
+    if args.thesis:
+        # Only these 3 solvers with UniDepth (depth index 12)
+        experiments = [
+            '3p_ours_shift_scale+12',              # 3PTsuv(M)
+            '3p_ours_shift_scale_reproj+12',       # 3PTsuv(M) + reproj
+            '3p_ours_shift_scale_hybrid_reproj+12',# 3PTsuv(M) + hybrid + reproj
+        ]
 
     if args.nlo:
         experiments = [f'nLO-{x}' for x in experiments]

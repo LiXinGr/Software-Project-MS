@@ -40,7 +40,7 @@ ENV_DINOV3="dinov3"
 ENV_DIFT="dift"
 ENV_LDM="ldm"
 ENV_ROMA="roma"
-ENV_SUPERPOINT="superpoint"
+ENV_SUPERPOINT="lightglue"
 ENV_REPOSED="reposed"
 
 # ============================================================================
@@ -51,6 +51,7 @@ MATCHER=""
 DRY_RUN=false
 SKIP_DEPTH=false
 SKIP_MATCHES=false
+SKIP_PACK=false
 LIMIT=""
 DEVICE="cuda:0"  # Default to first GPU
 ALL_SCENES_MODE=false
@@ -73,6 +74,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --skip-matches)
             SKIP_MATCHES=true
+            shift
+            ;;
+        --skip-pack)
+            SKIP_PACK=true
             shift
             ;;
         --limit)
@@ -136,7 +141,17 @@ if [ "$ALL_SCENES_MODE" = true ]; then
         
         echo ""
         echo "======== Processing scene: $scene ========"
+        
+        # Run sub-process but allow failure without killing the loop
+        set +e
         "$0" "${args[@]}"
+        exit_code=$?
+        set -e
+        
+        if [ $exit_code -ne 0 ]; then
+            echo "!!!! Error processing scene $scene (Exit code: $exit_code) !!!!"
+            echo "Continuing to next scene..."
+        fi
         
         # Find the latest CSV for this scene
         latest_csv=$(ls -t "$RESULTS_DIR/results_${MATCHER}_${scene}_"*.csv 2>/dev/null | head -1)
@@ -337,13 +352,35 @@ else
     MATCHER_ENV=$(get_matcher_env "$MATCHER")
     activate_env "$MATCHER_ENV"
     
-    python3 "scripts/${MATCHER}_matches.py" \
-        --pairs_file "$PAIRS_FILE" \
-        --images_dir "$IMAGES_DIR" \
-        --output_dir "$MATCHES_DIR" \
-        --device "$DEVICE" \
-        --use_mutual \
-        --ratio_thresh 0.8
+    # Build matcher arguments
+    MATCHER_ARGS="--pairs_file $PAIRS_FILE \
+        --images_dir $IMAGES_DIR \
+        --output_dir $MATCHES_DIR \
+        --device $DEVICE"
+    
+    # Add --use_mutual only for matchers that support it (not roma/ldm which have their own matching)
+    if [[ "$MATCHER" != "roma" && "$MATCHER" != "ldm" ]]; then
+        MATCHER_ARGS="$MATCHER_ARGS --use_mutual"
+    fi
+    
+    # Add feature cache for matchers that support it (saves time by not recomputing features)
+    if [[ "$MATCHER" == "dinov3" || "$MATCHER" == "dift" || "$MATCHER" == "superpoint" ]]; then
+        FEATURE_CACHE_DIR="$PROJECT_ROOT/cache/features/${MATCHER}/${SCENE}"
+        mkdir -p "$FEATURE_CACHE_DIR"
+        MATCHER_ARGS="$MATCHER_ARGS --feature_cache $FEATURE_CACHE_DIR"
+        log "  Using feature cache: $FEATURE_CACHE_DIR"
+    fi
+    
+    # Add limit if specified (process only first N pairs)
+    if [ -n "$LIMIT" ]; then
+        MATCHER_ARGS="$MATCHER_ARGS --limit $LIMIT"
+        log "  Limiting to $LIMIT pairs"
+    fi
+    
+    # Suppress diffusers warnings for DIFT
+    export PYTHONWARNINGS="ignore::UserWarning"
+    
+    python3 "scripts/${MATCHER}_matches.py" $MATCHER_ARGS
     
     log "Step 2: Match generation complete"
 fi
@@ -352,27 +389,34 @@ fi
 # Step 4: Pack into HDF5
 # ============================================================================
 
+# Use stable filename (no timestamp) for caching
+H5_FILE="$OUTPUT_BASE/benchmark_${MATCHER}_${SCENE}.h5"
 TIMESTAMP=$(date '+%Y%m%d_%H%M%S')
-H5_FILE="$OUTPUT_BASE/benchmark_${MATCHER}_${SCENE}_${TIMESTAMP}.h5"
 
-log "Step 3: Packing data into HDF5..."
-
-# Use reposed environment which has h5py
-activate_env "$ENV_REPOSED"
-
-PACK_ARGS="--matches_dir $MATCHES_DIR \
-    --depth_dir $DEPTH_DIR \
-    --sparse_dir $SPARSE_DIR \
-    --pairs_file $PAIRS_FILE \
-    --output $H5_FILE"
-
-if [ -n "$LIMIT" ]; then
-    PACK_ARGS="$PACK_ARGS --limit $LIMIT"
+if [ "$SKIP_PACK" = true ]; then
+    log "Step 3: Skipping packing (--skip-pack)"
+elif [ -f "$H5_FILE" ]; then
+    log "Step 3: Using existing HDF5 file: $H5_FILE"
+else
+    log "Step 3: Packing data into HDF5..."
+    
+    # Use reposed environment which has h5py
+    activate_env "$ENV_REPOSED"
+    
+    PACK_ARGS="--matches_dir $MATCHES_DIR \
+        --depth_dir $DEPTH_DIR \
+        --sparse_dir $SPARSE_DIR \
+        --pairs_file $PAIRS_FILE \
+        --output $H5_FILE"
+    
+    if [ -n "$LIMIT" ]; then
+        PACK_ARGS="$PACK_ARGS --limit $LIMIT"
+    fi
+    
+    python3 scripts/pack_benchmark.py $PACK_ARGS
+    
+    log "Step 3: Packing complete: $H5_FILE"
 fi
-
-python3 scripts/pack_benchmark.py $PACK_ARGS
-
-log "Step 3: Packing complete: $H5_FILE"
 
 # ============================================================================
 # Step 5: Run RePoseD Evaluation
@@ -387,13 +431,16 @@ cd "$PROJECT_ROOT/external/RePoseD"
 RESULTS_JSON="$RESULTS_DIR/results_${MATCHER}_${SCENE}_${TIMESTAMP}.json"
 RESULTS_CSV="$RESULTS_DIR/results_${MATCHER}_${SCENE}_${TIMESTAMP}.csv"
 
-# Run evaluation
-python3 eval.py "$H5_FILE" -nw 1
+# Run evaluation (--thesis runs only 3PTsuv and 3PTsoo with UniDepth = 2 experiments)
+python3 eval.py "$H5_FILE" -nw 8 --thesis
 
-# Copy results
-if [ -f "results_new/calibrated-benchmark_${MATCHER}_${SCENE}_${TIMESTAMP}.json" ]; then
-    cp "results_new/calibrated-benchmark_${MATCHER}_${SCENE}_${TIMESTAMP}.json" "$RESULTS_JSON"
+# Copy results (RePoseD saves as calibrated-{h5_basename}.json)
+REPOSED_RESULTS="results_new/calibrated-benchmark_${MATCHER}_${SCENE}.json"
+if [ -f "$REPOSED_RESULTS" ]; then
+    cp "$REPOSED_RESULTS" "$RESULTS_JSON"
     log "Results saved to: $RESULTS_JSON"
+else
+    log "Warning: Results file not found: $REPOSED_RESULTS"
 fi
 
 # Convert to CSV

@@ -11,6 +11,11 @@ Supports two modes:
 import argparse
 from pathlib import Path
 import sys
+import warnings
+
+# Suppress diffusers safety checker warnings
+warnings.filterwarnings("ignore", message=".*safety checker.*")
+
 import numpy as np
 import torch
 from PIL import Image
@@ -106,14 +111,16 @@ def main():
     # DIFT parameters
     parser.add_argument("--model_id", type=str, 
                         default="stable-diffusion-v1-5/stable-diffusion-v1-5")
-    parser.add_argument("--img_size", nargs="+", type=int, default=[768, 768])
+    parser.add_argument("--img_size", nargs="+", type=int, default=[512, 512])
     parser.add_argument("--t", type=int, default=261)
     parser.add_argument("--up_ft_index", type=int, choices=[0, 1, 2, 3], default=1)
     parser.add_argument("--prompt", type=str, default="")
-    parser.add_argument("--ensemble_size", type=int, default=8)
+    parser.add_argument("--ensemble_size", type=int, default=2)
     parser.add_argument("--device", type=str, default="cuda")
     parser.add_argument("--feature_cache", type=str, default=None,
                         help="Directory to cache extracted features")
+    parser.add_argument("--limit", type=int, default=None,
+                        help="Limit number of pairs to process")
     parser.add_argument("--visualize", action="store_true")
 
     args = parser.parse_args()
@@ -136,11 +143,22 @@ def main():
         with open(args.pairs_file, 'r') as f:
             pairs = [line.strip().split() for line in f if line.strip()]
         
+        # Apply limit if specified
+        if args.limit:
+            pairs = pairs[:args.limit]
+        
         print(f"[DIFT] Processing {len(pairs)} pairs...")
         
         for img1_name, img2_name in tqdm(pairs, desc="Matching"):
             img1_path = images_dir / img1_name
             img2_path = images_dir / img2_name
+            
+            # Check if output already exists
+            pair_name = f"{Path(img1_name).stem}__{Path(img2_name).stem}"
+            output_path = output_dir / f"{pair_name}.npz"
+            
+            if output_path.exists():
+                continue
             
             if not img1_path.exists() or not img2_path.exists():
                 print(f"[DIFT] Skipping pair: {img1_name}, {img2_name}")
@@ -150,8 +168,7 @@ def main():
                 img1_path, img2_path, feature_cache_dir, args
             )
             
-            pair_name = f"{Path(img1_name).stem}__{Path(img2_name).stem}"
-            save_matches(output_dir / f"{pair_name}.npz", mkpts0, mkpts1)
+            save_matches(output_path, mkpts0, mkpts1)
         
         print(f"[DIFT] Saved matches to {output_dir}")
         
