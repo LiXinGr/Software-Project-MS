@@ -41,6 +41,8 @@ def parse_args():
     parser.add_argument('--madonly', action='store_true', default=False)
     parser.add_argument('--nn',action='store_true', default=False)
     parser.add_argument('--iters', type=int, default=None)
+    parser.add_argument('--thesis', action='store_true', default=False, help='Run only 3PTsuv solvers with UniDepth')
+    parser.add_argument('--output_dir', type=str, default='results_new', help='Output directory for results')
     parser.add_argument('dataset_path')
 
     return parser.parse_args()
@@ -290,6 +292,14 @@ def eval(args):
         # experiments.extend([f'3p_reldepth+{i}' for i in depths])
         # experiments.append('6p')
 
+    if args.thesis:
+        # Only 3 thesis solvers with UniDepth (depth index 12)
+        experiments = [
+            '4p_ours_scale_shift+12',              # 4PTsuv(M)
+            '4p_ours_scale_shift_reproj+12',       # 4PTsuv(M) + reproj
+            '4p_ours_scale_shift_reproj-s+12',     # 4PTsuv(M) + reproj-s
+        ]
+
     print(experiments)
 
     if args.threshold != 1.0:
@@ -305,7 +315,8 @@ def eval(args):
         iterations_list = [args.iters]
 
     json_string = f'shared_focal-{basename}.json'
-    json_path = os.path.join('results_new', json_string)
+    os.makedirs(args.output_dir, exist_ok=True)
+    json_path = os.path.join(args.output_dir, json_string)
 
     if args.load:
         print("Loading: ", json_string)

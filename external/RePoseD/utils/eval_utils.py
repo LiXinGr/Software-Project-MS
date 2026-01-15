@@ -30,7 +30,7 @@ def print_results_focal(experiments, results, eq_only=False):
 
 
         tab.add_row([exp_name, np.median(p_errs), np.median(f_errs),
-                     np.mean(p_res), np.mean(f_res),
+                     np.mean(p_res) * 100, np.mean(f_res) * 100,
                      np.mean(times),
                      np.mean(inliers)])
     print(tab)
@@ -57,7 +57,7 @@ def print_results(experiments, results, eq_only=False):
         exp_name = exp
 
 
-        tab.add_row([exp_name, np.median(p_errs), np.mean(p_res),
+        tab.add_row([exp_name, np.median(p_errs), np.mean(p_res) * 100,
                      np.mean(times),
                      np.mean(inliers)])
     print(tab)

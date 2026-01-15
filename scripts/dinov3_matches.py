@@ -122,6 +122,8 @@ def main():
     parser.add_argument("--device", type=str, default="cuda")
     parser.add_argument("--feature_cache", type=str, default=None,
                         help="Directory to cache extracted features")
+    parser.add_argument("--limit", type=int, default=None,
+                        help="Limit number of pairs to process")
     parser.add_argument("--visualize", action="store_true",
                         help="Generate visualization images")
 
@@ -153,6 +155,10 @@ def main():
         # Read pairs file
         with open(args.pairs_file, 'r') as f:
             pairs = [line.strip().split() for line in f if line.strip()]
+        
+        # Apply limit if specified
+        if args.limit:
+            pairs = pairs[:args.limit]
         
         print(f"[DINOv3] Processing {len(pairs)} pairs...")
         
