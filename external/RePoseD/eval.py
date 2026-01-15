@@ -42,6 +42,7 @@ def parse_args():
     parser.add_argument('--thesis', action='store_true', default=False, help='Run only 3PTsuv and 3PTsoo with UniDepth')
     parser.add_argument('--ppbug', action='store_true', default=False)
     parser.add_argument('--iters', type=int, default=None)
+    parser.add_argument('--output_dir', type=str, default='results_new', help='Output directory for results')
     parser.add_argument('dataset_path')
 
     return parser.parse_args()
@@ -303,7 +304,8 @@ def eval(args):
         iterations_list = [args.iters]
 
     json_string = f'calibrated-{basename}.json'
-    json_path = os.path.join('results_new', json_string)
+    os.makedirs(args.output_dir, exist_ok=True)
+    json_path = os.path.join(args.output_dir, json_string)
 
     if args.load:
         print("Loading: ", json_string)

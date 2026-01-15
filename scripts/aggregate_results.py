@@ -50,23 +50,32 @@ def aggregate_results(csv_files, output_path, matcher_name=None):
         matcher_name = combined['Matches'].iloc[0] if 'Matches' in combined.columns else 'unknown'
     
     # Get columns to aggregate (numeric columns except Num_Pairs)
-    metric_cols = ['εr(°)', 'εt(°)', 'mAA@5', 'mAA@10', 'mAA@20', 'τ(ms)', 'Inliers']
+    # IMC-PT format: mAA@10 (AUC), mAA_f@10 (focal AUC if available)
+    metric_cols = ['εr(°)', 'εt(°)', 'mAA@10', 'mAA_f@10', 'τ(ms)', 'Inliers']
     metric_cols = [c for c in metric_cols if c in combined.columns]
     
-    # Group by Solver and average across scenes
-    grouped = combined.groupby('Solver').agg({
+    # Determine grouping columns based on available columns
+    group_cols = ['Solver']
+    if 'Exp.Type' in combined.columns:
+        group_cols.append('Exp.Type')
+    if 'Opt.' in combined.columns:
+        group_cols.append('Opt.')
+    
+    # Group by Solver (and Exp.Type, Opt. if exist) and average across scenes
+    agg_dict = {
         **{col: 'mean' for col in metric_cols},  # Average metrics
         'Num_Pairs': 'sum',  # Sum the pairs
         'Scene': lambda x: '+'.join(sorted(set(x)))  # Combine scene names
-    }).reset_index()
+    }
+    grouped = combined.groupby(group_cols).agg(agg_dict).reset_index()
     
     # Add fixed columns
     grouped['Matches'] = matcher_name
     grouped['Depth'] = 'UniDepth'
     
-    # Reorder columns to match paper format
-    cols_order = ['Matches', 'Depth', 'Solver', 'εr(°)', 'εt(°)', 
-                  'mAA@5', 'mAA@10', 'mAA@20', 'τ(ms)', 'Inliers', 'Num_Pairs', 'Scene']
+    # Reorder columns to match IMC-PT paper format
+    cols_order = ['Matches', 'Depth', 'Solver', 'Exp.Type', 'Opt.', 'εr(°)', 'εt(°)', 
+                  'mAA@10', 'mAA_f@10', 'τ(ms)', 'Inliers', 'Num_Pairs', 'Scene']
     cols_order = [c for c in cols_order if c in grouped.columns]
     grouped = grouped[cols_order]
     

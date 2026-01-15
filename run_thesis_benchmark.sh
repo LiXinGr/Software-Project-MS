@@ -32,7 +32,7 @@ DEPTH_DIR="$PROJECT_ROOT/datasets/phototourism/$SCENE/depth_unidepth"
 
 # Output paths
 OUTPUT_BASE="$PROJECT_ROOT/output"
-RESULTS_DIR="$OUTPUT_BASE/results"
+RESULTS_DIR="$OUTPUT_BASE/results_v2"  # New folder for complete experiments (calibrated + uncalibrated)
 
 # Environment names (adjust these to match your conda environments)
 ENV_UNIDEPTH="unidepth"
@@ -165,9 +165,10 @@ if [ "$ALL_SCENES_MODE" = true ]; then
     echo "All scenes completed! Aggregating results..."
     echo "============================================"
     
-    # Aggregate results from all scenes
+    # Aggregate results from all scenes (use base conda env which has pandas)
     if [ ${#GENERATED_CSVS[@]} -gt 0 ]; then
         COMBINED_CSV="$RESULTS_DIR/results_${MATCHER}_COMBINED_${BATCH_TIMESTAMP}.csv"
+        conda activate base
         python3 "$PROJECT_ROOT/scripts/aggregate_results.py" \
             --files "${GENERATED_CSVS[@]}" \
             --output "$COMBINED_CSV" \
@@ -431,17 +432,59 @@ cd "$PROJECT_ROOT/external/RePoseD"
 RESULTS_JSON="$RESULTS_DIR/results_${MATCHER}_${SCENE}_${TIMESTAMP}.json"
 RESULTS_CSV="$RESULTS_DIR/results_${MATCHER}_${SCENE}_${TIMESTAMP}.csv"
 
-# Run evaluation (--thesis runs only 3PTsuv and 3PTsoo with UniDepth = 2 experiments)
-python3 eval.py "$H5_FILE" -nw 8 --thesis
+# Run all 3 experiment types for complete mAA and mAA_f metrics
+# 1. Calibrated (known focal lengths) - for mAA pose accuracy
+log "  Running calibrated experiments (known focal)..."
+python3 eval.py "$H5_FILE" -nw 8 --thesis --output_dir "$RESULTS_DIR"
 
-# Copy results (RePoseD saves as calibrated-{h5_basename}.json)
-REPOSED_RESULTS="results_new/calibrated-benchmark_${MATCHER}_${SCENE}.json"
-if [ -f "$REPOSED_RESULTS" ]; then
-    cp "$REPOSED_RESULTS" "$RESULTS_JSON"
-    log "Results saved to: $RESULTS_JSON"
-else
-    log "Warning: Results file not found: $REPOSED_RESULTS"
-fi
+# 2. Shared focal (estimate one shared focal length) - for mAA_f
+log "  Running shared focal experiments (for mAA_f)..."
+python3 eval_shared_f.py "$H5_FILE" -nw 8 --thesis --output_dir "$RESULTS_DIR" || log "  Warning: shared_f eval failed"
+
+# 3. Varying focal (estimate two different focal lengths) - for mAA_f
+log "  Running varying focal experiments (for mAA_f)..."
+python3 eval_varying_f.py "$H5_FILE" -nw 8 --thesis --output_dir "$RESULTS_DIR" || log "  Warning: varying_f eval failed"
+
+# Combine all results into one JSON
+python3 - "$RESULTS_DIR" "$MATCHER" "$SCENE" "$RESULTS_JSON" << 'PYTHON_COMBINE'
+import json
+import sys
+from pathlib import Path
+
+results_dir = Path(sys.argv[1])
+matcher = sys.argv[2]
+scene = sys.argv[3]
+output_path = sys.argv[4]
+
+# Find all result files in the results directory
+basename = f"benchmark_{matcher}_{scene}"
+calibrated_path = results_dir / f"calibrated-{basename}.json"
+shared_path = results_dir / f"shared_focal-{basename}.json"
+varying_path = results_dir / f"varying_focal-{basename}.json"
+
+all_results = []
+
+for path, exp_type in [(calibrated_path, "calibrated"), 
+                        (shared_path, "shared_f"), 
+                        (varying_path, "varying_f")]:
+    if path.exists():
+        print(f"Loading {exp_type} results from {path}")
+        with open(path, 'r') as f:
+            results = json.load(f)
+            # Tag each result with experiment type
+            for r in results:
+                if isinstance(r, dict):
+                    r['exp_type'] = exp_type
+            all_results.extend(results)
+    else:
+        print(f"No {exp_type} results found at {path}")
+
+print(f"Combined {len(all_results)} total results")
+
+with open(output_path, 'w') as f:
+    json.dump(all_results, f)
+print(f"Saved to: {output_path}")
+PYTHON_COMBINE
 
 # Convert to CSV
 python3 - "$RESULTS_JSON" "$RESULTS_CSV" "$MATCHER" "UniDepth" << 'PYTHON_SCRIPT'
@@ -459,43 +502,76 @@ depth_method = sys.argv[4] if len(sys.argv) > 4 else "UniDepth"
 with open(json_path, 'r') as f:
     results = json.load(f)
 
-# Group by experiment
+# Group by experiment AND exp_type
 experiments = {}
 for r in results:
     if isinstance(r, dict):
         exp = r.get('experiment', 'unknown')
-        if exp not in experiments:
-            experiments[exp] = {'R_err': [], 't_err': [], 'runtime': [], 'inlier_ratio': []}
-        experiments[exp]['R_err'].append(r.get('R_err', float('nan')))
-        experiments[exp]['t_err'].append(r.get('t_err', float('nan')))
+        exp_type = r.get('exp_type', 'calibrated')
+        key = f"{exp}|{exp_type}"
+        if key not in experiments:
+            experiments[key] = {'R_err': [], 't_err': [], 'runtime': [], 'inlier_ratio': [], 
+                               'f_err': [], 'exp': exp, 'exp_type': exp_type}
+        experiments[key]['R_err'].append(r.get('R_err', float('nan')))
+        experiments[key]['t_err'].append(r.get('t_err', float('nan')))
+        # Focal length error (geometric mean of f1_err and f2_err if available)
+        if 'f_err' in r:
+            experiments[key]['f_err'].append(r.get('f_err', float('nan')))
         info = r.get('info', {})
-        experiments[exp]['runtime'].append(info.get('runtime', float('nan')))
-        experiments[exp]['inlier_ratio'].append(info.get('inlier_ratio', float('nan')))
+        experiments[key]['runtime'].append(info.get('runtime', float('nan')))
+        experiments[key]['inlier_ratio'].append(info.get('inlier_ratio', float('nan')))
 
-# Write CSV matching paper format
+# Check if we have focal length data
+has_focal = any(len(data['f_err']) > 0 and not all(np.isnan(data['f_err'])) for data in experiments.values())
+
+# Write CSV matching IMC-PT / RePoseD paper format
 with open(csv_path, 'w', newline='') as f:
     writer = csv.writer(f)
-    # Columns: Matches, Depth, Solver, εr(°), εt(°), mAA@5, mAA@10, mAA@20, τ(ms), Inliers, Num_Pairs
-    writer.writerow(['Matches', 'Depth', 'Solver', 'εr(°)', 'εt(°)', 'mAA@5', 'mAA@10', 'mAA@20', 'τ(ms)', 'Inliers', 'Num_Pairs'])
+    # Header following IMC-PT benchmarking standards
+    header = ['Matches', 'Depth', 'Solver', 'Exp.Type', 'Opt.', 'εr(°)', 'εt(°)', 'mAA@10', 'τ(ms)', 'Inliers', 'Num_Pairs']
+    if has_focal:
+        header.insert(8, 'mAA_f@10')
+    writer.writerow(header)
     
-    for exp, data in sorted(experiments.items()):
+    for key, data in sorted(experiments.items()):
+        exp = data['exp']
+        exp_type = data['exp_type']
         r_err = np.array(data['R_err'])
         t_err = np.array(data['t_err'])
         runtimes = np.array(data['runtime'])
         inliers = np.array(data['inlier_ratio'])
-        pose_err = np.maximum(r_err, t_err)
         
+        # Pose error = max(rotation, translation) per pair
+        pose_err = np.maximum(r_err, t_err)
+        pose_err[np.isnan(pose_err)] = 180  # Failed poses count as 180°
+        
+        # Median errors
         med_r = np.nanmedian(r_err)
         med_t = np.nanmedian(t_err)
-        mAA_5 = np.nanmean(pose_err < 5) * 100
-        mAA_10 = np.nanmean(pose_err < 10) * 100
-        mAA_20 = np.nanmean(pose_err < 20) * 100
-        mean_time = np.nanmean(runtimes) * 1000  # Convert to ms
+        
+        # mAA@10 (AUC): Average accuracy over thresholds 1° to 10°
+        # Formula: mean([fraction of pairs with error < t for t in 1..10])
+        mAA_10 = np.mean([np.sum(pose_err < t) / len(pose_err) for t in range(1, 11)]) * 100
+        
+        # mAA_f@10: Focal length AUC (thresholds 1% to 10%)
+        mAA_f_10 = None
+        if has_focal and len(data['f_err']) > 0:
+            f_err = np.array(data['f_err'])
+            f_err[np.isnan(f_err)] = 1.0  # Failed as 100% error
+            mAA_f_10 = np.mean([np.sum(f_err < t/100) / len(f_err) for t in range(1, 11)]) * 100
+        
+        # Determine optimization type from experiment name
+        # H = Hybrid (contains 'hybrid'), S = Standard (otherwise)
+        opt_type = 'H' if 'hybrid' in exp.lower() else 'S'
+        
+        mean_time = np.nanmean(runtimes)  # Already in ms from RePoseD
         mean_inliers = np.nanmean(inliers) * 100  # Convert to %
         
-        writer.writerow([matcher_name, depth_method, exp, f"{med_r:.2f}", f"{med_t:.2f}", 
-                        f"{mAA_5:.1f}", f"{mAA_10:.1f}", f"{mAA_20:.1f}",
-                        f"{mean_time:.1f}", f"{mean_inliers:.1f}", len(r_err)])
+        row = [matcher_name, depth_method, exp, exp_type, opt_type, f"{med_r:.2f}", f"{med_t:.2f}", 
+               f"{mAA_10:.1f}", f"{mean_time:.1f}", f"{mean_inliers:.1f}", len(r_err)]
+        if has_focal:
+            row.insert(8, f"{mAA_f_10:.1f}" if mAA_f_10 is not None else "N/A")
+        writer.writerow(row)
 
 print(f"CSV saved to: {csv_path}")
 PYTHON_SCRIPT
