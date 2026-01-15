@@ -10,6 +10,10 @@ import gc
 import os
 from PIL import Image
 from torchvision.transforms import PILToTensor
+import warnings
+
+# Suppress diffusers safety checker warning
+warnings.filterwarnings("ignore", message=".*safety checker.*")
 
 class MyUNet2DConditionModel(UNet2DConditionModel):
     def forward(
@@ -191,7 +195,7 @@ class SDFeaturizer:
     def __init__(self, sd_id='stable-diffusion-v1-5/stable-diffusion-v1-5', null_prompt='', device='cuda'):
         self.device = device
         unet = MyUNet2DConditionModel.from_pretrained(sd_id, subfolder="unet")
-        onestep_pipe = OneStepSDPipeline.from_pretrained(sd_id, unet=unet, safety_checker=None)
+        onestep_pipe = OneStepSDPipeline.from_pretrained(sd_id, unet=unet)
         onestep_pipe.vae.decoder = None
         onestep_pipe.scheduler = DDIMScheduler.from_pretrained(sd_id, subfolder="scheduler")
         gc.collect()
