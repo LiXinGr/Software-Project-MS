@@ -40,6 +40,7 @@ ENV_DINOV3="dinov3"
 ENV_DIFT="dift"
 ENV_LDM="ldm"
 ENV_ROMA="roma"
+ENV_ROMAV2="romav2"
 ENV_SUPERPOINT="lightglue"
 ENV_REPOSED="reposed"
 
@@ -59,7 +60,7 @@ CUSTOM_SCENE=""
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        dinov3|dift|ldm|roma|superpoint)
+        dinov3|dift|ldm|roma|romav2|superpoint)
             MATCHER="$1"
             shift
             ;;
@@ -113,7 +114,7 @@ done
 if [ -z "$MATCHER" ]; then
     echo "Error: No matcher specified"
     echo "Usage: ./run_thesis_benchmark.sh <matcher> [options]"
-    echo "  matcher: dinov3 | dift | ldm | roma | superpoint"
+    echo "  matcher: dinov3 | dift | ldm | roma | romav2 | superpoint"
     echo "  --device cuda:N   Use specific GPU (e.g., cuda:0, cuda:1, cuda:2)"
     echo "  --scene <name>    Scene to process (sacre_coeur, reichstag, st_peters_square)"
     echo "  --all-scenes      Process all available scenes"
@@ -168,8 +169,8 @@ if [ "$ALL_SCENES_MODE" = true ]; then
     # Aggregate results from all scenes (use base conda env which has pandas)
     if [ ${#GENERATED_CSVS[@]} -gt 0 ]; then
         COMBINED_CSV="$RESULTS_DIR/results_${MATCHER}_COMBINED_${BATCH_TIMESTAMP}.csv"
-        conda activate base
-        python3 "$PROJECT_ROOT/scripts/aggregate_results.py" \
+        # Use conda run instead of activate (works in non-interactive shell)
+        conda run -n base python3 "$PROJECT_ROOT/scripts/aggregate_results.py" \
             --files "${GENERATED_CSVS[@]}" \
             --output "$COMBINED_CSV" \
             --matcher "$MATCHER"
@@ -233,6 +234,7 @@ get_matcher_env() {
         dift) echo "$ENV_DIFT" ;;
         ldm) echo "$ENV_LDM" ;;
         roma) echo "$ENV_ROMA" ;;
+        romav2) echo "$ENV_ROMAV2" ;;
         superpoint) echo "$ENV_SUPERPOINT" ;;
         *) echo "" ;;
     esac
@@ -359,8 +361,8 @@ else
         --output_dir $MATCHES_DIR \
         --device $DEVICE"
     
-    # Add --use_mutual only for matchers that support it (not roma/ldm which have their own matching)
-    if [[ "$MATCHER" != "roma" && "$MATCHER" != "ldm" ]]; then
+    # Add --use_mutual only for matchers that support it (not roma/romav2/ldm which have their own matching)
+    if [[ "$MATCHER" != "roma" && "$MATCHER" != "romav2" && "$MATCHER" != "ldm" ]]; then
         MATCHER_ARGS="$MATCHER_ARGS --use_mutual"
     fi
     
