@@ -2,6 +2,56 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
+from pathlib import Path
+
+
+def get_superpoint_keypoints(img_path, device='cuda', max_keypoints=2048, cache_dir=None):
+    """
+    Extract keypoints using SuperPoint detector.
+    
+    This function provides keypoint locations that can be used with
+    other feature extractors (DINOv3, DIFT) for fair comparison.
+    
+    Args:
+        img_path: Path to image
+        device: torch device
+        max_keypoints: Maximum number of keypoints to detect
+        cache_dir: Optional directory to cache keypoints
+    
+    Returns:
+        kpts: [N, 2] tensor of keypoint coordinates (x, y) in pixel space
+    """
+    try:
+        from lightglue import SuperPoint
+    except ImportError:
+        raise ImportError("LightGlue not installed. Run: pip install git+https://github.com/cvg/LightGlue.git")
+    
+    img_path = Path(img_path)
+    
+    # Check cache
+    if cache_dir is not None:
+        cache_path = Path(cache_dir) / f"{img_path.stem}_sp_kpts.pt"
+        if cache_path.exists():
+            return torch.load(cache_path, map_location=device)
+    
+    # Load image
+    img = Image.open(img_path).convert('RGB')
+    img_tensor = torch.from_numpy(np.array(img)).permute(2, 0, 1).float() / 255.0
+    img_tensor = img_tensor.unsqueeze(0).to(device)
+    
+    # Extract keypoints
+    extractor = SuperPoint(max_num_keypoints=max_keypoints).eval().to(device)
+    with torch.no_grad():
+        feats = extractor.extract(img_tensor)
+        kpts = feats['keypoints'][0]  # [N, 2] in (x, y) format
+    
+    # Cache
+    if cache_dir is not None:
+        cache_path = Path(cache_dir) / f"{img_path.stem}_sp_kpts.pt"
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        torch.save(kpts.cpu(), cache_path)
+    
+    return kpts
 
 
 def compute_matches(
@@ -172,6 +222,139 @@ def match_dense_features(
     
     mkpts0 = np.stack([px1, py1], axis=1)  # [N, 2]
     mkpts1 = np.stack([px2, py2], axis=1)  # [N, 2]
+    
+    return mkpts0, mkpts1
+
+
+def match_at_keypoints(
+    ft1,
+    ft2,
+    kpts1,
+    kpts2,
+    img_size1,
+    img_size2,
+    use_mutual=True,
+    ratio_thresh=None,
+):
+    """
+    Match dense feature maps using precomputed keypoint locations.
+    
+    This allows using an external detector (e.g., SuperPoint) to select
+    keypoint locations, then extract dense features at those locations
+    for matching. This ensures fair comparison across different feature
+    extractors.
+    
+    Args:
+        ft1, ft2: feature maps [C, H, W] (torch tensors)
+        kpts1: [N1, 2] keypoint coordinates (x, y) in pixel space for image 1
+        kpts2: [N2, 2] keypoint coordinates (x, y) in pixel space for image 2
+        img_size1: (height, width) of original image 1
+        img_size2: (height, width) of original image 2
+        use_mutual: if True, apply mutual nearest neighbor filtering
+        ratio_thresh: Lowe's ratio test threshold (None = disabled)
+    
+    Returns:
+        mkpts0: [M, 2] numpy array of matched keypoints in image 1
+        mkpts1: [M, 2] numpy array of matched keypoints in image 2
+    """
+    device = ft1.device
+    C, H1, W1 = ft1.shape
+    C2, H2, W2 = ft2.shape
+    h1, w1 = img_size1
+    h2, w2 = img_size2
+    
+    # Convert keypoints to feature map coordinates
+    scale_x1 = W1 / w1
+    scale_y1 = H1 / h1
+    scale_x2 = W2 / w2
+    scale_y2 = H2 / h2
+    
+    # Scale keypoints to feature map space
+    kpts1_feat = kpts1.clone().float()
+    kpts1_feat[:, 0] *= scale_x1
+    kpts1_feat[:, 1] *= scale_y1
+    
+    kpts2_feat = kpts2.clone().float()
+    kpts2_feat[:, 0] *= scale_x2
+    kpts2_feat[:, 1] *= scale_y2
+    
+    # Clamp to valid range
+    kpts1_feat[:, 0] = kpts1_feat[:, 0].clamp(0, W1 - 1)
+    kpts1_feat[:, 1] = kpts1_feat[:, 1].clamp(0, H1 - 1)
+    kpts2_feat[:, 0] = kpts2_feat[:, 0].clamp(0, W2 - 1)
+    kpts2_feat[:, 1] = kpts2_feat[:, 1].clamp(0, H2 - 1)
+    
+    # Sample features at keypoint locations using bilinear interpolation
+    # grid_sample expects grid in [-1, 1] range
+    grid1 = kpts1_feat.clone()
+    grid1[:, 0] = (grid1[:, 0] / (W1 - 1)) * 2 - 1  # x
+    grid1[:, 1] = (grid1[:, 1] / (H1 - 1)) * 2 - 1  # y
+    grid1 = grid1.view(1, -1, 1, 2).to(device)  # [1, N, 1, 2]
+    
+    grid2 = kpts2_feat.clone()
+    grid2[:, 0] = (grid2[:, 0] / (W2 - 1)) * 2 - 1
+    grid2[:, 1] = (grid2[:, 1] / (H2 - 1)) * 2 - 1
+    grid2 = grid2.view(1, -1, 1, 2).to(device)
+    
+    import torch.nn.functional as F
+    
+    # Extract features: [1, C, N, 1] -> [N, C]
+    desc1 = F.grid_sample(ft1.unsqueeze(0), grid1, mode='bilinear', align_corners=True)
+    desc1 = desc1.squeeze(0).squeeze(-1).t()  # [N1, C]
+    
+    desc2 = F.grid_sample(ft2.unsqueeze(0), grid2, mode='bilinear', align_corners=True)
+    desc2 = desc2.squeeze(0).squeeze(-1).t()  # [N2, C]
+    
+    # L2-normalize
+    desc1 = desc1 / (desc1.norm(dim=1, keepdim=True) + 1e-8)
+    desc2 = desc2 / (desc2.norm(dim=1, keepdim=True) + 1e-8)
+    
+    N1 = desc1.shape[0]
+    N2 = desc2.shape[0]
+    
+    if N1 == 0 or N2 == 0:
+        return np.zeros((0, 2)), np.zeros((0, 2))
+    
+    # Compute similarity matrix
+    sim = desc1 @ desc2.t()  # [N1, N2]
+    
+    # Find best matches: 1 -> 2
+    best_sim, best_j = sim.max(dim=1)  # [N1]
+    rows_all = torch.arange(N1, device=device)
+    
+    rows = rows_all
+    
+    # Mutual nearest neighbor
+    if use_mutual:
+        rev_best_i = sim.argmax(dim=0)  # [N2]
+        mutual_mask = rev_best_i[best_j] == rows_all
+        rows = rows_all[mutual_mask]
+        best_j = best_j[mutual_mask]
+        best_sim = best_sim[mutual_mask]
+        
+        if rows.numel() == 0:
+            return np.zeros((0, 2)), np.zeros((0, 2))
+    
+    # Ratio test
+    if ratio_thresh is not None and N2 >= 2:
+        # Convert ratio_thresh for similarity-based matching
+        sim_ratio_thresh = ratio_thresh if ratio_thresh > 1.0 else 1.0 / ratio_thresh
+        
+        top2_sim, _ = sim.topk(2, dim=1)
+        best = top2_sim[:, 0]
+        second = top2_sim[:, 1]
+        ratio = best / (second + 1e-8)
+        
+        good = ratio[rows] >= sim_ratio_thresh
+        rows = rows[good]
+        best_j = best_j[good]
+        
+        if rows.numel() == 0:
+            return np.zeros((0, 2)), np.zeros((0, 2))
+    
+    # Get matched keypoints in original pixel space
+    mkpts0 = kpts1[rows].cpu().numpy()
+    mkpts1 = kpts2[best_j].cpu().numpy()
     
     return mkpts0, mkpts1
 

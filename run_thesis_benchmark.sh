@@ -374,6 +374,12 @@ else
         log "  Using feature cache: $FEATURE_CACHE_DIR"
     fi
     
+    # Use SuperPoint keypoints for DINOv3 and DIFT for fair comparison
+    if [[ "$MATCHER" == "dinov3" || "$MATCHER" == "dift" ]]; then
+        MATCHER_ARGS="$MATCHER_ARGS --use_sp_keypoints"
+        log "  Using SuperPoint keypoints for fair comparison"
+    fi
+    
     # Add limit if specified (process only first N pairs)
     if [ -n "$LIMIT" ]; then
         MATCHER_ARGS="$MATCHER_ARGS --limit $LIMIT"
