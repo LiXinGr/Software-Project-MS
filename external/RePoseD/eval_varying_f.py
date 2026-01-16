@@ -44,6 +44,8 @@ def parse_args():
     parser.add_argument('--iters', type=int, default=None)
     parser.add_argument('--thesis', action='store_true', default=False, help='Run only 3PTsuv solvers with UniDepth')
     parser.add_argument('--output_dir', type=str, default='results_new', help='Output directory for results')
+    parser.add_argument('--preprocess_info', type=str, default=None, 
+                        help='Path to preprocess_info.json for intrinsics adjustment')
     parser.add_argument('dataset_path')
 
     return parser.parse_args()
@@ -332,6 +334,30 @@ def eval(args):
         if args.first is not None:
             pairs = pairs[:args.first]
 
+        # Load preprocessing info for intrinsics adjustment
+        preprocess_info = None
+        if args.preprocess_info and os.path.exists(args.preprocess_info):
+            with open(args.preprocess_info, 'r') as f:
+                preprocess_info = json.load(f)
+            print(f"Loaded preprocessing info from {args.preprocess_info}")
+
+        def adjust_K_for_preprocessing(K, img_name, preprocess_info):
+            """Adjust intrinsics matrix for preprocessing (scale + pad)."""
+            for ext in ['.jpg', '.jpeg', '.png', '.JPG', '.JPEG', '.PNG', '']:
+                key = img_name.replace('_o', '') + ext
+                if key in preprocess_info:
+                    info = preprocess_info[key]
+                    K_new = K.copy()
+                    scale = info['scale']
+                    pad_left = info['pad_left']
+                    pad_top = info['pad_top']
+                    K_new[0, 0] *= scale
+                    K_new[1, 1] *= scale
+                    K_new[0, 2] = K_new[0, 2] * scale + pad_left
+                    K_new[1, 2] = K_new[1, 2] * scale + pad_top
+                    return K_new
+            return K
+
         def gen_data():
             for img_name_1, img_name_2 in pairs:
                 for experiment in experiments:
@@ -343,6 +369,12 @@ def eval(args):
 
                         K1 = np.array(H5_file[f'K_{img_name_1}'])
                         K2 = np.array(H5_file[f'K_{img_name_2}'])
+
+                        # Adjust K for preprocessing if info is available
+                        if preprocess_info is not None:
+                            K1 = adjust_K_for_preprocessing(K1, img_name_1, preprocess_info)
+                            K2 = adjust_K_for_preprocessing(K2, img_name_2, preprocess_info)
+
                         pp1 = K1[:2, 2]
                         pp2 = K2[:2, 2]
 
