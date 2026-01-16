@@ -69,12 +69,25 @@ def aggregate_results(csv_files, output_path, matcher_name=None):
     if 'Opt.' in combined.columns:
         group_cols.append('Opt.')
     
-    # Group by Matches, Solver (and Exp.Type, Opt. if exist) and average across scenes
+    # Include hyperparameter columns in grouping (if they vary)
+    hyperparam_cols = ['max_points', 'feat_level', 'up_ft_index', 'dift_t', 'ratio_thresh']
+    hyperparam_cols_present = [c for c in hyperparam_cols if c in combined.columns]
+    for hc in hyperparam_cols_present:
+        if combined[hc].nunique() > 1:  # Only group by if there are different values
+            group_cols.append(hc)
+    
+    # Group by Matches, Solver (and Exp.Type, Opt., hyperparams if exist) and average across scenes
     agg_dict = {
         **{col: 'mean' for col in metric_cols},  # Average metrics
         'Num_Pairs': 'sum',  # Sum the pairs
         'Scene': lambda x: '+'.join(sorted(set(x)))  # Combine scene names
     }
+    
+    # Keep hyperparameter columns that have consistent values (take first)
+    for hc in hyperparam_cols_present:
+        if hc not in group_cols:
+            agg_dict[hc] = 'first'
+    
     grouped = combined.groupby(group_cols).agg(agg_dict).reset_index()
     
     # Only add Matches/Depth if they don't exist (single matcher mode)
@@ -83,9 +96,9 @@ def aggregate_results(csv_files, output_path, matcher_name=None):
     if 'Depth' not in grouped.columns:
         grouped['Depth'] = 'UniDepth'
     
-    # Reorder columns to match IMC-PT paper format
+    # Reorder columns to match IMC-PT paper format + hyperparameters
     cols_order = ['Matches', 'Depth', 'Solver', 'Exp.Type', 'Opt.', 'εr(°)', 'εt(°)', 
-                  'mAA@10', 'mAA_f@10', 'τ(ms)', 'Inliers', 'Num_Pairs', 'Scene']
+                  'mAA@10', 'mAA_f@10', 'τ(ms)', 'Inliers', 'Num_Pairs', 'Scene'] + hyperparam_cols_present
     cols_order = [c for c in cols_order if c in grouped.columns]
     grouped = grouped[cols_order]
     

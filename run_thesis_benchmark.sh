@@ -32,7 +32,7 @@ DEPTH_DIR="$PROJECT_ROOT/datasets/phototourism/$SCENE/depth_unidepth"
 
 # Output paths
 OUTPUT_BASE="$PROJECT_ROOT/output"
-RESULTS_DIR="$OUTPUT_BASE/results_v2"  # New folder for complete experiments (calibrated + uncalibrated)
+RESULTS_DIR=""  # Set dynamically after matcher is known
 
 # Environment names (adjust these to match your conda environments)
 ENV_UNIDEPTH="unidepth"
@@ -57,6 +57,13 @@ LIMIT=""
 DEVICE="cuda:0"  # Default to first GPU
 ALL_SCENES_MODE=false
 CUSTOM_SCENE=""
+
+# Hyperparameters (model-specific, tracked in results)
+MAX_POINTS="2000"       # Number of keypoints for matching
+FEAT_LEVEL="-1"         # DINOv3: ViT block to extract features from (-1 = last)
+UP_FT_INDEX="1"         # DIFT: UNet decoder layer (0-3)
+DIFT_T="261"            # DIFT: Diffusion timestep
+RATIO_THRESH=""         # Lowe's ratio test threshold (empty = use default)
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -97,15 +104,40 @@ while [[ $# -gt 0 ]]; do
             ALL_SCENES_MODE=true
             shift
             ;;
+        --max_points|--max-points)
+            MAX_POINTS="$2"
+            shift 2
+            ;;
+        --feat_level|--feat-level)
+            FEAT_LEVEL="$2"
+            shift 2
+            ;;
+        --up_ft_index|--up-ft-index)
+            UP_FT_INDEX="$2"
+            shift 2
+            ;;
+        --dift_t|--dift-t)
+            DIFT_T="$2"
+            shift 2
+            ;;
+        --ratio_thresh|--ratio-thresh)
+            RATIO_THRESH="$2"
+            shift 2
+            ;;
         *)
             echo "Unknown argument: $1"
             echo "Usage: ./run_thesis_benchmark.sh <matcher> [options]"
-            echo "  --dry-run         Process only first 10 pairs"
-            echo "  --skip-depth      Skip depth generation"
-            echo "  --skip-matches    Skip match generation"
-            echo "  --device <dev>    CUDA device (cuda:0, cuda:1, cuda:2)"
-            echo "  --scene <name>    Scene to process (sacre_coeur, reichstag, st_peters_square)"
-            echo "  --all-scenes      Process all available scenes"
+            echo "  --dry-run           Process only first 10 pairs"
+            echo "  --skip-depth        Skip depth generation"
+            echo "  --skip-matches      Skip match generation"
+            echo "  --device <dev>      CUDA device (cuda:0, cuda:1, cuda:2)"
+            echo "  --scene <name>      Scene to process (sacre_coeur, reichstag, st_peters_square)"
+            echo "  --all-scenes        Process all available scenes"
+            echo "  --max_points <N>    Number of keypoints (default: 2000)"
+            echo "  --feat_level <L>    DINOv3 feature level (default: -1)"
+            echo "  --up_ft_index <I>   DIFT UNet layer 0-3 (default: 1)"
+            echo "  --dift_t <T>        DIFT diffusion timestep (default: 261)"
+            echo "  --ratio_thresh <R>  Lowe's ratio test threshold"
             exit 1
             ;;
     esac
@@ -190,9 +222,10 @@ if [ -n "$CUSTOM_SCENE" ]; then
 fi
 
 # Update paths based on SCENE
-IMAGES_DIR="$PROJECT_ROOT/datasets/phototourism/$SCENE/dense/images"
-SPARSE_DIR="$PROJECT_ROOT/datasets/phototourism/$SCENE/dense/sparse"
-DEPTH_DIR="$PROJECT_ROOT/datasets/phototourism/$SCENE/depth_unidepth"
+DATASET_ROOT="$PROJECT_ROOT/datasets/phototourism/$SCENE"
+IMAGES_DIR="$DATASET_ROOT/dense/images"
+SPARSE_DIR="$DATASET_ROOT/dense/sparse"
+DEPTH_DIR="$DATASET_ROOT/depth_unidepth"
 
 # ============================================================================
 # Helper Functions
@@ -256,7 +289,8 @@ if [ -n "$LIMIT" ]; then
 fi
 log "============================================"
 
-# Create output directories
+# Create output directories (per-matcher results folder)
+RESULTS_DIR="$OUTPUT_BASE/results_v2/$MATCHER"
 MATCHES_DIR="$OUTPUT_BASE/matches/$MATCHER"
 mkdir -p "$MATCHES_DIR"
 mkdir -p "$RESULTS_DIR"
@@ -331,8 +365,8 @@ if [ -d "$PREPROCESSED_DIR" ] && [ -f "$PREPROCESS_INFO" ]; then
 else
     log "Step 1.5: Preprocessing images (resize to 1120px + letterbox)..."
     
-    # Use base environment (has PIL, numpy)
-    activate_env "base"
+    # Use dinov3 environment (has PIL with libjpeg)
+    activate_env "$ENV_DINOV3"
     
     python3 scripts/preprocess_images.py \
         --images_dir "$IMAGES_DIR" \
@@ -408,6 +442,28 @@ else
     if [[ "$MATCHER" == "dinov3" || "$MATCHER" == "dift" ]]; then
         MATCHER_ARGS="$MATCHER_ARGS --use_sp_keypoints"
         log "  Using SuperPoint keypoints for fair comparison"
+    fi
+    
+    # Add hyperparameters
+    MATCHER_ARGS="$MATCHER_ARGS --max_points $MAX_POINTS"
+    log "  max_points: $MAX_POINTS"
+    
+    # DINOv3-specific parameters
+    if [[ "$MATCHER" == "dinov3" ]]; then
+        MATCHER_ARGS="$MATCHER_ARGS --feat_level $FEAT_LEVEL"
+        log "  feat_level: $FEAT_LEVEL"
+    fi
+    
+    # DIFT-specific parameters
+    if [[ "$MATCHER" == "dift" ]]; then
+        MATCHER_ARGS="$MATCHER_ARGS --up_ft_index $UP_FT_INDEX --t $DIFT_T"
+        log "  up_ft_index: $UP_FT_INDEX, t: $DIFT_T"
+    fi
+    
+    # Ratio threshold (if specified)
+    if [ -n "$RATIO_THRESH" ]; then
+        MATCHER_ARGS="$MATCHER_ARGS --ratio_thresh $RATIO_THRESH"
+        log "  ratio_thresh: $RATIO_THRESH"
     fi
     
     # Add limit if specified (process only first N pairs)
@@ -524,18 +580,25 @@ with open(output_path, 'w') as f:
 print(f"Saved to: {output_path}")
 PYTHON_COMBINE
 
-# Convert to CSV
-python3 - "$RESULTS_JSON" "$RESULTS_CSV" "$MATCHER" "UniDepth" << 'PYTHON_SCRIPT'
+# Convert to CSV with hyperparameters
+python3 - "$RESULTS_JSON" "$RESULTS_CSV" "$MATCHER" "UniDepth" "$MAX_POINTS" "$FEAT_LEVEL" "$UP_FT_INDEX" "$DIFT_T" "$RATIO_THRESH" << 'PYTHON_SCRIPT'
 import json
 import sys
 import csv
 import numpy as np
 
-# Read arguments: json_path, csv_path, matcher_name, depth_method
+# Read arguments
 json_path = sys.argv[1]
 csv_path = sys.argv[2]
 matcher_name = sys.argv[3] if len(sys.argv) > 3 else "unknown"
 depth_method = sys.argv[4] if len(sys.argv) > 4 else "UniDepth"
+
+# Hyperparameters
+max_points = sys.argv[5] if len(sys.argv) > 5 else "2000"
+feat_level = sys.argv[6] if len(sys.argv) > 6 else "-1"
+up_ft_index = sys.argv[7] if len(sys.argv) > 7 else "1"
+dift_t = sys.argv[8] if len(sys.argv) > 8 else "261"
+ratio_thresh = sys.argv[9] if len(sys.argv) > 9 else ""
 
 with open(json_path, 'r') as f:
     results = json.load(f)
@@ -562,11 +625,12 @@ for r in results:
 # Check if we have focal length data
 has_focal = any(len(data['f_err']) > 0 and not all(np.isnan(data['f_err'])) for data in experiments.values())
 
-# Write CSV matching IMC-PT / RePoseD paper format
+# Write CSV matching IMC-PT / RePoseD paper format + hyperparameters
 with open(csv_path, 'w', newline='') as f:
     writer = csv.writer(f)
-    # Header following IMC-PT benchmarking standards
-    header = ['Matches', 'Depth', 'Solver', 'Exp.Type', 'Opt.', 'εr(°)', 'εt(°)', 'mAA@10', 'τ(ms)', 'Inliers', 'Num_Pairs']
+    # Header with hyperparameter columns
+    header = ['Matches', 'Depth', 'Solver', 'Exp.Type', 'Opt.', 'εr(°)', 'εt(°)', 'mAA@10', 'τ(ms)', 'Inliers', 'Num_Pairs', 
+              'max_points', 'feat_level', 'up_ft_index', 'dift_t', 'ratio_thresh']
     if has_focal:
         header.insert(8, 'mAA_f@10')
     writer.writerow(header)
@@ -588,7 +652,6 @@ with open(csv_path, 'w', newline='') as f:
         med_t = np.nanmedian(t_err)
         
         # mAA@10 (AUC): Average accuracy over thresholds 1° to 10°
-        # Formula: mean([fraction of pairs with error < t for t in 1..10])
         mAA_10 = np.mean([np.sum(pose_err < t) / len(pose_err) for t in range(1, 11)]) * 100
         
         # mAA_f@10: Focal length AUC (thresholds 1% to 10%)
@@ -599,14 +662,14 @@ with open(csv_path, 'w', newline='') as f:
             mAA_f_10 = np.mean([np.sum(f_err < t/100) / len(f_err) for t in range(1, 11)]) * 100
         
         # Determine optimization type from experiment name
-        # H = Hybrid (contains 'hybrid'), S = Standard (otherwise)
         opt_type = 'H' if 'hybrid' in exp.lower() else 'S'
         
-        mean_time = np.nanmean(runtimes)  # Already in ms from RePoseD
-        mean_inliers = np.nanmean(inliers) * 100  # Convert to %
+        mean_time = np.nanmean(runtimes)
+        mean_inliers = np.nanmean(inliers) * 100
         
         row = [matcher_name, depth_method, exp, exp_type, opt_type, f"{med_r:.2f}", f"{med_t:.2f}", 
-               f"{mAA_10:.1f}", f"{mean_time:.1f}", f"{mean_inliers:.1f}", len(r_err)]
+               f"{mAA_10:.1f}", f"{mean_time:.1f}", f"{mean_inliers:.1f}", len(r_err),
+               max_points, feat_level, up_ft_index, dift_t, ratio_thresh]
         if has_focal:
             row.insert(8, f"{mAA_f_10:.1f}" if mAA_f_10 is not None else "N/A")
         writer.writerow(row)
