@@ -12,7 +12,7 @@ import torch
 from PIL import Image
 import torchvision.transforms as T
 import timm
-from util import compute_matches, visualize_matches, match_dense_features, save_matches
+from util import compute_matches, visualize_matches, match_dense_features, save_matches, match_at_keypoints, get_superpoint_keypoints
 import argparse
 from pathlib import Path
 import numpy as np
@@ -81,15 +81,30 @@ def process_pair(img1_path, img2_path, model, transform, args, feature_cache=Non
     ft1 = ft1.to(device)
     ft2 = ft2.to(device)
     
-    # Use the standardized matching interface
-    mkpts0, mkpts1 = match_dense_features(
-        ft1, ft2,
-        img_size1=orig_size1,
-        img_size2=orig_size2,
-        max_points=args.max_points,
-        use_mutual=args.use_mutual,
-        ratio_thresh=args.ratio_thresh,
-    )
+    if args.use_sp_keypoints:
+        # Use SuperPoint-detected keypoints for fair comparison
+        sp_cache = Path(feature_cache).parent / 'superpoint_kpts' if feature_cache else None
+        kpts1 = get_superpoint_keypoints(img1_path, device=device, max_keypoints=args.max_points, cache_dir=sp_cache)
+        kpts2 = get_superpoint_keypoints(img2_path, device=device, max_keypoints=args.max_points, cache_dir=sp_cache)
+        
+        mkpts0, mkpts1 = match_at_keypoints(
+            ft1, ft2,
+            kpts1, kpts2,
+            img_size1=orig_size1,
+            img_size2=orig_size2,
+            use_mutual=args.use_mutual,
+            ratio_thresh=args.ratio_thresh,
+        )
+    else:
+        # Use dense matching with random sampling (original behavior)
+        mkpts0, mkpts1 = match_dense_features(
+            ft1, ft2,
+            img_size1=orig_size1,
+            img_size2=orig_size2,
+            max_points=args.max_points,
+            use_mutual=args.use_mutual,
+            ratio_thresh=args.ratio_thresh,
+        )
     
     return mkpts0, mkpts1, orig_size1, orig_size2
 
@@ -126,6 +141,8 @@ def main():
                         help="Limit number of pairs to process")
     parser.add_argument("--visualize", action="store_true",
                         help="Generate visualization images")
+    parser.add_argument("--use_sp_keypoints", action="store_true",
+                        help="Use SuperPoint-detected keypoints for fair comparison")
 
     args = parser.parse_args()
 
