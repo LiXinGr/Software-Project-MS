@@ -320,6 +320,36 @@ else
 fi
 
 # ============================================================================
+# Step 1.5: Image Preprocessing (resize + letterbox for fair comparison)
+# ============================================================================
+
+PREPROCESSED_DIR="$DATASET_ROOT/images_preprocessed"
+PREPROCESS_INFO="$PREPROCESSED_DIR/preprocess_info.json"
+
+if [ -d "$PREPROCESSED_DIR" ] && [ -f "$PREPROCESS_INFO" ]; then
+    log "Step 1.5: Preprocessed images already exist at $PREPROCESSED_DIR, skipping..."
+else
+    log "Step 1.5: Preprocessing images (resize to 1120px + letterbox)..."
+    
+    # Use base environment (has PIL, numpy)
+    activate_env "base"
+    
+    python3 scripts/preprocess_images.py \
+        --images_dir "$IMAGES_DIR" \
+        --output_dir "$PREPROCESSED_DIR" \
+        --target_size 1120 \
+        --divisibility 16 \
+        --format jpg \
+        --quality 95
+    
+    log "Step 1.5: Preprocessing complete"
+fi
+
+# Use preprocessed images for all subsequent steps
+IMAGES_DIR_ORIGINAL="$IMAGES_DIR"
+IMAGES_DIR="$PREPROCESSED_DIR"
+
+# ============================================================================
 # Step 2: Depth Generation
 # ============================================================================
 
@@ -443,15 +473,15 @@ RESULTS_CSV="$RESULTS_DIR/results_${MATCHER}_${SCENE}_${TIMESTAMP}.csv"
 # Run all 3 experiment types for complete mAA and mAA_f metrics
 # 1. Calibrated (known focal lengths) - for mAA pose accuracy
 log "  Running calibrated experiments (known focal)..."
-python3 eval.py "$H5_FILE" -nw 8 --thesis --output_dir "$RESULTS_DIR"
+python3 eval.py "$H5_FILE" -nw 8 --thesis --output_dir "$RESULTS_DIR" --preprocess_info "$PREPROCESS_INFO"
 
 # 2. Shared focal (estimate one shared focal length) - for mAA_f
 log "  Running shared focal experiments (for mAA_f)..."
-python3 eval_shared_f.py "$H5_FILE" -nw 8 --thesis --output_dir "$RESULTS_DIR" || log "  Warning: shared_f eval failed"
+python3 eval_shared_f.py "$H5_FILE" -nw 8 --thesis --output_dir "$RESULTS_DIR" --preprocess_info "$PREPROCESS_INFO" || log "  Warning: shared_f eval failed"
 
 # 3. Varying focal (estimate two different focal lengths) - for mAA_f
 log "  Running varying focal experiments (for mAA_f)..."
-python3 eval_varying_f.py "$H5_FILE" -nw 8 --thesis --output_dir "$RESULTS_DIR" || log "  Warning: varying_f eval failed"
+python3 eval_varying_f.py "$H5_FILE" -nw 8 --thesis --output_dir "$RESULTS_DIR" --preprocess_info "$PREPROCESS_INFO" || log "  Warning: varying_f eval failed"
 
 # Combine all results into one JSON
 python3 - "$RESULTS_DIR" "$MATCHER" "$SCENE" "$RESULTS_JSON" << 'PYTHON_COMBINE'

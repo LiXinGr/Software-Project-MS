@@ -3,6 +3,146 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 from pathlib import Path
+from dataclasses import dataclass
+
+
+@dataclass
+class PreprocessInfo:
+    """Information about image preprocessing for coordinate transformation."""
+    scale: float           # Resize scale factor
+    pad_left: int          # Padding added to left
+    pad_top: int           # Padding added to top
+    orig_size: tuple       # Original (H, W)
+    resized_size: tuple    # Size after resize, before padding (H, W)
+    final_size: tuple      # Final size after padding (H, W)
+
+
+def preprocess_image(
+    img,
+    target_long_edge=1120,
+    divisibility=16,
+    return_info=True,
+):
+    """
+    Preprocess image for fair comparison across matchers.
+    
+    Steps:
+    1. Resize so long edge = target_long_edge (1120 = LCM of 14 and 16)
+    2. Scale short edge proportionally (maintains aspect ratio)
+    3. Pad with zeros to make both dimensions divisible by divisibility
+    
+    Args:
+        img: PIL Image or numpy array [H, W, 3]
+        target_long_edge: Target size for long edge (default 1120, divisible by 14 & 16)
+        divisibility: Pad so dimensions are divisible by this (default 16)
+        return_info: If True, return PreprocessInfo for coordinate mapping
+    
+    Returns:
+        img_out: Preprocessed PIL Image
+        info: PreprocessInfo (if return_info=True)
+    """
+    if isinstance(img, np.ndarray):
+        img = Image.fromarray(img)
+    
+    orig_w, orig_h = img.size
+    orig_size = (orig_h, orig_w)
+    
+    # Step 1: Resize so long edge = target_long_edge
+    if orig_w >= orig_h:
+        # Width is long edge
+        new_w = target_long_edge
+        scale = target_long_edge / orig_w
+        new_h = int(round(orig_h * scale))
+    else:
+        # Height is long edge
+        new_h = target_long_edge
+        scale = target_long_edge / orig_h
+        new_w = int(round(orig_w * scale))
+    
+    img_resized = img.resize((new_w, new_h), Image.BILINEAR)
+    resized_size = (new_h, new_w)
+    
+    # Step 2: Pad to divisibility
+    pad_h = (divisibility - new_h % divisibility) % divisibility
+    pad_w = (divisibility - new_w % divisibility) % divisibility
+    
+    # Pad evenly (or slightly more on bottom/right)
+    pad_top = pad_h // 2
+    pad_bottom = pad_h - pad_top
+    pad_left = pad_w // 2
+    pad_right = pad_w - pad_left
+    
+    final_h = new_h + pad_h
+    final_w = new_w + pad_w
+    final_size = (final_h, final_w)
+    
+    # Create padded image (black padding)
+    img_padded = Image.new('RGB', (final_w, final_h), (0, 0, 0))
+    img_padded.paste(img_resized, (pad_left, pad_top))
+    
+    if return_info:
+        info = PreprocessInfo(
+            scale=scale,
+            pad_left=pad_left,
+            pad_top=pad_top,
+            orig_size=orig_size,
+            resized_size=resized_size,
+            final_size=final_size,
+        )
+        return img_padded, info
+    
+    return img_padded
+
+
+def map_points_to_original(points, info):
+    """
+    Map keypoint coordinates from preprocessed image back to original image.
+    
+    Args:
+        points: [N, 2] array of (x, y) coordinates in preprocessed image
+        info: PreprocessInfo from preprocess_image
+    
+    Returns:
+        points_orig: [N, 2] array of (x, y) coordinates in original image
+    """
+    if len(points) == 0:
+        return points
+    
+    points = np.asarray(points)
+    
+    # Undo padding
+    x = points[:, 0] - info.pad_left
+    y = points[:, 1] - info.pad_top
+    
+    # Undo resize
+    x = x / info.scale
+    y = y / info.scale
+    
+    return np.stack([x, y], axis=1)
+
+
+def update_intrinsics(K, info):
+    """
+    Update camera intrinsics matrix for preprocessed image.
+    
+    Args:
+        K: [3, 3] camera intrinsics matrix
+        info: PreprocessInfo from preprocess_image
+    
+    Returns:
+        K_new: [3, 3] updated intrinsics for preprocessed image
+    """
+    K_new = K.copy()
+    
+    # Scale focal length
+    K_new[0, 0] *= info.scale  # fx
+    K_new[1, 1] *= info.scale  # fy
+    
+    # Scale and shift principal point
+    K_new[0, 2] = K_new[0, 2] * info.scale + info.pad_left  # cx
+    K_new[1, 2] = K_new[1, 2] * info.scale + info.pad_top   # cy
+    
+    return K_new
 
 
 def get_superpoint_keypoints(img_path, device='cuda', max_keypoints=2048, cache_dir=None):
