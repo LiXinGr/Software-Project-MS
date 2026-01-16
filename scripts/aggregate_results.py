@@ -54,14 +54,22 @@ def aggregate_results(csv_files, output_path, matcher_name=None):
     metric_cols = ['εr(°)', 'εt(°)', 'mAA@10', 'mAA_f@10', 'τ(ms)', 'Inliers']
     metric_cols = [c for c in metric_cols if c in combined.columns]
     
+    
     # Determine grouping columns based on available columns
-    group_cols = ['Solver']
+    group_cols = []
+    
+    # Include Matches if combining multiple matchers
+    if 'Matches' in combined.columns:
+        group_cols.append('Matches')
+    
+    group_cols.append('Solver')
+    
     if 'Exp.Type' in combined.columns:
         group_cols.append('Exp.Type')
     if 'Opt.' in combined.columns:
         group_cols.append('Opt.')
     
-    # Group by Solver (and Exp.Type, Opt. if exist) and average across scenes
+    # Group by Matches, Solver (and Exp.Type, Opt. if exist) and average across scenes
     agg_dict = {
         **{col: 'mean' for col in metric_cols},  # Average metrics
         'Num_Pairs': 'sum',  # Sum the pairs
@@ -69,9 +77,11 @@ def aggregate_results(csv_files, output_path, matcher_name=None):
     }
     grouped = combined.groupby(group_cols).agg(agg_dict).reset_index()
     
-    # Add fixed columns
-    grouped['Matches'] = matcher_name
-    grouped['Depth'] = 'UniDepth'
+    # Only add Matches/Depth if they don't exist (single matcher mode)
+    if 'Matches' not in grouped.columns:
+        grouped['Matches'] = matcher_name
+    if 'Depth' not in grouped.columns:
+        grouped['Depth'] = 'UniDepth'
     
     # Reorder columns to match IMC-PT paper format
     cols_order = ['Matches', 'Depth', 'Solver', 'Exp.Type', 'Opt.', 'εr(°)', 'εt(°)', 
