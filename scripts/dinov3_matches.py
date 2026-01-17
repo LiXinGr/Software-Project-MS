@@ -24,12 +24,12 @@ def run_dinov3_extractor(
     model,
     transform,
     img_size,
-    feat_level,
     cache_dir=None,
 ):
     """
     Extract a single DINOv3 feature map [C, H, W] for one image.
     Returns the feature map and original image size (H, W).
+    Note: feat_level is configured at model creation time via out_indices.
     """
     # Load original image to get its size
     img_orig = Image.open(img_path).convert("RGB")
@@ -49,7 +49,7 @@ def run_dinov3_extractor(
     with torch.no_grad():
         feats = model(x)
 
-    ft = feats[feat_level].squeeze(0).cpu()  # [C, H, W]
+    ft = feats[0].squeeze(0).cpu()  # [C, H, W] - index 0 because we only request one layer
 
     # Save to cache if specified
     if cache_dir is not None:
@@ -65,16 +65,16 @@ def process_pair(img1_path, img2_path, model, transform, args, feature_cache=Non
     ft1, orig_size1 = run_dinov3_extractor(
         img1_path, model, transform,
         img_size=args.img_size,
-        feat_level=args.feat_level,
         cache_dir=feature_cache,
     )
     
     ft2, orig_size2 = run_dinov3_extractor(
         img2_path, model, transform,
         img_size=args.img_size,
-        feat_level=args.feat_level,
         cache_dir=feature_cache,
     )
+    
+
     
     # Move to device for matching
     device = next(model.parameters()).device
@@ -124,8 +124,8 @@ def main():
     parser.add_argument("--output_dir", type=str, help="Output directory for matches (batch mode)")
     
     # Model parameters
-    parser.add_argument("--img_size", type=int, default=518, 
-                        help="Image size for feature extraction (default: 518 for ViT patch=14)")
+    parser.add_argument("--img_size", type=int, default=1120, 
+                        help="Image size for feature extraction (default: 1120 to match preprocessing)")
     parser.add_argument("--feat_level", type=int, default=-1)
     parser.add_argument("--max_points", type=int, default=2000)
     parser.add_argument("--use_mutual", action="store_true", default=True,
@@ -149,12 +149,26 @@ def main():
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
     print("Using device:", device)
 
-    # Initialize model
+    # Initialize model with specific layer extraction
+    # DINOv2 ViT-L has 24 transformer blocks (indices 0-23)
+    # Negative indices work: -1 = last (23), -12 = block 12
     transform = T.Compose([T.ToTensor()])
+    
+    # Convert negative index to positive for timm
+    num_blocks = 24  # ViT-L has 24 blocks
+    if args.feat_level < 0:
+        out_idx = num_blocks + args.feat_level
+    else:
+        out_idx = args.feat_level
+    
+    print(f"[DINOv3] Extracting features from block {out_idx} (feat_level={args.feat_level})")
+    
     model = timm.create_model(
         "vit_large_patch14_dinov2.lvd142m",
         pretrained=True,
         features_only=True,
+        out_indices=[out_idx],  # Extract only this specific layer
+        img_size=args.img_size,
     )
     model.to(device)
     model.eval()

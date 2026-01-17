@@ -60,12 +60,17 @@ CUSTOM_SCENE=""
 
 # Hyperparameters (model-specific, tracked in results)
 MAX_POINTS="2000"       # Number of keypoints for matching
+IMG_SIZE="1120"         # Image size for feature extraction
 FEAT_LEVEL="-1"         # DINOv3: ViT block to extract features from (-1 = last)
 UP_FT_INDEX="1"         # DIFT: UNet decoder layer (0-3)
 DIFT_T="261"            # DIFT: Diffusion timestep
+ENSEMBLE_SIZE="8"       # DIFT: Number of noise samples to average (2-8)
 RATIO_THRESH=""         # Lowe's ratio test threshold (empty = use default)
 
 while [[ $# -gt 0 ]]; do
+    # Debug: uncomment to see argument parsing
+    # echo "DEBUG: Processing arg: $1 (next: $2)"
+    
     case "$1" in
         dinov3|dift|ldm|roma|romav2|superpoint)
             MATCHER="$1"
@@ -124,6 +129,14 @@ while [[ $# -gt 0 ]]; do
             RATIO_THRESH="$2"
             shift 2
             ;;
+        --ensemble_size|--ensemble-size)
+            ENSEMBLE_SIZE="$2"
+            shift 2
+            ;;
+        --img_size|--img-size)
+            IMG_SIZE="$2"
+            shift 2
+            ;;
         *)
             echo "Unknown argument: $1"
             echo "Usage: ./run_thesis_benchmark.sh <matcher> [options]"
@@ -137,6 +150,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --feat_level <L>    DINOv3 feature level (default: -1)"
             echo "  --up_ft_index <I>   DIFT UNet layer 0-3 (default: 1)"
             echo "  --dift_t <T>        DIFT diffusion timestep (default: 261)"
+            echo "  --ensemble_size <N> DIFT noise ensemble size (default: 8)"
             echo "  --ratio_thresh <R>  Lowe's ratio test threshold"
             exit 1
             ;;
@@ -171,6 +185,15 @@ if [ "$ALL_SCENES_MODE" = true ]; then
         [ "$SKIP_DEPTH" = true ] && args+=("--skip-depth")
         [ "$SKIP_MATCHES" = true ] && args+=("--skip-matches")
         [ -n "$LIMIT" ] && args+=("--limit" "$LIMIT")
+        
+        # Pass hyperparameters to subprocess
+        args+=("--max_points" "$MAX_POINTS")
+        args+=("--img_size" "$IMG_SIZE")
+        args+=("--feat_level" "$FEAT_LEVEL")
+        args+=("--up_ft_index" "$UP_FT_INDEX")
+        args+=("--dift_t" "$DIFT_T")
+        args+=("--ensemble_size" "$ENSEMBLE_SIZE")
+        [ -n "$RATIO_THRESH" ] && args+=("--ratio_thresh" "$RATIO_THRESH")
         
         echo ""
         echo "======== Processing scene: $scene ========"
@@ -448,6 +471,16 @@ else
     MATCHER_ARGS="$MATCHER_ARGS --max_points $MAX_POINTS"
     log "  max_points: $MAX_POINTS"
     
+    # Add img_size for DINOv3 and DIFT (feature extraction resolution)
+    if [[ "$MATCHER" == "dinov3" ]]; then
+        MATCHER_ARGS="$MATCHER_ARGS --img_size $IMG_SIZE"
+        log "  img_size: $IMG_SIZE"
+    fi
+    if [[ "$MATCHER" == "dift" ]]; then
+        MATCHER_ARGS="$MATCHER_ARGS --img_size $IMG_SIZE $IMG_SIZE"
+        log "  img_size: ${IMG_SIZE}x${IMG_SIZE}"
+    fi
+    
     # DINOv3-specific parameters
     if [[ "$MATCHER" == "dinov3" ]]; then
         MATCHER_ARGS="$MATCHER_ARGS --feat_level $FEAT_LEVEL"
@@ -456,8 +489,8 @@ else
     
     # DIFT-specific parameters
     if [[ "$MATCHER" == "dift" ]]; then
-        MATCHER_ARGS="$MATCHER_ARGS --up_ft_index $UP_FT_INDEX --t $DIFT_T"
-        log "  up_ft_index: $UP_FT_INDEX, t: $DIFT_T"
+        MATCHER_ARGS="$MATCHER_ARGS --up_ft_index $UP_FT_INDEX --t $DIFT_T --ensemble_size $ENSEMBLE_SIZE"
+        log "  up_ft_index: $UP_FT_INDEX, t: $DIFT_T, ensemble_size: $ENSEMBLE_SIZE"
     fi
     
     # Ratio threshold (if specified)
@@ -581,7 +614,7 @@ print(f"Saved to: {output_path}")
 PYTHON_COMBINE
 
 # Convert to CSV with hyperparameters
-python3 - "$RESULTS_JSON" "$RESULTS_CSV" "$MATCHER" "UniDepth" "$MAX_POINTS" "$FEAT_LEVEL" "$UP_FT_INDEX" "$DIFT_T" "$RATIO_THRESH" << 'PYTHON_SCRIPT'
+python3 - "$RESULTS_JSON" "$RESULTS_CSV" "$MATCHER" "UniDepth" "$MAX_POINTS" "$IMG_SIZE" "$FEAT_LEVEL" "$UP_FT_INDEX" "$DIFT_T" "$RATIO_THRESH" << 'PYTHON_SCRIPT'
 import json
 import sys
 import csv
@@ -595,10 +628,11 @@ depth_method = sys.argv[4] if len(sys.argv) > 4 else "UniDepth"
 
 # Hyperparameters
 max_points = sys.argv[5] if len(sys.argv) > 5 else "2000"
-feat_level = sys.argv[6] if len(sys.argv) > 6 else "-1"
-up_ft_index = sys.argv[7] if len(sys.argv) > 7 else "1"
-dift_t = sys.argv[8] if len(sys.argv) > 8 else "261"
-ratio_thresh = sys.argv[9] if len(sys.argv) > 9 else ""
+img_size = sys.argv[6] if len(sys.argv) > 6 else "1120"
+feat_level = sys.argv[7] if len(sys.argv) > 7 else "-1"
+up_ft_index = sys.argv[8] if len(sys.argv) > 8 else "1"
+dift_t = sys.argv[9] if len(sys.argv) > 9 else "261"
+ratio_thresh = sys.argv[10] if len(sys.argv) > 10 else ""
 
 with open(json_path, 'r') as f:
     results = json.load(f)
@@ -630,7 +664,7 @@ with open(csv_path, 'w', newline='') as f:
     writer = csv.writer(f)
     # Header with hyperparameter columns
     header = ['Matches', 'Depth', 'Solver', 'Exp.Type', 'Opt.', 'εr(°)', 'εt(°)', 'mAA@10', 'τ(ms)', 'Inliers', 'Num_Pairs', 
-              'max_points', 'feat_level', 'up_ft_index', 'dift_t', 'ratio_thresh']
+              'max_points', 'img_size', 'feat_level', 'up_ft_index', 'dift_t', 'ratio_thresh']
     if has_focal:
         header.insert(8, 'mAA_f@10')
     writer.writerow(header)
@@ -669,7 +703,7 @@ with open(csv_path, 'w', newline='') as f:
         
         row = [matcher_name, depth_method, exp, exp_type, opt_type, f"{med_r:.2f}", f"{med_t:.2f}", 
                f"{mAA_10:.1f}", f"{mean_time:.1f}", f"{mean_inliers:.1f}", len(r_err),
-               max_points, feat_level, up_ft_index, dift_t, ratio_thresh]
+               max_points, img_size, feat_level, up_ft_index, dift_t, ratio_thresh]
         if has_focal:
             row.insert(8, f"{mAA_f_10:.1f}" if mAA_f_10 is not None else "N/A")
         writer.writerow(row)

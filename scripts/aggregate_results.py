@@ -70,7 +70,7 @@ def aggregate_results(csv_files, output_path, matcher_name=None):
         group_cols.append('Opt.')
     
     # Include hyperparameter columns in grouping (if they vary)
-    hyperparam_cols = ['max_points', 'feat_level', 'up_ft_index', 'dift_t', 'ratio_thresh']
+    hyperparam_cols = ['max_points', 'img_size', 'feat_level', 'up_ft_index', 'dift_t', 'ratio_thresh']
     hyperparam_cols_present = [c for c in hyperparam_cols if c in combined.columns]
     for hc in hyperparam_cols_present:
         if combined[hc].nunique() > 1:  # Only group by if there are different values
