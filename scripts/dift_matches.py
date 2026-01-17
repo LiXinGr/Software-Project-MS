@@ -30,13 +30,22 @@ sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(DIFT_ROOT))
 
 from util import compute_matches, visualize_matches, match_dense_features, save_matches, match_at_keypoints, get_superpoint_keypoints
-from external.DIFT.extract_dift import main as dift_extract_main
+from torchvision.transforms import PILToTensor
+
+# Import DIFT's SDFeaturizer for efficient single-load feature extraction
+from src.models.dift_sd import SDFeaturizer
 
 
-def run_dift_extractor(img_path, feature_cache_dir, shared_args):
+def run_dift_extractor(img_path, dift_model, feature_cache_dir, shared_args):
     """
-    Extract DIFT features for one image.
+    Extract DIFT features for one image using pre-loaded model.
     Returns feature map [C, H, W] and original image size (H, W).
+    
+    Args:
+        img_path: Path to the image
+        dift_model: Pre-loaded SDFeaturizer instance (loaded once, reused for all images)
+        feature_cache_dir: Directory to cache extracted features
+        shared_args: Arguments containing t, up_ft_index, ensemble_size, etc.
     """
     # Get original image size
     img_orig = Image.open(img_path).convert("RGB")
@@ -48,28 +57,39 @@ def run_dift_extractor(img_path, feature_cache_dir, shared_args):
     if ft_path.exists():
         return torch.load(ft_path), orig_size
 
-    dift_args = argparse.Namespace(
-        img_size=shared_args.img_size,
-        model_id=shared_args.model_id,
+    # Resize image to target size
+    img_size = shared_args.img_size
+    if isinstance(img_size, list):
+        img_size = tuple(img_size)
+    img_resized = img_orig.resize(img_size)
+    
+    # Convert to tensor: [1, C, H, W], range [-1, 1]
+    img_tensor = (PILToTensor()(img_resized) / 255.0 - 0.5) * 2
+    img_tensor = img_tensor.unsqueeze(0)  # [1, C, H, W]
+    
+    # Extract features using pre-loaded model
+    ft = dift_model.forward(
+        img_tensor,
+        prompt=shared_args.prompt,
         t=shared_args.t,
         up_ft_index=shared_args.up_ft_index,
-        prompt=shared_args.prompt,
-        ensemble_size=shared_args.ensemble_size,
-        input_path=str(img_path),
-        output_path=str(ft_path),
-        device=shared_args.device,
+        ensemble_size=shared_args.ensemble_size
     )
     
+    # Squeeze batch dimension: [1, C, H, W] -> [C, H, W]
+    ft = ft.squeeze(0)
+    
+    # Save to cache
     ft_path.parent.mkdir(parents=True, exist_ok=True)
-    dift_extract_main(dift_args)
-    ft = torch.load(ft_path)
+    torch.save(ft.cpu(), ft_path)
+    
     return ft, orig_size
 
 
-def process_pair(img1_path, img2_path, feature_cache_dir, args):
+def process_pair(img1_path, img2_path, dift_model, feature_cache_dir, args):
     """Process a single pair and return mkpts0, mkpts1."""
-    ft1, orig_size1 = run_dift_extractor(img1_path, feature_cache_dir, args)
-    ft2, orig_size2 = run_dift_extractor(img2_path, feature_cache_dir, args)
+    ft1, orig_size1 = run_dift_extractor(img1_path, dift_model, feature_cache_dir, args)
+    ft2, orig_size2 = run_dift_extractor(img2_path, dift_model, feature_cache_dir, args)
     
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
     ft1 = ft1.to(device)
@@ -81,14 +101,50 @@ def process_pair(img1_path, img2_path, feature_cache_dir, args):
         kpts1 = get_superpoint_keypoints(img1_path, device=device, max_keypoints=args.max_points, cache_dir=sp_cache)
         kpts2 = get_superpoint_keypoints(img2_path, device=device, max_keypoints=args.max_points, cache_dir=sp_cache)
         
-        mkpts0, mkpts1 = match_at_keypoints(
+        # DIFT extracts features at args.img_size (e.g., 512x512), which may differ from
+        # the preprocessed image size. We need to map SuperPoint keypoints from preprocessed
+        # image coords to DIFT's input coords.
+        img_size = args.img_size
+        if isinstance(img_size, list):
+            img_size = tuple(img_size)
+        dift_h, dift_w = img_size if len(img_size) == 2 else (img_size[0], img_size[0])
+        
+        # Scale keypoints from preprocessed image coords to DIFT input coords
+        # orig_size is (H, W) format
+        preproc_h1, preproc_w1 = orig_size1  # (H, W)
+        preproc_h2, preproc_w2 = orig_size2
+        
+        kpts1_scaled = kpts1.clone().float()
+        kpts1_scaled[:, 0] *= dift_w / preproc_w1  # x: scale by width ratio
+        kpts1_scaled[:, 1] *= dift_h / preproc_h1  # y: scale by height ratio
+        
+        kpts2_scaled = kpts2.clone().float()
+        kpts2_scaled[:, 0] *= dift_w / preproc_w2  # x
+        kpts2_scaled[:, 1] *= dift_h / preproc_h2  # y
+        
+        # Note: Ratio test is disabled for DIFT keypoint matching because the
+        # similarity-based ratio test doesn't work well with dense diffusion features.
+        # Mutual matching alone provides sufficient filtering.
+        mkpts0_scaled, mkpts1_scaled = match_at_keypoints(
             ft1, ft2,
-            kpts1, kpts2,
-            img_size1=orig_size1,
-            img_size2=orig_size2,
+            kpts1_scaled, kpts2_scaled,
+            img_size1=(dift_h, dift_w),  # DIFT's input size
+            img_size2=(dift_h, dift_w),
             use_mutual=args.use_mutual,
-            ratio_thresh=args.ratio_thresh,
+            ratio_thresh=None,  # Disabled for DIFT - ratio test incompatible with dense features
         )
+        
+        # Scale matched keypoints back to preprocessed image coords
+        if len(mkpts0_scaled) > 0:
+            mkpts0 = mkpts0_scaled.copy()
+            mkpts0[:, 0] *= preproc_w1 / dift_w
+            mkpts0[:, 1] *= preproc_h1 / dift_h
+            
+            mkpts1 = mkpts1_scaled.copy()
+            mkpts1[:, 0] *= preproc_w2 / dift_w
+            mkpts1[:, 1] *= preproc_h2 / dift_h
+        else:
+            mkpts0, mkpts1 = mkpts0_scaled, mkpts1_scaled
     else:
         # Use dense matching with random sampling (original behavior)
         mkpts0, mkpts1 = match_dense_features(
@@ -127,7 +183,8 @@ def main():
     # DIFT parameters
     parser.add_argument("--model_id", type=str, 
                         default="stable-diffusion-v1-5/stable-diffusion-v1-5")
-    parser.add_argument("--img_size", nargs="+", type=int, default=[512, 512])
+    parser.add_argument("--img_size", nargs="+", type=int, default=[1120, 1120],
+                        help="Image size for DIFT extraction (default: 1120x1120 to match preprocessing)")
     parser.add_argument("--t", type=int, default=261)
     parser.add_argument("--up_ft_index", type=int, choices=[0, 1, 2, 3], default=1)
     parser.add_argument("--prompt", type=str, default="")
@@ -167,6 +224,11 @@ def main():
         
         print(f"[DIFT] Processing {len(pairs)} pairs...")
         
+        # Initialize DIFT model ONCE (Stable Diffusion)
+        print(f"[DIFT] Loading Stable Diffusion model: {args.model_id}")
+        dift_model = SDFeaturizer(sd_id=args.model_id, device=args.device)
+        print(f"[DIFT] Model loaded successfully")
+        
         for img1_name, img2_name in tqdm(pairs, desc="Matching"):
             img1_path = images_dir / img1_name
             img2_path = images_dir / img2_name
@@ -183,7 +245,7 @@ def main():
                 continue
             
             mkpts0, mkpts1, _, _ = process_pair(
-                img1_path, img2_path, feature_cache_dir, args
+                img1_path, img2_path, dift_model, feature_cache_dir, args
             )
             
             save_matches(output_path, mkpts0, mkpts1)
@@ -195,8 +257,12 @@ def main():
         img1_path = Path(args.img1)
         img2_path = Path(args.img2)
         
+        # Single-pair mode - need to load model
+        print(f"[DIFT] Loading Stable Diffusion model: {args.model_id}")
+        dift_model = SDFeaturizer(sd_id=args.model_id, device=args.device)
+        
         mkpts0, mkpts1, orig_size1, orig_size2 = process_pair(
-            img1_path, img2_path, feature_cache_dir, args
+            img1_path, img2_path, dift_model, feature_cache_dir, args
         )
         
         print(f"[DIFT] Found {len(mkpts0)} matches")
