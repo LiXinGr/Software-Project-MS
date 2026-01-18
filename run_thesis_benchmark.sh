@@ -65,6 +65,7 @@ FEAT_LEVEL="-1"         # DINOv3: ViT block to extract features from (-1 = last)
 UP_FT_INDEX="1"         # DIFT: UNet decoder layer (0-3)
 DIFT_T="261"            # DIFT: Diffusion timestep
 ENSEMBLE_SIZE="8"       # DIFT: Number of noise samples to average (2-8)
+ROMA_SETTING="precise"  # RoMaV2: 'precise' (default) or 'fast' mode
 RATIO_THRESH=""         # Lowe's ratio test threshold (empty = use default)
 
 while [[ $# -gt 0 ]]; do
@@ -137,6 +138,10 @@ while [[ $# -gt 0 ]]; do
             IMG_SIZE="$2"
             shift 2
             ;;
+        --roma_setting|--roma-setting)
+            ROMA_SETTING="$2"
+            shift 2
+            ;;
         *)
             echo "Unknown argument: $1"
             echo "Usage: ./run_thesis_benchmark.sh <matcher> [options]"
@@ -193,6 +198,7 @@ if [ "$ALL_SCENES_MODE" = true ]; then
         args+=("--up_ft_index" "$UP_FT_INDEX")
         args+=("--dift_t" "$DIFT_T")
         args+=("--ensemble_size" "$ENSEMBLE_SIZE")
+        args+=("--roma_setting" "$ROMA_SETTING")
         [ -n "$RATIO_THRESH" ] && args+=("--ratio_thresh" "$RATIO_THRESH")
         
         echo ""
@@ -491,6 +497,12 @@ else
     if [[ "$MATCHER" == "dift" ]]; then
         MATCHER_ARGS="$MATCHER_ARGS --up_ft_index $UP_FT_INDEX --t $DIFT_T --ensemble_size $ENSEMBLE_SIZE"
         log "  up_ft_index: $UP_FT_INDEX, t: $DIFT_T, ensemble_size: $ENSEMBLE_SIZE"
+    fi
+    
+    # RoMaV2-specific parameters
+    if [[ "$MATCHER" == "romav2" ]]; then
+        MATCHER_ARGS="$MATCHER_ARGS --setting $ROMA_SETTING"
+        log "  setting: $ROMA_SETTING"
     fi
     
     # Ratio threshold (if specified)

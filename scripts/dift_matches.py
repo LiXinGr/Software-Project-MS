@@ -52,7 +52,14 @@ def run_dift_extractor(img_path, dift_model, feature_cache_dir, shared_args):
     orig_size = (img_orig.height, img_orig.width)
     
     # Determine cache path
-    ft_path = Path(feature_cache_dir) / f"{Path(img_path).stem}_dift.pt"
+    # Include parameters in cache key to avoid stale data
+    if isinstance(shared_args.img_size, list):
+        sz_str = f"{shared_args.img_size[0]}x{shared_args.img_size[1]}" if len(shared_args.img_size) > 1 else str(shared_args.img_size[0])
+    else:
+        sz_str = str(shared_args.img_size)
+    
+    cache_key = f"{Path(img_path).stem}_dift_sz{sz_str}_t{shared_args.t}_up{shared_args.up_ft_index}_ens{shared_args.ensemble_size}.pt"
+    ft_path = Path(feature_cache_dir) / cache_key
     
     if ft_path.exists():
         return torch.load(ft_path), orig_size
