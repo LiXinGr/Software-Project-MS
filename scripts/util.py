@@ -170,7 +170,7 @@ def get_superpoint_keypoints(img_path, device='cuda', max_keypoints=2048, cache_
     
     # Check cache
     if cache_dir is not None:
-        cache_path = Path(cache_dir) / f"{img_path.stem}_sp_kpts.pt"
+        cache_path = Path(cache_dir) / f"{img_path.stem}_sp_kpts_k{max_keypoints}.pt"
         if cache_path.exists():
             return torch.load(cache_path, map_location=device)
     

@@ -24,6 +24,7 @@ def run_dinov3_extractor(
     model,
     transform,
     img_size,
+    feat_level,
     cache_dir=None,
 ):
     """
@@ -37,7 +38,7 @@ def run_dinov3_extractor(
     
     # Check cache
     if cache_dir is not None:
-        cache_path = Path(cache_dir) / f"{Path(img_path).stem}.dinov3.pt"
+        cache_path = Path(cache_dir) / f"{Path(img_path).stem}_dinov3_sz{img_size}_l{feat_level}.pt"
         if cache_path.exists():
             return torch.load(cache_path), orig_size
     
@@ -53,7 +54,7 @@ def run_dinov3_extractor(
 
     # Save to cache if specified
     if cache_dir is not None:
-        cache_path = Path(cache_dir) / f"{Path(img_path).stem}.dinov3.pt"
+        cache_path = Path(cache_dir) / f"{Path(img_path).stem}_dinov3_sz{img_size}_l{feat_level}.pt"
         cache_path.parent.mkdir(parents=True, exist_ok=True)
         torch.save(ft, cache_path)
 
@@ -64,13 +65,13 @@ def process_pair(img1_path, img2_path, model, transform, args, feature_cache=Non
     """Process a single pair and return mkpts0, mkpts1."""
     ft1, orig_size1 = run_dinov3_extractor(
         img1_path, model, transform,
-        img_size=args.img_size,
+        args.img_size, args.feat_level,
         cache_dir=feature_cache,
     )
     
     ft2, orig_size2 = run_dinov3_extractor(
         img2_path, model, transform,
-        img_size=args.img_size,
+        args.img_size, args.feat_level,
         cache_dir=feature_cache,
     )
     
