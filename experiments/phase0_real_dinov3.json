@@ -1,0 +1,88 @@
+{
+  "run_id": "phase0_real_dinov3",
+  "timestamp": "2026-03-05T21:19:20",
+  "git_commit": "c1d2b1710ace95aa4d61207237bbd6cabe9b138f",
+  "git_branch": "phase0-bugfixes",
+  "method": "dinov3",
+  "config_key": "dinov3_l-1_sp_mnn_mp2000",
+  "config": {
+    "feat_level": -1,
+    "img_size": 1120,
+    "max_points": 2000,
+    "up_ft_index": 1,
+    "dift_t": 261,
+    "ensemble_size": 8,
+    "roma_setting": "precise"
+  },
+  "scenes": {
+    "sacre_coeur": {
+      "calibrated": {
+        "mAA10": 57.6,
+        "rot_err": 0.74,
+        "trans_err": 3.77,
+        "inlier_pct": 56.17
+      },
+      "shared_focal": {
+        "mAA10": 41.71,
+        "rot_err": 1.45,
+        "trans_err": 5.99,
+        "inlier_pct": 55.48
+      },
+      "varying_focal": {
+        "mAA10": 23.87,
+        "rot_err": 1.93,
+        "trans_err": 12.24,
+        "inlier_pct": 54.69
+      }
+    },
+    "reichstag": {
+      "calibrated": {
+        "mAA10": 42.93,
+        "rot_err": 2.22,
+        "trans_err": 5.57,
+        "inlier_pct": 50.04
+      },
+      "shared_focal": {
+        "mAA10": 33.92,
+        "rot_err": 3.09,
+        "trans_err": 6.91,
+        "inlier_pct": 49.36
+      },
+      "varying_focal": {
+        "mAA10": 18.03,
+        "rot_err": 3.45,
+        "trans_err": 13.95,
+        "inlier_pct": 48.68
+      }
+    },
+    "st_peters_square": {
+      "calibrated": {
+        "mAA10": 40.67,
+        "rot_err": 1.61,
+        "trans_err": 6.63,
+        "inlier_pct": 69.31
+      },
+      "shared_focal": {
+        "mAA10": 36.3,
+        "rot_err": 2.03,
+        "trans_err": 7.12,
+        "inlier_pct": 69.12
+      },
+      "varying_focal": {
+        "mAA10": 16.9,
+        "rot_err": 2.55,
+        "trans_err": 16.91,
+        "inlier_pct": 69.33
+      }
+    }
+  },
+  "paths": {
+    "matches": "/mnt/datagrid/personal/gorbuden/Software-Project-MS/output/matches/dinov3_l-1_sp_mnn_mp2000",
+    "benchmark_files": [
+      "output/benchmarks/dinov3_l-1_sp_mnn_mp2000_sacre_coeur.h5",
+      "output/benchmarks/dinov3_l-1_sp_mnn_mp2000_reichstag.h5",
+      "output/benchmarks/dinov3_l-1_sp_mnn_mp2000_st_peters_square.h5"
+    ],
+    "results": "/mnt/datagrid/personal/gorbuden/Software-Project-MS/output/results/phase0_real_dinov3"
+  }
+}

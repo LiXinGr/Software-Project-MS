@@ -49,11 +49,16 @@ ENV_REPOSED="reposed"
 # ============================================================================
 
 MATCHER=""
+RUN_ID=""
 DRY_RUN=false
 SKIP_DEPTH=false
 SKIP_MATCHES=false
 SKIP_PACK=false
+FORCE_MATCHES=false
+FORCE_BENCHMARK=false
+REUSE_MATCHES=""        # Config key of existing matches to reuse
 LIMIT=""
+MAX_PAIRS="15000"       # Default max pairs limit (override with --limit)
 DEVICE="cuda:0"  # Default to first GPU
 ALL_SCENES_MODE=false
 CUSTOM_SCENE=""
@@ -77,6 +82,10 @@ while [[ $# -gt 0 ]]; do
             MATCHER="$1"
             shift
             ;;
+        --run_id|--run-id)
+            RUN_ID="$2"
+            shift 2
+            ;;
         --dry-run)
             DRY_RUN=true
             LIMIT="10"
@@ -94,8 +103,25 @@ while [[ $# -gt 0 ]]; do
             SKIP_PACK=true
             shift
             ;;
+        --force-matches)
+            FORCE_MATCHES=true
+            shift
+            ;;
+        --force-benchmark)
+            FORCE_BENCHMARK=true
+            shift
+            ;;
+        --reuse_matches|--reuse-matches)
+            REUSE_MATCHES="$2"
+            SKIP_MATCHES=true
+            shift 2
+            ;;
         --limit)
             LIMIT="$2"
+            shift 2
+            ;;
+        --max-pairs)
+            MAX_PAIRS="$2"
             shift 2
             ;;
         --device)
@@ -144,10 +170,16 @@ while [[ $# -gt 0 ]]; do
             ;;
         *)
             echo "Unknown argument: $1"
-            echo "Usage: ./run_thesis_benchmark.sh <matcher> [options]"
+            echo "Usage: ./run_thesis_benchmark.sh <matcher> --run_id <id> [options]"
+            echo "  --run_id <id>       REQUIRED: human label for this run (used for results dir + log)"
             echo "  --dry-run           Process only first 10 pairs"
             echo "  --skip-depth        Skip depth generation"
             echo "  --skip-matches      Skip match generation"
+            echo "  --force-matches     Regenerate matches even if they exist"
+            echo "  --force-benchmark   Regenerate HDF5 even if it exists"
+            echo "  --reuse_matches <k> Use matches from a different config_key (implies --skip-matches)"
+            echo "  --limit <N>         Process at most N pairs (default: MAX_PAIRS=$MAX_PAIRS)"
+            echo "  --max-pairs <N>     Set the default pair limit (default: 15000)"
             echo "  --device <dev>      CUDA device (cuda:0, cuda:1, cuda:2)"
             echo "  --scene <name>      Scene to process (sacre_coeur, reichstag, st_peters_square)"
             echo "  --all-scenes        Process all available scenes"
@@ -164,12 +196,19 @@ done
 
 if [ -z "$MATCHER" ]; then
     echo "Error: No matcher specified"
-    echo "Usage: ./run_thesis_benchmark.sh <matcher> [options]"
+    echo "Usage: ./run_thesis_benchmark.sh <matcher> --run_id <id> [options]"
     echo "  matcher: dinov3 | dift | ldm | roma | romav2 | superpoint"
-    echo "  --device cuda:N   Use specific GPU (e.g., cuda:0, cuda:1, cuda:2)"
-    echo "  --scene <name>    Scene to process (sacre_coeur, reichstag, st_peters_square)"
-    echo "  --all-scenes      Process all available scenes"
-    echo "  --dry-run         Process only first 10 pairs"
+    echo "  --run_id <id>   REQUIRED: human label for this run"
+    echo "  --device cuda:N Use specific GPU (e.g., cuda:0, cuda:1, cuda:2)"
+    echo "  --scene <name>  Scene to process (sacre_coeur, reichstag, st_peters_square)"
+    echo "  --all-scenes    Process all available scenes"
+    echo "  --dry-run       Process only first 10 pairs"
+    exit 1
+fi
+
+if [ -z "$RUN_ID" ]; then
+    echo "ERROR: --run_id is required."
+    echo "Example: ./run_thesis_benchmark.sh $MATCHER --run_id phase0_bugfix --scene sacre_coeur"
     exit 1
 fi
 
@@ -185,12 +224,15 @@ if [ "$ALL_SCENES_MODE" = true ]; then
     GENERATED_CSVS=()
     
     for scene in "${ALL_SCENES[@]}"; do
-        args=("$MATCHER" "--scene" "$scene" "--device" "$DEVICE")
+        args=("$MATCHER" "--run_id" "$RUN_ID" "--scene" "$scene" "--device" "$DEVICE")
         [ "$DRY_RUN" = true ] && args+=("--dry-run")
         [ "$SKIP_DEPTH" = true ] && args+=("--skip-depth")
         [ "$SKIP_MATCHES" = true ] && args+=("--skip-matches")
+        [ "$FORCE_MATCHES" = true ] && args+=("--force-matches")
+        [ "$FORCE_BENCHMARK" = true ] && args+=("--force-benchmark")
+        [ -n "$REUSE_MATCHES" ] && args+=("--reuse_matches" "$REUSE_MATCHES")
         [ -n "$LIMIT" ] && args+=("--limit" "$LIMIT")
-        
+
         # Pass hyperparameters to subprocess
         args+=("--max_points" "$MAX_POINTS")
         args+=("--img_size" "$IMG_SIZE")
@@ -215,27 +257,27 @@ if [ "$ALL_SCENES_MODE" = true ]; then
             echo "Continuing to next scene..."
         fi
         
-        # Find the latest CSV for this scene
-        latest_csv=$(ls -t "$RESULTS_DIR/results_${MATCHER}_${scene}_"*.csv 2>/dev/null | head -1)
+        # Find the latest CSV for this scene (new path: output/results/{RUN_ID}/{scene}/)
+        scene_results_dir="$OUTPUT_BASE/results/$RUN_ID/$scene"
+        latest_csv=$(ls -t "$scene_results_dir/"*.csv 2>/dev/null | head -1)
         if [ -n "$latest_csv" ]; then
             GENERATED_CSVS+=("$latest_csv")
         fi
     done
-    
+
     echo ""
     echo "============================================"
     echo "All scenes completed! Aggregating results..."
     echo "============================================"
-    
+
     # Aggregate results from all scenes (use base conda env which has pandas)
     if [ ${#GENERATED_CSVS[@]} -gt 0 ]; then
-        COMBINED_CSV="$RESULTS_DIR/results_${MATCHER}_COMBINED_${BATCH_TIMESTAMP}.csv"
-        # Use conda run instead of activate (works in non-interactive shell)
+        COMBINED_CSV="$OUTPUT_BASE/results/$RUN_ID/combined_${BATCH_TIMESTAMP}.csv"
         conda run -n base python3 "$PROJECT_ROOT/scripts/aggregate_results.py" \
             --files "${GENERATED_CSVS[@]}" \
             --output "$COMBINED_CSV" \
             --matcher "$MATCHER"
-        
+
         echo ""
         echo "============================================"
         echo "Combined results saved to: $COMBINED_CSV"
@@ -309,20 +351,75 @@ get_matcher_env() {
 log "============================================"
 log "Thesis Benchmark Pipeline"
 log "============================================"
-log "Matcher: $MATCHER"
-log "Scene: $SCENE"
-log "Device: $DEVICE"
-log "Dry-run: $DRY_RUN"
+log "Matcher:  $MATCHER"
+log "Run ID:   $RUN_ID"
+log "Scene:    $SCENE"
+log "Device:   $DEVICE"
+log "Dry-run:  $DRY_RUN"
 if [ -n "$LIMIT" ]; then
     log "Limit: $LIMIT pairs"
+else
+    log "Limit: $MAX_PAIRS pairs (default)"
 fi
 log "============================================"
 
-# Create output directories (per-matcher results folder)
-RESULTS_DIR="$OUTPUT_BASE/results_v2/$MATCHER"
-MATCHES_DIR="$OUTPUT_BASE/matches/$MATCHER"
+# Apply default limit if no explicit --limit given
+if [ -z "$LIMIT" ]; then
+    LIMIT="$MAX_PAIRS"
+fi
+
+# ============================================================================
+# Derive CONFIG_KEY from matcher script (fast, no model loading)
+# ============================================================================
+
+get_config_key_for_matcher() {
+    # Compute config key in pure bash (mirrors get_config_key() in each Python script).
+    # This avoids dependency on conda envs with broken PIL/libjpeg at import time.
+    case "$MATCHER" in
+        dinov3)
+            local rt_suffix=""
+            [ -n "$RATIO_THRESH" ] && rt_suffix="_rt${RATIO_THRESH}"
+            echo "dinov3_l${FEAT_LEVEL}_sp_mnn${rt_suffix}_mp${MAX_POINTS}"
+            ;;
+        dift)
+            echo "dift_t${DIFT_T}_up${UP_FT_INDEX}_ens${ENSEMBLE_SIZE}_sp_mnn_mp${MAX_POINTS}"
+            ;;
+        superpoint)
+            echo "superpoint_lg_mp${MAX_POINTS}"
+            ;;
+        roma)
+            echo "roma_outdoor_mp${MAX_POINTS}"
+            ;;
+        romav2)
+            echo "romav2_${ROMA_SETTING}_mp${MAX_POINTS}"
+            ;;
+        *)
+            echo "${MATCHER}_mp${MAX_POINTS}"
+            ;;
+    esac
+}
+
+CONFIG_KEY=$(get_config_key_for_matcher)
+log "Config key: $CONFIG_KEY"
+
+# ============================================================================
+# Output paths (all keyed by CONFIG_KEY or RUN_ID)
+# ============================================================================
+
+# Matches: use CONFIG_KEY unless --reuse_matches provides a different key
+if [ -n "$REUSE_MATCHES" ]; then
+    MATCHES_DIR="$OUTPUT_BASE/matches/${REUSE_MATCHES}/${SCENE}"
+    log "Reusing matches from: $MATCHES_DIR"
+else
+    MATCHES_DIR="$OUTPUT_BASE/matches/${CONFIG_KEY}/${SCENE}"
+fi
+
+BENCHMARK_FILE="$OUTPUT_BASE/benchmarks/${CONFIG_KEY}_${SCENE}.h5"
+RESULTS_DIR="$OUTPUT_BASE/results/${RUN_ID}/${SCENE}"
+
 mkdir -p "$MATCHES_DIR"
 mkdir -p "$RESULTS_DIR"
+mkdir -p "$(dirname "$BENCHMARK_FILE")"
 
 # ============================================================================
 # Step 1: Generate Pairs File
@@ -440,43 +537,50 @@ fi
 # Step 3: Generate Matches
 # ============================================================================
 
+MATCHES_EXIST=false
+if compgen -G "$MATCHES_DIR/*.npz" > /dev/null 2>&1; then
+    MATCHES_EXIST=true
+fi
+
 if [ "$SKIP_MATCHES" = true ]; then
-    log "Step 2: Skipping match generation (--skip-matches)"
+    log "Step 2: Skipping match generation (--skip-matches or --reuse_matches)"
+elif [ "$MATCHES_EXIST" = true ] && [ "$FORCE_MATCHES" = false ]; then
+    log "Step 2: Matches already exist at $MATCHES_DIR — skipping (use --force-matches to regenerate)"
 else
     log "Step 2: Generating matches with $MATCHER..."
-    
+
     MATCHER_ENV=$(get_matcher_env "$MATCHER")
     activate_env "$MATCHER_ENV"
-    
+
     # Build matcher arguments
     MATCHER_ARGS="--pairs_file $PAIRS_FILE \
         --images_dir $IMAGES_DIR \
         --output_dir $MATCHES_DIR \
         --device $DEVICE"
-    
+
     # Add --use_mutual only for matchers that support it (not roma/romav2/ldm which have their own matching)
     if [[ "$MATCHER" != "roma" && "$MATCHER" != "romav2" && "$MATCHER" != "ldm" ]]; then
         MATCHER_ARGS="$MATCHER_ARGS --use_mutual"
     fi
-    
-    # Add feature cache for matchers that support it (saves time by not recomputing features)
+
+    # Add feature cache keyed by CONFIG_KEY to avoid cross-config contamination
     if [[ "$MATCHER" == "dinov3" || "$MATCHER" == "dift" || "$MATCHER" == "superpoint" ]]; then
-        FEATURE_CACHE_DIR="$PROJECT_ROOT/cache/features/${MATCHER}/${SCENE}"
+        FEATURE_CACHE_DIR="$PROJECT_ROOT/cache/features/${CONFIG_KEY}/${SCENE}"
         mkdir -p "$FEATURE_CACHE_DIR"
         MATCHER_ARGS="$MATCHER_ARGS --feature_cache $FEATURE_CACHE_DIR"
-        log "  Using feature cache: $FEATURE_CACHE_DIR"
+        log "  Feature cache: $FEATURE_CACHE_DIR"
     fi
-    
+
     # Use SuperPoint keypoints for DINOv3 and DIFT for fair comparison
     if [[ "$MATCHER" == "dinov3" || "$MATCHER" == "dift" ]]; then
         MATCHER_ARGS="$MATCHER_ARGS --use_sp_keypoints"
         log "  Using SuperPoint keypoints for fair comparison"
     fi
-    
+
     # Add hyperparameters
     MATCHER_ARGS="$MATCHER_ARGS --max_points $MAX_POINTS"
     log "  max_points: $MAX_POINTS"
-    
+
     # Add img_size for DINOv3 and DIFT (feature extraction resolution)
     if [[ "$MATCHER" == "dinov3" ]]; then
         MATCHER_ARGS="$MATCHER_ARGS --img_size $IMG_SIZE"
@@ -486,42 +590,40 @@ else
         MATCHER_ARGS="$MATCHER_ARGS --img_size $IMG_SIZE $IMG_SIZE"
         log "  img_size: ${IMG_SIZE}x${IMG_SIZE}"
     fi
-    
+
     # DINOv3-specific parameters
     if [[ "$MATCHER" == "dinov3" ]]; then
         MATCHER_ARGS="$MATCHER_ARGS --feat_level $FEAT_LEVEL"
         log "  feat_level: $FEAT_LEVEL"
     fi
-    
+
     # DIFT-specific parameters
     if [[ "$MATCHER" == "dift" ]]; then
         MATCHER_ARGS="$MATCHER_ARGS --up_ft_index $UP_FT_INDEX --t $DIFT_T --ensemble_size $ENSEMBLE_SIZE"
         log "  up_ft_index: $UP_FT_INDEX, t: $DIFT_T, ensemble_size: $ENSEMBLE_SIZE"
     fi
-    
+
     # RoMaV2-specific parameters
     if [[ "$MATCHER" == "romav2" ]]; then
         MATCHER_ARGS="$MATCHER_ARGS --setting $ROMA_SETTING"
         log "  setting: $ROMA_SETTING"
     fi
-    
+
     # Ratio threshold (if specified)
     if [ -n "$RATIO_THRESH" ]; then
         MATCHER_ARGS="$MATCHER_ARGS --ratio_thresh $RATIO_THRESH"
         log "  ratio_thresh: $RATIO_THRESH"
     fi
-    
-    # Add limit if specified (process only first N pairs)
-    if [ -n "$LIMIT" ]; then
-        MATCHER_ARGS="$MATCHER_ARGS --limit $LIMIT"
-        log "  Limiting to $LIMIT pairs"
-    fi
-    
+
+    # Always pass limit
+    MATCHER_ARGS="$MATCHER_ARGS --limit $LIMIT"
+    log "  Limiting to $LIMIT pairs"
+
     # Suppress diffusers warnings for DIFT
     export PYTHONWARNINGS="ignore::UserWarning"
-    
+
     python3 "scripts/${MATCHER}_matches.py" $MATCHER_ARGS
-    
+
     log "Step 2: Match generation complete"
 fi
 
@@ -529,33 +631,28 @@ fi
 # Step 4: Pack into HDF5
 # ============================================================================
 
-# Use stable filename (no timestamp) for caching
-H5_FILE="$OUTPUT_BASE/benchmark_${MATCHER}_${SCENE}.h5"
 TIMESTAMP=$(date '+%Y%m%d_%H%M%S')
 
 if [ "$SKIP_PACK" = true ]; then
     log "Step 3: Skipping packing (--skip-pack)"
-elif [ -f "$H5_FILE" ]; then
-    log "Step 3: Using existing HDF5 file: $H5_FILE"
+elif [ -f "$BENCHMARK_FILE" ] && [ "$FORCE_BENCHMARK" = false ]; then
+    log "Step 3: Benchmark already exists: $BENCHMARK_FILE — skipping (use --force-benchmark to regenerate)"
 else
     log "Step 3: Packing data into HDF5..."
-    
+
     # Use reposed environment which has h5py
     activate_env "$ENV_REPOSED"
-    
+
     PACK_ARGS="--matches_dir $MATCHES_DIR \
         --depth_dir $DEPTH_DIR \
         --sparse_dir $SPARSE_DIR \
         --pairs_file $PAIRS_FILE \
-        --output $H5_FILE"
-    
-    if [ -n "$LIMIT" ]; then
-        PACK_ARGS="$PACK_ARGS --limit $LIMIT"
-    fi
-    
+        --output $BENCHMARK_FILE \
+        --limit $LIMIT"
+
     python3 scripts/pack_benchmark.py $PACK_ARGS
-    
-    log "Step 3: Packing complete: $H5_FILE"
+
+    log "Step 3: Packing complete: $BENCHMARK_FILE"
 fi
 
 # ============================================================================
@@ -574,18 +671,18 @@ RESULTS_CSV="$RESULTS_DIR/results_${MATCHER}_${SCENE}_${TIMESTAMP}.csv"
 # Run all 3 experiment types for complete mAA and mAA_f metrics
 # 1. Calibrated (known focal lengths) - for mAA pose accuracy
 log "  Running calibrated experiments (known focal)..."
-python3 eval.py "$H5_FILE" -nw 8 --thesis --output_dir "$RESULTS_DIR" --preprocess_info "$PREPROCESS_INFO"
+python3 eval.py "$BENCHMARK_FILE" -nw 8 --thesis --output_dir "$RESULTS_DIR" --preprocess_info "$PREPROCESS_INFO"
 
 # 2. Shared focal (estimate one shared focal length) - for mAA_f
 log "  Running shared focal experiments (for mAA_f)..."
-python3 eval_shared_f.py "$H5_FILE" -nw 8 --thesis --output_dir "$RESULTS_DIR" --preprocess_info "$PREPROCESS_INFO" || log "  Warning: shared_f eval failed"
+python3 eval_shared_f.py "$BENCHMARK_FILE" -nw 8 --thesis --output_dir "$RESULTS_DIR" --preprocess_info "$PREPROCESS_INFO" || log "  Warning: shared_f eval failed"
 
 # 3. Varying focal (estimate two different focal lengths) - for mAA_f
 log "  Running varying focal experiments (for mAA_f)..."
-python3 eval_varying_f.py "$H5_FILE" -nw 8 --thesis --output_dir "$RESULTS_DIR" --preprocess_info "$PREPROCESS_INFO" || log "  Warning: varying_f eval failed"
+python3 eval_varying_f.py "$BENCHMARK_FILE" -nw 8 --thesis --output_dir "$RESULTS_DIR" --preprocess_info "$PREPROCESS_INFO" || log "  Warning: varying_f eval failed"
 
 # Combine all results into one JSON
-python3 - "$RESULTS_DIR" "$MATCHER" "$SCENE" "$RESULTS_JSON" << 'PYTHON_COMBINE'
+python3 - "$RESULTS_DIR" "$MATCHER" "$SCENE" "$RESULTS_JSON" "$CONFIG_KEY" << 'PYTHON_COMBINE'
 import json
 import sys
 from pathlib import Path
@@ -594,9 +691,10 @@ results_dir = Path(sys.argv[1])
 matcher = sys.argv[2]
 scene = sys.argv[3]
 output_path = sys.argv[4]
+config_key = sys.argv[5] if len(sys.argv) > 5 else f"benchmark_{matcher}_{scene}"
 
-# Find all result files in the results directory
-basename = f"benchmark_{matcher}_{scene}"
+# eval.py writes: calibrated-{config_key}_{scene}.json
+basename = f"{config_key}_{scene}"
 calibrated_path = results_dir / f"calibrated-{basename}.json"
 shared_path = results_dir / f"shared_focal-{basename}.json"
 varying_path = results_dir / f"varying_focal-{basename}.json"
@@ -726,17 +824,40 @@ PYTHON_SCRIPT
 cd "$PROJECT_ROOT"
 
 # ============================================================================
+# Experiment Logging
+# ============================================================================
+
+log "Step 5: Logging experiment..."
+
+LOG_ARGS="--run_id $RUN_ID \
+    --method $MATCHER \
+    --config_key $CONFIG_KEY \
+    --scene $SCENE \
+    --results_dir $RESULTS_DIR \
+    --matches_dir $MATCHES_DIR \
+    --benchmark $BENCHMARK_FILE \
+    --config feat_level=$FEAT_LEVEL img_size=$IMG_SIZE max_points=$MAX_POINTS \
+             up_ft_index=$UP_FT_INDEX dift_t=$DIFT_T ensemble_size=$ENSEMBLE_SIZE \
+             roma_setting=$ROMA_SETTING"
+[ -n "$RATIO_THRESH" ] && LOG_ARGS="$LOG_ARGS ratio_thresh=$RATIO_THRESH"
+
+conda run -n "$ENV_REPOSED" python3 "$PROJECT_ROOT/experiments/log_experiment.py" \
+    $LOG_ARGS || log "  Warning: experiment logging failed (non-fatal)"
+
+# ============================================================================
 # Summary
 # ============================================================================
 
 log "============================================"
 log "Pipeline Complete!"
 log "============================================"
-log "Matcher: $MATCHER"
-log "Scene: $SCENE"
-log "H5 File: $H5_FILE"
-log "Results JSON: $RESULTS_JSON"
-log "Results CSV: $RESULTS_CSV"
+log "Matcher:    $MATCHER"
+log "Run ID:     $RUN_ID"
+log "Config key: $CONFIG_KEY"
+log "Scene:      $SCENE"
+log "H5 File:    $BENCHMARK_FILE"
+log "Results:    $RESULTS_DIR"
+log "Exp. log:   experiments/${RUN_ID}.json"
 log "============================================"
 
 # Display results summary

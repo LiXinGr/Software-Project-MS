@@ -36,6 +36,20 @@ from torchvision.transforms import PILToTensor
 from src.models.dift_sd import SDFeaturizer
 
 
+def get_config_key(args):
+    """Return a canonical string identifying this configuration."""
+    sz = args.img_size
+    if isinstance(sz, list):
+        sz_str = f"{sz[0]}x{sz[1]}" if len(sz) > 1 else str(sz[0])
+    else:
+        sz_str = str(sz)
+    parts = ["dift", f"t{args.t}", f"up{args.up_ft_index}", f"ens{args.ensemble_size}"]
+    parts.append("sp" if args.use_sp_keypoints else "dense")
+    parts.append("mnn" if args.use_mutual else "nn")
+    parts.append(f"mp{args.max_points}")
+    return "_".join(parts)
+
+
 def run_dift_extractor(img_path, dift_model, feature_cache_dir, shared_args):
     """
     Extract DIFT features for one image using pre-loaded model.
@@ -204,8 +218,14 @@ def main():
     parser.add_argument("--visualize", action="store_true")
     parser.add_argument("--use_sp_keypoints", action="store_true",
                         help="Use SuperPoint-detected keypoints for fair comparison")
+    parser.add_argument("--print_config_key", action="store_true",
+                        help="Print the config key for this configuration and exit")
 
     args = parser.parse_args()
+
+    if args.print_config_key:
+        print(get_config_key(args))
+        sys.exit(0)
 
     # Set default feature cache
     if args.feature_cache is None:

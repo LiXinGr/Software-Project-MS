@@ -1,0 +1,84 @@
+{
+  "run_id": "semestral_romav2",
+  "timestamp": "2026-01-18T12:18:00",
+  "git_commit": "",
+  "git_branch": "main",
+  "method": "romav2",
+  "config_key": "romav2_precise_mp5000",
+  "note": "Historical reference from semestral project (Jan 2026)",
+  "config": {
+    "feat_level": -1,
+    "img_size": 1120,
+    "max_points": 5000,
+    "up_ft_index": 1,
+    "dift_t": 261,
+    "ensemble_size": 8,
+    "roma_setting": "precise"
+  },
+  "scenes": {
+    "sacre_coeur": {
+      "calibrated": {
+        "mAA10": 88.1,
+        "rot_err": 0.16,
+        "trans_err": 0.52,
+        "inlier_pct": 93.4
+      },
+      "shared_focal": {
+        "mAA10": 79.7,
+        "rot_err": 0.33,
+        "trans_err": 1.18,
+        "inlier_pct": 93.7
+      },
+      "varying_focal": {
+        "mAA10": 61.9,
+        "rot_err": 0.83,
+        "trans_err": 2.63,
+        "inlier_pct": 92.6
+      }
+    },
+    "reichstag": {
+      "calibrated": {
+        "mAA10": 89.1,
+        "rot_err": 0.39,
+        "trans_err": 0.87,
+        "inlier_pct": 94.2
+      },
+      "shared_focal": {
+        "mAA10": 83.7,
+        "rot_err": 0.52,
+        "trans_err": 1.13,
+        "inlier_pct": 94.3
+      },
+      "varying_focal": {
+        "mAA10": 57.5,
+        "rot_err": 1.36,
+        "trans_err": 2.98,
+        "inlier_pct": 93.4
+      }
+    },
+    "st_peters_square": {
+      "calibrated": {
+        "mAA10": 81.9,
+        "rot_err": 0.32,
+        "trans_err": 1.03,
+        "inlier_pct": 95.1
+      },
+      "shared_focal": {
+        "mAA10": 75.6,
+        "rot_err": 0.46,
+        "trans_err": 1.45,
+        "inlier_pct": 95.7
+      },
+      "varying_focal": {
+        "mAA10": 52.8,
+        "rot_err": 1.12,
+        "trans_err": 3.96,
+        "inlier_pct": 94.9
+      }
+    }
+  },
+  "paths": {
+    "matches": "output_1/matches/romav2",
+    "results": "output_1/results_v2/romav2"
+  }
+}
