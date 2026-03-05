@@ -1,0 +1,78 @@
+{
+  "run_id": "semestral_roma",
+  "timestamp": "2026-01-18T20:32:00",
+  "git_commit": "",
+  "git_branch": "main",
+  "method": "roma",
+  "config_key": "roma_outdoor_mp5000",
+  "note": "Historical reference from semestral project (Jan 2026). sacre_coeur and reichstag from mp5000/outdoor config; st_peters_square from baseline run (mp2000/precise config, Mar 2026).",
+  "config": {
+    "feat_level": -1,
+    "img_size": 1120,
+    "max_points": 5000,
+    "up_ft_index": 1,
+    "dift_t": 261,
+    "ensemble_size": 8,
+    "roma_setting": "outdoor"
+  },
+  "scenes": {
+    "sacre_coeur": {
+      "calibrated": {
+        "mAA10": 88.7,
+        "rot_err": 0.15,
+        "trans_err": 0.48,
+        "inlier_pct": 96.8
+      },
+      "shared_focal": {
+        "mAA10": 80.7,
+        "rot_err": 0.31,
+        "trans_err": 1.11,
+        "inlier_pct": 97.0
+      },
+      "varying_focal": {
+        "mAA10": 63.2,
+        "rot_err": 0.80,
+        "trans_err": 2.50,
+        "inlier_pct": 96.2
+      }
+    },
+    "reichstag": {
+      "calibrated": {
+        "mAA10": 89.7,
+        "rot_err": 0.39,
+        "trans_err": 0.87,
+        "inlier_pct": 97.3
+      },
+      "shared_focal": {
+        "mAA10": 84.9,
+        "rot_err": 0.48,
+        "trans_err": 1.04,
+        "inlier_pct": 97.4
+      },
+      "varying_focal": {
+        "mAA10": 59.1,
+        "rot_err": 1.36,
+        "trans_err": 2.81,
+        "inlier_pct": 96.8
+      }
+    },
+    "st_peters_square": {
+      "calibrated": {
+        "mAA10": 82.79,
+        "inlier_pct": 97.13
+      },
+      "shared_focal": {
+        "mAA10": 76.58,
+        "inlier_pct": 97.50
+      },
+      "varying_focal": {
+        "mAA10": 53.63,
+        "inlier_pct": 96.95
+      }
+    }
+  },
+  "paths": {
+    "matches": "output_1/matches/roma",
+    "results": "output_1/results_v2/roma"
+  }
+}

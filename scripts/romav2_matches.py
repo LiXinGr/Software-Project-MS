@@ -33,6 +33,11 @@ except ImportError as e:
     sys.exit(1)
 
 
+def get_config_key(args):
+    """Return a canonical string identifying this configuration."""
+    return f"romav2_{args.setting}_mp{args.max_points}"
+
+
 def process_pair(img1_path, img2_path, model, args, device):
     """Process a single pair and return mkpts0, mkpts1."""
     # Get model dimensions
@@ -93,8 +98,14 @@ def main():
     parser.add_argument("--limit", type=int, default=None,
                         help="Limit number of pairs to process")
     parser.add_argument("--visualize", action="store_true")
+    parser.add_argument("--print_config_key", action="store_true",
+                        help="Print the config key for this configuration and exit")
 
     args = parser.parse_args()
+
+    if args.print_config_key:
+        print(get_config_key(args))
+        sys.exit(0)
 
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
     print(f"[RoMaV2] Using device: {device}")

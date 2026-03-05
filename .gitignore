@@ -14,8 +14,8 @@ datasets/phototourism
 *.pt
 
 # Pipeline outputs
-output/
-cache/
+output*
+cache*
 *.log
 
 # External dependencies
@@ -26,3 +26,5 @@ benchmark*
 
 docs
 figures 
+
+res*

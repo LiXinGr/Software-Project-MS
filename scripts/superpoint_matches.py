@@ -8,6 +8,7 @@ Supports two modes:
 2. Batch mode: --pairs_file and --output_dir arguments for benchmarking
 """
 
+import sys
 import torch
 import numpy as np
 import argparse
@@ -18,6 +19,12 @@ from tqdm import tqdm
 from lightglue import LightGlue, SuperPoint
 from lightglue.utils import load_image
 from util import compute_matches, visualize_matches, save_matches
+
+
+def get_config_key(args):
+    """Return a canonical string identifying this configuration."""
+    matcher_abbrev = "lg" if args.matcher == "lightglue" else args.matcher
+    return f"superpoint_{matcher_abbrev}_mp{args.max_points}"
 
 
 def extract_features(img_path, extractor, device, cache_dir=None):
@@ -137,8 +144,14 @@ def main():
     parser.add_argument("--limit", type=int, default=None,
                         help="Limit number of pairs to process")
     parser.add_argument("--visualize", action="store_true")
+    parser.add_argument("--print_config_key", action="store_true",
+                        help="Print the config key for this configuration and exit")
 
     args = parser.parse_args()
+
+    if args.print_config_key:
+        print(get_config_key(args))
+        sys.exit(0)
 
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
     print(f"[SuperPoint] Using device: {device}")

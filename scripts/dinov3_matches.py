@@ -1,13 +1,15 @@
 """
 DINOv3 Feature Matching Script
 
-Extracts features using DINOv3 ViT-L/16 and matches them using MNN + ratio test.
+Extracts features using DINOv3 ViT-Large/patch16 (vit_large_patch16_dinov3.lvd1689m)
+and matches them using MNN + ratio test.
 
 Supports two modes:
 1. Single-pair mode: --img1 and --img2 arguments
 2. Batch mode: --pairs_file and --output_dir arguments for benchmarking
 """
 
+import sys
 import torch
 from PIL import Image
 import torchvision.transforms as T
@@ -19,42 +21,60 @@ import numpy as np
 from tqdm import tqdm
 
 
+PATCH_SIZE = 16  # DINOv3 ViT-Large uses patch size 16
+
+
+def get_config_key(args):
+    """Return a canonical string identifying this configuration."""
+    parts = ["dinov3", f"l{args.feat_level}"]
+    parts.append("sp" if args.use_sp_keypoints else "dense")
+    parts.append("mnn" if args.use_mutual else "nn")
+    if args.ratio_thresh:
+        parts.append(f"rt{args.ratio_thresh}")
+    parts.append(f"mp{args.max_points}")
+    return "_".join(parts)
+
+
 def run_dinov3_extractor(
     img_path,
     model,
     transform,
-    img_size,
     feat_level,
     cache_dir=None,
 ):
     """
-    Extract a single DINOv3 feature map [C, H, W] for one image.
-    Returns the feature map and original image size (H, W).
-    Note: feat_level is configured at model creation time via out_indices.
+    Extract a single DINOv3 feature map [C, H_feat, W_feat] for one image.
+    Loads the preprocessed image at its native resolution (no square resize).
+    Pads height/width to the nearest multiple of PATCH_SIZE if needed.
+    Returns the feature map and original image size (H, W) in pixel coordinates.
     """
-    # Load original image to get its size
-    img_orig = Image.open(img_path).convert("RGB")
-    orig_size = (img_orig.height, img_orig.width)  # (H, W)
-    
-    # Check cache
+    img = Image.open(img_path).convert("RGB")
+    W, H = img.size  # PIL gives (W, H)
+    orig_size = (H, W)  # keep numpy convention (H, W) for downstream coordinate mapping
+
+    # Check cache — key encodes actual image dimensions
+    cache_path = None
     if cache_dir is not None:
-        cache_path = Path(cache_dir) / f"{Path(img_path).stem}_dinov3_sz{img_size}_l{feat_level}.pt"
+        cache_path = Path(cache_dir) / f"{Path(img_path).stem}_dinov3_{W}x{H}_l{feat_level}.pt"
         if cache_path.exists():
             return torch.load(cache_path), orig_size
-    
-    # Resize and extract features
-    img = img_orig.resize((img_size, img_size), Image.BILINEAR)
-    x = transform(img).unsqueeze(0).to(next(model.parameters()).device)
+
+    x = transform(img).unsqueeze(0).to(next(model.parameters()).device)  # [1, 3, H, W]
+
+    # Pad to nearest multiple of patch size (preprocessed images are already div-by-16,
+    # but guard against edge cases)
+    pad_h = (PATCH_SIZE - H % PATCH_SIZE) % PATCH_SIZE
+    pad_w = (PATCH_SIZE - W % PATCH_SIZE) % PATCH_SIZE
+    if pad_h > 0 or pad_w > 0:
+        x = torch.nn.functional.pad(x, (0, pad_w, 0, pad_h))
 
     model.eval()
     with torch.no_grad():
         feats = model(x)
 
-    ft = feats[0].squeeze(0).cpu()  # [C, H, W] - index 0 because we only request one layer
+    ft = feats[0].squeeze(0).cpu()  # [C, H_feat, W_feat]
 
-    # Save to cache if specified
-    if cache_dir is not None:
-        cache_path = Path(cache_dir) / f"{Path(img_path).stem}_dinov3_sz{img_size}_l{feat_level}.pt"
+    if cache_path is not None:
         cache_path.parent.mkdir(parents=True, exist_ok=True)
         torch.save(ft, cache_path)
 
@@ -65,13 +85,13 @@ def process_pair(img1_path, img2_path, model, transform, args, feature_cache=Non
     """Process a single pair and return mkpts0, mkpts1."""
     ft1, orig_size1 = run_dinov3_extractor(
         img1_path, model, transform,
-        args.img_size, args.feat_level,
+        args.feat_level,
         cache_dir=feature_cache,
     )
-    
+
     ft2, orig_size2 = run_dinov3_extractor(
         img2_path, model, transform,
-        args.img_size, args.feat_level,
+        args.feat_level,
         cache_dir=feature_cache,
     )
     
@@ -144,35 +164,47 @@ def main():
                         help="Generate visualization images")
     parser.add_argument("--use_sp_keypoints", action="store_true",
                         help="Use SuperPoint-detected keypoints for fair comparison")
+    parser.add_argument("--print_config_key", action="store_true",
+                        help="Print the config key for this configuration and exit")
 
     args = parser.parse_args()
+
+    if args.print_config_key:
+        print(get_config_key(args))
+        sys.exit(0)
 
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
     print("Using device:", device)
 
     # Initialize model with specific layer extraction
-    # DINOv2 ViT-L has 24 transformer blocks (indices 0-23)
+    # DINOv3 ViT-L has 24 transformer blocks (indices 0-23)
     # Negative indices work: -1 = last (23), -12 = block 12
-    transform = T.Compose([T.ToTensor()])
-    
+
     # Convert negative index to positive for timm
     num_blocks = 24  # ViT-L has 24 blocks
     if args.feat_level < 0:
         out_idx = num_blocks + args.feat_level
     else:
         out_idx = args.feat_level
-    
+
     print(f"[DINOv3] Extracting features from block {out_idx} (feat_level={args.feat_level})")
-    
+
     model = timm.create_model(
-        "vit_large_patch14_dinov2.lvd142m",
+        "vit_large_patch16_dinov3.lvd1689m",
         pretrained=True,
         features_only=True,
         out_indices=[out_idx],  # Extract only this specific layer
-        img_size=args.img_size,
+        dynamic_img_size=True,  # Support non-square images via RoPE
     )
     model.to(device)
     model.eval()
+
+    # Use model-specific normalization (ImageNet stats for DINOv3)
+    data_config = timm.data.resolve_model_data_config(model)
+    transform = T.Compose([
+        T.ToTensor(),
+        T.Normalize(mean=data_config["mean"], std=data_config["std"]),
+    ])
 
     # Determine mode
     if args.pairs_file and args.output_dir:
