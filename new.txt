@@ -1,0 +1,29 @@
+────────────────────────────────────────────────────────────────────────────────────────────
+Method     Run ID               Scene              Cal mAA10   SF mAA10   VF mAA10  Inliers%
+────────────────────────────────────────────────────────────────────────────────────────────
+roma       baseline             st_peters_square       82.79      76.58      53.63     97.13
+
+dinov3     phase0_real_dinov3   sacre_coeur            67.39      44.84      16.94     36.94
+                                reichstag              50.76      31.60      14.25     31.01
+                                st_peters_square       62.61      47.30      20.58     50.49
+
+dift       semestral_dift       sacre_coeur            69.60      47.60      19.90     38.20
+                                reichstag              50.10      31.40      13.80     28.40
+                                st_peters_square       64.40      47.90      20.00     48.60
+
+dinov2     semestral_dinov2     sacre_coeur            49.00      24.10       7.80     22.00
+                                reichstag              37.80      17.60       7.80     18.70
+                                st_peters_square       51.30      31.10      10.40     31.50
+
+roma       semestral_roma       sacre_coeur            88.70      80.70      63.20     96.80
+                                reichstag              89.70      84.90      59.10     97.30
+                                st_peters_square       82.79      76.58      53.63     97.13
+
+romav2     semestral_romav2     sacre_coeur            88.10      79.70      61.90     93.40
+                                reichstag              89.10      83.70      57.50     94.20
+                                st_peters_square       81.90      75.60      52.80     95.10
+
+superpoint semestral_superpoint sacre_coeur            86.20      77.40      57.20     71.20
+                                reichstag              84.50      75.30      44.70     66.80
+                                st_peters_square       75.30      63.40      34.60     70.80
+────────────────────────────────────────────────────────────────────────────────────────────

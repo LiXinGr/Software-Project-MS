@@ -72,6 +72,7 @@ DIFT_T="261"            # DIFT: Diffusion timestep
 ENSEMBLE_SIZE="8"       # DIFT: Number of noise samples to average (2-8)
 ROMA_SETTING="precise"  # RoMaV2: 'precise' (default) or 'fast' mode
 RATIO_THRESH=""         # Lowe's ratio test threshold (empty = use default)
+DINOV3_MODE="sp"        # DINOv3 keypoint mode: sp | snap | dense
 
 while [[ $# -gt 0 ]]; do
     # Debug: uncomment to see argument parsing
@@ -168,6 +169,14 @@ while [[ $# -gt 0 ]]; do
             ROMA_SETTING="$2"
             shift 2
             ;;
+        --dinov3-snap)
+            DINOV3_MODE="snap"
+            shift
+            ;;
+        --dinov3-dense)
+            DINOV3_MODE="dense"
+            shift
+            ;;
         *)
             echo "Unknown argument: $1"
             echo "Usage: ./run_thesis_benchmark.sh <matcher> --run_id <id> [options]"
@@ -185,6 +194,8 @@ while [[ $# -gt 0 ]]; do
             echo "  --all-scenes        Process all available scenes"
             echo "  --max_points <N>    Number of keypoints (default: 2000)"
             echo "  --feat_level <L>    DINOv3 feature level (default: -1)"
+  echo "  --dinov3-snap       DINOv3 Mode A: snap SP keypoints to nearest patch center"
+  echo "  --dinov3-dense      DINOv3 Mode B: use all patch centers as keypoints (dense grid)"
             echo "  --up_ft_index <I>   DIFT UNet layer 0-3 (default: 1)"
             echo "  --dift_t <T>        DIFT diffusion timestep (default: 261)"
             echo "  --ensemble_size <N> DIFT noise ensemble size (default: 8)"
@@ -379,7 +390,11 @@ get_config_key_for_matcher() {
         dinov3)
             local rt_suffix=""
             [ -n "$RATIO_THRESH" ] && rt_suffix="_rt${RATIO_THRESH}"
-            echo "dinov3_l${FEAT_LEVEL}_sp_mnn${rt_suffix}_mp${MAX_POINTS}"
+            case "$DINOV3_MODE" in
+                snap)  echo "dinov3_l${FEAT_LEVEL}_gridalign_mnn${rt_suffix}_mp${MAX_POINTS}" ;;
+                dense) echo "dinov3_l${FEAT_LEVEL}_dense16_mnn${rt_suffix}_mp${MAX_POINTS}" ;;
+                *)     echo "dinov3_l${FEAT_LEVEL}_sp_mnn${rt_suffix}_mp${MAX_POINTS}" ;;
+            esac
             ;;
         dift)
             echo "dift_t${DIFT_T}_up${UP_FT_INDEX}_ens${ENSEMBLE_SIZE}_sp_mnn_mp${MAX_POINTS}"
@@ -571,10 +586,26 @@ else
         log "  Feature cache: $FEATURE_CACHE_DIR"
     fi
 
-    # Use SuperPoint keypoints for DINOv3 and DIFT for fair comparison
-    if [[ "$MATCHER" == "dinov3" || "$MATCHER" == "dift" ]]; then
+    # Use SuperPoint keypoints for DIFT; DINOv3 mode is controlled by DINOV3_MODE
+    if [[ "$MATCHER" == "dift" ]]; then
         MATCHER_ARGS="$MATCHER_ARGS --use_sp_keypoints"
         log "  Using SuperPoint keypoints for fair comparison"
+    fi
+    if [[ "$MATCHER" == "dinov3" ]]; then
+        case "$DINOV3_MODE" in
+            snap)
+                MATCHER_ARGS="$MATCHER_ARGS --snap_to_grid"
+                log "  DINOv3 mode: snap SP keypoints to grid (Mode A)"
+                ;;
+            dense)
+                MATCHER_ARGS="$MATCHER_ARGS --dense_grid"
+                log "  DINOv3 mode: dense grid matching (Mode B)"
+                ;;
+            *)
+                MATCHER_ARGS="$MATCHER_ARGS --use_sp_keypoints"
+                log "  DINOv3 mode: SuperPoint keypoints with bilinear interpolation (default)"
+                ;;
+        esac
     fi
 
     # Add hyperparameters
@@ -662,6 +693,17 @@ fi
 log "Step 4: Running RePoseD evaluation..."
 
 activate_env "$ENV_REPOSED"
+
+# madpose links against MKL + intel-openmp; expose them via conda pkgs cache if not in the env
+MKL_PKG=$(find "$HOME/.conda/pkgs" -maxdepth 3 -name "libmkl_intel_lp64.so.2" 2>/dev/null | head -1 | xargs -I{} dirname {} 2>/dev/null)
+OMP_PKG=$(find "$HOME/.conda/pkgs" -maxdepth 3 -name "libiomp5.so" 2>/dev/null | head -1 | xargs -I{} dirname {} 2>/dev/null)
+EXTRA_LIBS=""
+[ -n "$MKL_PKG" ] && EXTRA_LIBS="$MKL_PKG"
+[ -n "$OMP_PKG" ] && EXTRA_LIBS="${EXTRA_LIBS:+$EXTRA_LIBS:}$OMP_PKG"
+if [ -n "$EXTRA_LIBS" ]; then
+    export LD_LIBRARY_PATH="${EXTRA_LIBS}:${LD_LIBRARY_PATH:-}"
+    log "  MKL/OMP libs added to LD_LIBRARY_PATH for madpose"
+fi
 
 cd "$PROJECT_ROOT/external/RePoseD"
 
