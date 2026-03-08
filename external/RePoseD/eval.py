@@ -9,13 +9,11 @@ from time import perf_counter
 import h5py
 import numpy as np
 import poselib
-import madpose
 # import pykitti
 from tqdm import tqdm
 
 from utils.data import depth_indices, R_err_fun, t_err_fun, get_valid_depth_mask
 from utils.eval_utils import print_results, NoDaemonProcessPool, get_exception_result_dict
-from utils.madpose import madpose_opt_from_dict
 from utils.vis import draw_results_pose_auc_10, draw_cumplots
 
 
@@ -144,6 +142,8 @@ def eval_experiment(x):
     #     pose_est, info = poselib.estimate_relative_pose_w_relative_depth(kp1, kp2, d[:, 1] / d[:, 0], camera1, camera2, ransac_dict, bundle_dict)
     #     info['runtime'] = 1000 * (perf_counter() - start)
     elif 'madpose' in experiment:
+        import madpose
+        from utils.madpose import madpose_opt_from_dict
         opt, est_config = madpose_opt_from_dict(ransac_dict)
         start = perf_counter()
         pose, info = madpose.HybridEstimatePoseScaleOffset(kp1, kp2, d[:, 0], d[:, 1], [d[:, 0].min(), d[:, 1].min()],

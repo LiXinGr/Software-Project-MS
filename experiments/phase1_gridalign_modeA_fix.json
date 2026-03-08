@@ -1,0 +1,46 @@
+{
+  "run_id": "phase1_gridalign_modeA_fix",
+  "timestamp": "2026-03-08T13:52:18",
+  "git_commit": "unknown",
+  "git_branch": "unknown",
+  "method": "dinov3",
+  "config_key": "dinov3_l-1_gridalign_mnn_mp2000",
+  "config": {
+    "feat_level": -1,
+    "img_size": 1120,
+    "max_points": 2000,
+    "up_ft_index": 1,
+    "dift_t": 261,
+    "ensemble_size": 8,
+    "roma_setting": "precise"
+  },
+  "scenes": {
+    "sacre_coeur": {
+      "calibrated": {
+        "mAA10": 49.68,
+        "rot_err": 0.96,
+        "trans_err": 4.77,
+        "inlier_pct": 39.86
+      },
+      "shared_focal": {
+        "mAA10": 32.18,
+        "rot_err": 1.97,
+        "trans_err": 8.13,
+        "inlier_pct": 39.02
+      },
+      "varying_focal": {
+        "mAA10": 17.51,
+        "rot_err": 2.43,
+        "trans_err": 16.97,
+        "inlier_pct": 38.1
+      }
+    }
+  },
+  "paths": {
+    "matches": "/home.stud/gorbuden/datagrid/Software-Project-MS/output/matches/dinov3_l-1_gridalign_mnn_mp2000",
+    "benchmark_files": [
+      "output/benchmarks/dinov3_l-1_gridalign_mnn_mp2000_sacre_coeur.h5"
+    ],
+    "results": "/home.stud/gorbuden/datagrid/Software-Project-MS/output/results/phase1_gridalign_modeA_fix"
+  }
+}

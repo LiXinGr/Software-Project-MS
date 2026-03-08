@@ -27,12 +27,157 @@ PATCH_SIZE = 16  # DINOv3 ViT-Large uses patch size 16
 def get_config_key(args):
     """Return a canonical string identifying this configuration."""
     parts = ["dinov3", f"l{args.feat_level}"]
-    parts.append("sp" if args.use_sp_keypoints else "dense")
+    if args.snap_to_grid:
+        parts.append("gridalign")
+    elif args.dense_grid:
+        parts.append("dense16")
+    elif args.use_sp_keypoints:
+        parts.append("sp")
+    else:
+        parts.append("dense")
     parts.append("mnn" if args.use_mutual else "nn")
     if args.ratio_thresh:
         parts.append(f"rt{args.ratio_thresh}")
     parts.append(f"mp{args.max_points}")
     return "_".join(parts)
+
+
+def _snap_to_grid_indices(kpts, feat_shape, device):
+    """
+    Snap pixel keypoints to nearest DINOv3 patch center grid indices.
+
+    Args:
+        kpts: [N, 2] tensor of (x, y) pixel coords
+        feat_shape: (H_feat, W_feat)
+        device: torch device
+
+    Returns:
+        hi: [M] long tensor of feature row indices (deduplicated)
+        wi: [M] long tensor of feature col indices (deduplicated)
+        px_snap: [M] float tensor of snapped pixel x coords
+        py_snap: [M] float tensor of snapped pixel y coords
+        px_orig: [M] float tensor of original keypoint x coords (representative per snapped cell)
+        py_orig: [M] float tensor of original keypoint y coords (representative per snapped cell)
+    """
+    H_feat, W_feat = feat_shape
+    x = kpts[:, 0].float()
+    y = kpts[:, 1].float()
+
+    wi = ((x - 8) / PATCH_SIZE).round().long().clamp(0, W_feat - 1)
+    hi = ((y - 8) / PATCH_SIZE).round().long().clamp(0, H_feat - 1)
+
+    flat_idx = hi * W_feat + wi
+    # Keep one representative original keypoint per snapped grid cell.
+    # np.unique returns sorted unique values and the first index where each occurs.
+    flat_idx_np = flat_idx.cpu().numpy()
+    unique_flat_np, first_idx_np = np.unique(flat_idx_np, return_index=True)
+    unique_flat = torch.from_numpy(unique_flat_np).to(device)
+    first_idx = torch.from_numpy(first_idx_np).long()
+
+    hi_out = (unique_flat // W_feat).to(device)
+    wi_out = (unique_flat % W_feat).to(device)
+    px_snap = (8 + PATCH_SIZE * wi_out).float()
+    py_snap = (8 + PATCH_SIZE * hi_out).float()
+    px_orig = kpts[first_idx, 0].float().to(device)
+    py_orig = kpts[first_idx, 1].float().to(device)
+
+    return hi_out, wi_out, px_snap, py_snap, px_orig, py_orig
+
+
+def _get_dense_grid_indices(feat_shape, device):
+    """
+    Generate all DINOv3 patch center grid indices for an image.
+
+    Args:
+        feat_shape: (H_feat, W_feat)
+        device: torch device
+
+    Returns:
+        hi: [N] long tensor of feature row indices
+        wi: [N] long tensor of feature col indices
+        px: [N] float tensor of pixel x coords (patch centers)
+        py: [N] float tensor of pixel y coords (patch centers)
+    """
+    H_feat, W_feat = feat_shape
+    hi = torch.arange(H_feat, device=device).repeat_interleave(W_feat)
+    wi = torch.arange(W_feat, device=device).repeat(H_feat)
+    px = (8 + PATCH_SIZE * wi).float()
+    py = (8 + PATCH_SIZE * hi).float()
+    return hi, wi, px, py
+
+
+def _match_at_grid_indices(
+    ft1, ft2,
+    hi1, wi1, px1, py1,
+    hi2, wi2, px2, py2,
+    use_mutual=True,
+    ratio_thresh=None,
+    out_px1=None,
+    out_py1=None,
+    out_px2=None,
+    out_py2=None,
+):
+    """
+    Match DINOv3 features at exact grid indices (no bilinear interpolation).
+
+    Args:
+        ft1, ft2: [C, H_feat, W_feat] feature maps on device
+        hi1, wi1: [N1] row/col indices into ft1
+        px1, py1: [N1] pixel x/y coords for ft1 descriptor lookup points
+        hi2, wi2: [N2] row/col indices into ft2
+        px2, py2: [N2] pixel x/y coords for ft2 descriptor lookup points
+        use_mutual: apply mutual nearest neighbor
+        ratio_thresh: Lowe's ratio test threshold (None = disabled)
+        out_px1, out_py1: optional [N1] output coords for image 1 (defaults to px1/py1)
+        out_px2, out_py2: optional [N2] output coords for image 2 (defaults to px2/py2)
+
+    Returns:
+        mkpts0: [M, 2] numpy array (x, y) in image 1 pixel space
+        mkpts1: [M, 2] numpy array (x, y) in image 2 pixel space
+    """
+    device = ft1.device
+    if out_px1 is None:
+        out_px1, out_py1 = px1, py1
+    if out_px2 is None:
+        out_px2, out_py2 = px2, py2
+
+    desc1 = ft1[:, hi1, wi1].t()  # [N1, C]
+    desc2 = ft2[:, hi2, wi2].t()  # [N2, C]
+
+    desc1 = desc1 / (desc1.norm(dim=1, keepdim=True) + 1e-8)
+    desc2 = desc2 / (desc2.norm(dim=1, keepdim=True) + 1e-8)
+
+    N1, N2 = desc1.shape[0], desc2.shape[0]
+    if N1 == 0 or N2 == 0:
+        return np.zeros((0, 2)), np.zeros((0, 2))
+
+    sim = desc1 @ desc2.t()  # [N1, N2]
+
+    best_sim, best_j = sim.max(dim=1)
+    rows_all = torch.arange(N1, device=device)
+    rows = rows_all
+
+    if use_mutual:
+        rev_best_i = sim.argmax(dim=0)
+        mutual_mask = rev_best_i[best_j] == rows_all
+        rows = rows_all[mutual_mask]
+        best_j = best_j[mutual_mask]
+        if rows.numel() == 0:
+            return np.zeros((0, 2)), np.zeros((0, 2))
+
+    if ratio_thresh is not None and N2 >= 2:
+        sim_ratio_thresh = ratio_thresh if ratio_thresh > 1.0 else 1.0 / ratio_thresh
+        top2_sim, _ = sim.topk(2, dim=1)
+        ratio = top2_sim[:, 0] / (top2_sim[:, 1] + 1e-8)
+        good = ratio[rows] >= sim_ratio_thresh
+        rows = rows[good]
+        best_j = best_j[good]
+        if rows.numel() == 0:
+            return np.zeros((0, 2)), np.zeros((0, 2))
+
+    mkpts0 = torch.stack([out_px1[rows], out_py1[rows]], dim=1).cpu().numpy()
+    mkpts1 = torch.stack([out_px2[best_j], out_py2[best_j]], dim=1).cpu().numpy()
+    return mkpts0, mkpts1
 
 
 def run_dinov3_extractor(
@@ -102,12 +247,48 @@ def process_pair(img1_path, img2_path, model, transform, args, feature_cache=Non
     ft1 = ft1.to(device)
     ft2 = ft2.to(device)
     
-    if args.use_sp_keypoints:
-        # Use SuperPoint-detected keypoints for fair comparison
+    if args.snap_to_grid:
+        # Mode A: Snap SuperPoint keypoints to nearest DINOv3 patch center
+        sp_cache = Path(feature_cache).parent / 'superpoint_kpts' if feature_cache else None
+        kpts1_original = get_superpoint_keypoints(img1_path, device=device, max_keypoints=args.max_points, cache_dir=sp_cache)
+        kpts2_original = get_superpoint_keypoints(img2_path, device=device, max_keypoints=args.max_points, cache_dir=sp_cache)
+
+        hi1, wi1, px1_snap, py1_snap, px1_orig, py1_orig = _snap_to_grid_indices(
+            kpts1_original.cpu(), ft1.shape[1:], device
+        )
+        hi2, wi2, px2_snap, py2_snap, px2_orig, py2_orig = _snap_to_grid_indices(
+            kpts2_original.cpu(), ft2.shape[1:], device
+        )
+
+        mkpts0, mkpts1 = _match_at_grid_indices(
+            ft1, ft2,
+            hi1, wi1, px1_snap, py1_snap,
+            hi2, wi2, px2_snap, py2_snap,
+            use_mutual=args.use_mutual,
+            ratio_thresh=args.ratio_thresh,
+            out_px1=px1_orig,
+            out_py1=py1_orig,
+            out_px2=px2_orig,
+            out_py2=py2_orig,
+        )
+    elif args.dense_grid:
+        # Mode B: Use all DINOv3 patch centers as keypoints
+        hi1, wi1, px1, py1 = _get_dense_grid_indices(ft1.shape[1:], device)
+        hi2, wi2, px2, py2 = _get_dense_grid_indices(ft2.shape[1:], device)
+
+        mkpts0, mkpts1 = _match_at_grid_indices(
+            ft1, ft2,
+            hi1, wi1, px1, py1,
+            hi2, wi2, px2, py2,
+            use_mutual=args.use_mutual,
+            ratio_thresh=args.ratio_thresh,
+        )
+    elif args.use_sp_keypoints:
+        # Original SP mode: bilinear interpolation at SuperPoint keypoints
         sp_cache = Path(feature_cache).parent / 'superpoint_kpts' if feature_cache else None
         kpts1 = get_superpoint_keypoints(img1_path, device=device, max_keypoints=args.max_points, cache_dir=sp_cache)
         kpts2 = get_superpoint_keypoints(img2_path, device=device, max_keypoints=args.max_points, cache_dir=sp_cache)
-        
+
         mkpts0, mkpts1 = match_at_keypoints(
             ft1, ft2,
             kpts1, kpts2,
@@ -117,7 +298,7 @@ def process_pair(img1_path, img2_path, model, transform, args, feature_cache=Non
             ratio_thresh=args.ratio_thresh,
         )
     else:
-        # Use dense matching with random sampling (original behavior)
+        # Original dense mode: random sampling with bilinear interpolation
         mkpts0, mkpts1 = match_dense_features(
             ft1, ft2,
             img_size1=orig_size1,
@@ -163,7 +344,11 @@ def main():
     parser.add_argument("--visualize", action="store_true",
                         help="Generate visualization images")
     parser.add_argument("--use_sp_keypoints", action="store_true",
-                        help="Use SuperPoint-detected keypoints for fair comparison")
+                        help="Use SuperPoint-detected keypoints with bilinear interpolation (original SP mode)")
+    parser.add_argument("--snap_to_grid", action="store_true",
+                        help="Mode A: snap SuperPoint keypoints to nearest DINOv3 patch center (no interpolation)")
+    parser.add_argument("--dense_grid", action="store_true",
+                        help="Mode B: use all DINOv3 patch centers as keypoints (no SuperPoint, no interpolation)")
     parser.add_argument("--print_config_key", action="store_true",
                         help="Print the config key for this configuration and exit")
 

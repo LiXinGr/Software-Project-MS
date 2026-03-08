@@ -1,0 +1,88 @@
+{
+  "run_id": "phase1_dense16",
+  "timestamp": "2026-03-08T12:31:35",
+  "git_commit": "unknown",
+  "git_branch": "unknown",
+  "method": "dinov3",
+  "config_key": "dinov3_l-1_sp_mnn_mp5000",
+  "config": {
+    "feat_level": -1,
+    "img_size": 1120,
+    "max_points": 5000,
+    "up_ft_index": 1,
+    "dift_t": 261,
+    "ensemble_size": 8,
+    "roma_setting": "precise"
+  },
+  "scenes": {
+    "sacre_coeur": {
+      "calibrated": {
+        "mAA10": 53.87,
+        "rot_err": 0.83,
+        "trans_err": 4.2,
+        "inlier_pct": 53.68
+      },
+      "shared_focal": {
+        "mAA10": 37.3,
+        "rot_err": 1.65,
+        "trans_err": 6.9,
+        "inlier_pct": 53.02
+      },
+      "varying_focal": {
+        "mAA10": 21.26,
+        "rot_err": 2.13,
+        "trans_err": 13.79,
+        "inlier_pct": 52.6
+      }
+    },
+    "reichstag": {
+      "calibrated": {
+        "mAA10": 41.41,
+        "rot_err": 2.33,
+        "trans_err": 5.83,
+        "inlier_pct": 49.07
+      },
+      "shared_focal": {
+        "mAA10": 32.73,
+        "rot_err": 3.19,
+        "trans_err": 7.14,
+        "inlier_pct": 48.43
+      },
+      "varying_focal": {
+        "mAA10": 17.47,
+        "rot_err": 3.61,
+        "trans_err": 13.97,
+        "inlier_pct": 47.83
+      }
+    },
+    "st_peters_square": {
+      "calibrated": {
+        "mAA10": 38.17,
+        "rot_err": 1.72,
+        "trans_err": 6.96,
+        "inlier_pct": 66.46
+      },
+      "shared_focal": {
+        "mAA10": 32.86,
+        "rot_err": 2.24,
+        "trans_err": 7.78,
+        "inlier_pct": 66.2
+      },
+      "varying_focal": {
+        "mAA10": 14.96,
+        "rot_err": 2.72,
+        "trans_err": 17.95,
+        "inlier_pct": 66.44
+      }
+    }
+  },
+  "paths": {
+    "matches": "/home.stud/gorbuden/datagrid/Software-Project-MS/output/matches/dinov3_l-1_sp_mnn_mp5000",
+    "benchmark_files": [
+      "output/benchmarks/dinov3_l-1_sp_mnn_mp5000_sacre_coeur.h5",
+      "output/benchmarks/dinov3_l-1_sp_mnn_mp5000_reichstag.h5",
+      "output/benchmarks/dinov3_l-1_sp_mnn_mp5000_st_peters_square.h5"
+    ],
+    "results": "/home.stud/gorbuden/datagrid/Software-Project-MS/output/results/phase1_dense16"
+  }
+}
