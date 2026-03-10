@@ -1,0 +1,151 @@
+{
+  "run_id": "layer_study_b20",
+  "timestamp": "2026-03-10T15:03:38",
+  "git_commit": "unknown",
+  "git_branch": "unknown",
+  "method": "dinov3",
+  "config_key": "dinov3_l-4_sp_mnn_mp2000",
+  "config": {
+    "feat_level": -4,
+    "img_size": 1120,
+    "max_points": 2000,
+    "up_ft_index": 1,
+    "dift_t": 261,
+    "ensemble_size": 8,
+    "roma_setting": "precise"
+  },
+  "scenes": {
+    "sacre_coeur": {
+      "calibrated": {
+        "mAA10": 59.76,
+        "rot_err": 0.7,
+        "trans_err": 3.52,
+        "inlier_pct": 52.23,
+        "solvers": {
+          "3p_ours_shift_scale+12": {
+            "mAA10": 69.11,
+            "inliers_pct": 35.49,
+            "eR_median": 0.46,
+            "eT_median": 1.92,
+            "runtime_ms": 10.48,
+            "n_pairs": 14896
+          },
+          "3p_ours_shift_scale_hybrid_reproj+12": {
+            "mAA10": 55.09,
+            "inliers_pct": 60.6,
+            "eR_median": 0.82,
+            "eT_median": 4.17,
+            "runtime_ms": 7.14,
+            "n_pairs": 14896
+          },
+          "3p_ours_shift_scale_reproj+12": {
+            "mAA10": 55.09,
+            "inliers_pct": 60.6,
+            "eR_median": 0.82,
+            "eT_median": 4.17,
+            "runtime_ms": 7.25,
+            "n_pairs": 14896
+          }
+        },
+        "primary_solver": {
+          "name": "3p_ours_shift_scale+12",
+          "mAA10": 69.11,
+          "inliers_pct": 35.49,
+          "eR_median": 0.46,
+          "eT_median": 1.92,
+          "runtime_ms": 10.48,
+          "n_pairs": 14896
+        }
+      },
+      "shared_focal": {
+        "mAA10": 44.47,
+        "rot_err": 1.35,
+        "trans_err": 5.43,
+        "inlier_pct": 51.44,
+        "solvers": {
+          "4p_ours_scale_shift+12": {
+            "mAA10": 44.54,
+            "inliers_pct": 32.55,
+            "eR_median": 1.42,
+            "eT_median": 5.49,
+            "runtime_ms": 26.31,
+            "n_pairs": 14896
+          },
+          "4p_ours_scale_shift_reproj+12": {
+            "mAA10": 47.47,
+            "inliers_pct": 60.12,
+            "eR_median": 1.19,
+            "eT_median": 5.0,
+            "runtime_ms": 25.49,
+            "n_pairs": 14896
+          },
+          "4p_ours_scale_shift_reproj-s+12": {
+            "mAA10": 41.41,
+            "inliers_pct": 61.64,
+            "eR_median": 1.46,
+            "eT_median": 5.96,
+            "runtime_ms": 27.01,
+            "n_pairs": 14896
+          }
+        },
+        "primary_solver": {
+          "name": "4p_ours_scale_shift+12",
+          "mAA10": 44.54,
+          "inliers_pct": 32.55,
+          "eR_median": 1.42,
+          "eT_median": 5.49,
+          "runtime_ms": 26.31,
+          "n_pairs": 14896
+        }
+      },
+      "varying_focal": {
+        "mAA10": 26.82,
+        "rot_err": 1.82,
+        "trans_err": 10.57,
+        "inlier_pct": 50.31,
+        "solvers": {
+          "4p_ours_scale_shift+12": {
+            "mAA10": 16.56,
+            "inliers_pct": 27.76,
+            "eR_median": 3.49,
+            "eT_median": 18.72,
+            "runtime_ms": 14.89,
+            "n_pairs": 14896
+          },
+          "4p_ours_scale_shift_reproj+12": {
+            "mAA10": 30.58,
+            "inliers_pct": 60.71,
+            "eR_median": 1.17,
+            "eT_median": 9.18,
+            "runtime_ms": 13.63,
+            "n_pairs": 14896
+          },
+          "4p_ours_scale_shift_reproj-s+12": {
+            "mAA10": 33.31,
+            "inliers_pct": 62.47,
+            "eR_median": 1.73,
+            "eT_median": 7.64,
+            "runtime_ms": 15.41,
+            "n_pairs": 14896
+          }
+        },
+        "primary_solver": {
+          "name": "4p_ours_scale_shift+12",
+          "mAA10": 16.56,
+          "inliers_pct": 27.76,
+          "eR_median": 3.49,
+          "eT_median": 18.72,
+          "runtime_ms": 14.89,
+          "n_pairs": 14896
+        }
+      }
+    }
+  },
+  "paths": {
+    "matches": "output/matches/dinov3_l-4_sp_mnn_mp2000",
+    "benchmark_files": [
+      "output/benchmarks/dinov3_l-4_sp_mnn_mp2000_sacre_coeur.h5"
+    ],
+    "results": "output/results/layer_study_b20"
+  }
+}
