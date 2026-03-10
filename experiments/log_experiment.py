@@ -44,15 +44,20 @@ JSON schema:
 
 import argparse
 import json
+import math
 import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-
-import numpy as np
+from statistics import median
 
 EXPERIMENTS_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = EXPERIMENTS_DIR.parent
+PRIMARY_SOLVERS = {
+    "calibrated": "3p_ours_shift_scale+12",
+    "shared_focal": "4p_ours_scale_shift+12",
+    "varying_focal": "4p_ours_scale_shift+12",
+}
 
 
 def get_git_info():
@@ -97,7 +102,54 @@ def parse_config(config_list):
     return config
 
 
-def parse_eval_json(json_path):
+def _summarize_entries(entries):
+    """Summarize a list of eval rows into aggregate metrics."""
+    if not entries:
+        return None
+
+    def _to_float(v):
+        try:
+            return float(v)
+        except Exception:
+            return float("nan")
+
+    def _is_nan(v):
+        return isinstance(v, float) and math.isnan(v)
+
+    def _nanmean(values):
+        clean = [v for v in values if not _is_nan(v)]
+        return float(sum(clean) / len(clean)) if clean else float("nan")
+
+    def _nanmedian(values):
+        clean = [v for v in values if not _is_nan(v)]
+        return float(median(clean)) if clean else float("nan")
+
+    r_err = [_to_float(r.get("R_err", float("nan"))) for r in entries]
+    t_err = [_to_float(r.get("t_err", float("nan"))) for r in entries]
+    runtimes = [_to_float(r.get("info", {}).get("runtime", float("nan"))) for r in entries]
+    inliers = [_to_float(r.get("info", {}).get("inlier_ratio", float("nan"))) for r in entries]
+
+    pose_err = []
+    for re, te in zip(r_err, t_err):
+        if _is_nan(re) or _is_nan(te):
+            pose_err.append(180.0)
+        else:
+            pose_err.append(max(re, te))
+
+    n = len(pose_err)
+    mAA_10 = float(sum(sum(1 for e in pose_err if e < t) / n for t in range(1, 11)) * 10.0)
+
+    return {
+        "mAA10": round(mAA_10, 2),
+        "rot_err": round(_nanmedian(r_err), 2),
+        "trans_err": round(_nanmedian(t_err), 2),
+        "inlier_pct": round(_nanmean(inliers) * 100, 2),
+        "runtime_ms": round(_nanmean(runtimes), 2),
+        "n_pairs": int(len(entries)),
+    }
+
+
+def parse_eval_json(json_path, primary_solver=None):
     """
     Parse a single eval output JSON (calibrated / shared_focal / varying_focal)
     and return aggregate metrics across all solvers and pairs.
@@ -113,21 +165,53 @@ def parse_eval_json(json_path):
     if not results:
         return None
 
-    r_err    = np.array([r.get("R_err", float("nan")) for r in results], dtype=float)
-    t_err    = np.array([r.get("t_err", float("nan")) for r in results], dtype=float)
-    runtimes = np.array([r.get("info", {}).get("runtime",      float("nan")) for r in results], dtype=float)
-    inliers  = np.array([r.get("info", {}).get("inlier_ratio", float("nan")) for r in results], dtype=float)
+    aggregate = _summarize_entries(results)
+    if aggregate is None:
+        return None
 
-    pose_err = np.maximum(r_err, t_err)
-    pose_err[np.isnan(pose_err)] = 180.0
-    mAA_10 = float(np.mean([np.sum(pose_err < t) / len(pose_err) for t in range(1, 11)]) * 100)
+    by_solver = {}
+    for r in results:
+        solver = r.get("experiment", "unknown")
+        by_solver.setdefault(solver, []).append(r)
 
-    return {
-        "mAA10":      round(mAA_10, 2),
-        "rot_err":    round(float(np.nanmedian(r_err)), 2),
-        "trans_err":  round(float(np.nanmedian(t_err)), 2),
-        "inlier_pct": round(float(np.nanmean(inliers) * 100), 2),
+    solvers = {}
+    for solver_name, entries in sorted(by_solver.items()):
+        s = _summarize_entries(entries)
+        if s is None:
+            continue
+        solvers[solver_name] = {
+            "mAA10": s["mAA10"],
+            "inliers_pct": s["inlier_pct"],
+            "eR_median": s["rot_err"],
+            "eT_median": s["trans_err"],
+            "runtime_ms": s["runtime_ms"],
+            "n_pairs": s["n_pairs"],
+        }
+
+    primary_payload = None
+    if primary_solver:
+        primary = solvers.get(primary_solver)
+        if primary is not None:
+            primary_payload = {
+                "name": primary_solver,
+                "mAA10": primary["mAA10"],
+                "inliers_pct": primary["inliers_pct"],
+                "eR_median": primary["eR_median"],
+                "eT_median": primary["eT_median"],
+                "runtime_ms": primary["runtime_ms"],
+                "n_pairs": primary["n_pairs"],
+            }
+
+    out = {
+        "mAA10": aggregate["mAA10"],
+        "rot_err": aggregate["rot_err"],
+        "trans_err": aggregate["trans_err"],
+        "inlier_pct": aggregate["inlier_pct"],
+        "solvers": solvers,
     }
+    if primary_payload is not None:
+        out["primary_solver"] = primary_payload
+    return out
 
 
 def load_or_create_record(output_path, run_id, method, config_key,
@@ -230,7 +314,8 @@ def main():
         for exp_type, json_path in eval_files.items():
             if json_path.exists():
                 try:
-                    metrics = parse_eval_json(json_path)
+                    primary_solver = PRIMARY_SOLVERS.get(exp_type)
+                    metrics = parse_eval_json(json_path, primary_solver=primary_solver)
                     if metrics:
                         scene_results[exp_type] = metrics
                 except Exception as e:

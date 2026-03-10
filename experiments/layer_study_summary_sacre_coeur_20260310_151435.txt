@@ -1,0 +1,23 @@
+Layer Study Results - sacre_coeur (calibrated, all solvers)
+-----------------------------------------------------------
+
+Block  FeatLvl  Config Key                              Solver                                    mAA@10   Inliers%  Run ID              
+-----------------------------------------------------------------------------------------------------------------------------------------
+    4      -20  dinov3_l-20_sp_mnn_mp2000               3p_ours_shift_scale+12                     23.53      12.12  layer_study_b4      
+                                                        3p_ours_shift_scale_hybrid_reproj+12       35.28      21.58                      
+                                                        3p_ours_shift_scale_reproj+12              35.28      21.58                      
+    8      -16  dinov3_l-16_sp_mnn_mp2000               3p_ours_shift_scale+12                     65.02      35.40  layer_study_b8      
+                                                        3p_ours_shift_scale_hybrid_reproj+12       52.08      54.92                      
+                                                        3p_ours_shift_scale_reproj+12              52.08      54.92                      
+   12      -12  dinov3_l-12_sp_mnn_mp2000               3p_ours_shift_scale+12                     40.00      65.37  layer_study_b12     
+                                                        3p_ours_shift_scale_hybrid_reproj+12       41.00      90.44                      
+                                                        3p_ours_shift_scale_reproj+12              41.00      90.44                      
+   16       -8  dinov3_l-8_sp_mnn_mp2000                3p_ours_shift_scale+12                     73.12      40.12  layer_study_b16     
+                                                        3p_ours_shift_scale_hybrid_reproj+12       55.81      65.14                      
+                                                        3p_ours_shift_scale_reproj+12              55.81      65.14                      
+   20       -4  dinov3_l-4_sp_mnn_mp2000                3p_ours_shift_scale+12                     69.11      35.49  layer_study_b20     
+                                                        3p_ours_shift_scale_hybrid_reproj+12       55.09      60.60                      
+                                                        3p_ours_shift_scale_reproj+12              55.09      60.60                      
+   23       -1  dinov3_l-1_sp_mnn_mp2000                3p_ours_shift_scale+12                     67.39      36.94  layer_study_b23     
+                                                        3p_ours_shift_scale_hybrid_reproj+12       52.70      65.79                      
+                                                        3p_ours_shift_scale_reproj+12              52.70      65.79                      
