@@ -14,7 +14,9 @@ datasets/phototourism
 *.pt
 
 # Pipeline outputs
-output*
+output_1
+output/matches
+output/benchmarks
 cache*
 *.log
 
