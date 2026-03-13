@@ -1,0 +1,10 @@
+Matches,Depth,Solver,Exp.Type,Opt.,εr(°),εt(°),mAA@10,mAA_f@10,τ(ms),Inliers,Num_Pairs,max_points,img_size,feat_level,up_ft_index,dift_t,ratio_thresh
+roma,UniDepth,3p_ours_shift_scale+12,calibrated,S,0.30,0.96,82.8,N/A,68.4,97.1,14868,2000,1120,-1,1,261,
+roma,UniDepth,3p_ours_shift_scale_hybrid_reproj+12,calibrated,H,1.94,6.64,37.8,N/A,23.1,92.0,14868,2000,1120,-1,1,261,
+roma,UniDepth,3p_ours_shift_scale_reproj+12,calibrated,S,1.94,6.64,37.8,N/A,24.4,92.0,14868,2000,1120,-1,1,261,
+roma,UniDepth,4p_ours_scale_shift+12,shared_f,S,0.43,1.37,76.6,51.9,63.5,97.5,14868,2000,1120,-1,1,261,
+roma,UniDepth,4p_ours_scale_shift+12,varying_f,S,1.10,3.87,53.6,25.9,60.8,96.9,14868,2000,1120,-1,1,261,
+roma,UniDepth,4p_ours_scale_shift_reproj+12,shared_f,S,2.17,6.45,38.0,21.0,45.3,91.6,14868,2000,1120,-1,1,261,
+roma,UniDepth,4p_ours_scale_shift_reproj+12,varying_f,S,1.93,11.53,23.8,12.6,32.6,93.0,14868,2000,1120,-1,1,261,
+roma,UniDepth,4p_ours_scale_shift_reproj-s+12,shared_f,S,1.59,5.70,43.8,25.0,59.1,93.1,14868,2000,1120,-1,1,261,
+roma,UniDepth,4p_ours_scale_shift_reproj-s+12,varying_f,S,2.30,14.35,19.6,14.2,47.0,93.3,14868,2000,1120,-1,1,261,
