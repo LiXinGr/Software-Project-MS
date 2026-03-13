@@ -13,10 +13,21 @@ datasets/phototourism
 *.h5
 *.pt
 
-# Pipeline outputs
+# Ignore everything under output
+output/**
 output_1
-output/matches
-output/benchmarks
+
+# Re-include results and its subfolders
+!output/results/
+!output/results/**/
+!output/results/**/*.csv
+!output/results/**/*.txt
+
+# Explicit large/generated files still ignored
+output/pairs_reichstag.txt
+output/pairs_sacre_coeur.txt
+output/pairs_st_peters_square.txt
+
 cache*
 *.log
 
@@ -27,6 +38,6 @@ benchmark*
 .nfs*
 
 docs
-figures 
+figures
 
-res*
+res_*

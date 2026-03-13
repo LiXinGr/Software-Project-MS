@@ -1,0 +1,151 @@
+{
+  "run_id": "phase1_dift_temporal_t200_up2_s768",
+  "timestamp": "2026-03-11T21:32:21",
+  "git_commit": "unknown",
+  "git_branch": "unknown",
+  "method": "dift",
+  "config_key": "dift_t200_up2_ens8_sp_mnn_mp2000",
+  "config": {
+    "feat_level": -1,
+    "img_size": 768,
+    "max_points": 2000,
+    "up_ft_index": 2,
+    "dift_t": 200,
+    "ensemble_size": 8,
+    "roma_setting": "precise"
+  },
+  "scenes": {
+    "sacre_coeur": {
+      "calibrated": {
+        "mAA10": 61.7,
+        "rot_err": 0.64,
+        "trans_err": 3.33,
+        "inlier_pct": 53.15,
+        "solvers": {
+          "3p_ours_shift_scale+12": {
+            "mAA10": 72.62,
+            "inliers_pct": 41.21,
+            "eR_median": 0.38,
+            "eT_median": 1.65,
+            "runtime_ms": 13.08,
+            "n_pairs": 14896
+          },
+          "3p_ours_shift_scale_hybrid_reproj+12": {
+            "mAA10": 56.24,
+            "inliers_pct": 59.12,
+            "eR_median": 0.79,
+            "eT_median": 4.04,
+            "runtime_ms": 8.08,
+            "n_pairs": 14896
+          },
+          "3p_ours_shift_scale_reproj+12": {
+            "mAA10": 56.24,
+            "inliers_pct": 59.12,
+            "eR_median": 0.79,
+            "eT_median": 4.04,
+            "runtime_ms": 8.25,
+            "n_pairs": 14896
+          }
+        },
+        "primary_solver": {
+          "name": "3p_ours_shift_scale+12",
+          "mAA10": 72.62,
+          "inliers_pct": 41.21,
+          "eR_median": 0.38,
+          "eT_median": 1.65,
+          "runtime_ms": 13.08,
+          "n_pairs": 14896
+        }
+      },
+      "shared_focal": {
+        "mAA10": 46.8,
+        "rot_err": 1.2,
+        "trans_err": 5.05,
+        "inlier_pct": 52.34,
+        "solvers": {
+          "4p_ours_scale_shift+12": {
+            "mAA10": 49.29,
+            "inliers_pct": 38.48,
+            "eR_median": 1.08,
+            "eT_median": 4.59,
+            "runtime_ms": 26.41,
+            "n_pairs": 14896
+          },
+          "4p_ours_scale_shift_reproj+12": {
+            "mAA10": 48.02,
+            "inliers_pct": 58.47,
+            "eR_median": 1.13,
+            "eT_median": 4.94,
+            "runtime_ms": 24.85,
+            "n_pairs": 14896
+          },
+          "4p_ours_scale_shift_reproj-s+12": {
+            "mAA10": 43.08,
+            "inliers_pct": 60.07,
+            "eR_median": 1.34,
+            "eT_median": 5.62,
+            "runtime_ms": 26.36,
+            "n_pairs": 14896
+          }
+        },
+        "primary_solver": {
+          "name": "4p_ours_scale_shift+12",
+          "mAA10": 49.29,
+          "inliers_pct": 38.48,
+          "eR_median": 1.08,
+          "eT_median": 4.59,
+          "runtime_ms": 26.41,
+          "n_pairs": 14896
+        }
+      },
+      "varying_focal": {
+        "mAA10": 29.19,
+        "rot_err": 1.65,
+        "trans_err": 9.79,
+        "inlier_pct": 51.14,
+        "solvers": {
+          "4p_ours_scale_shift+12": {
+            "mAA10": 21.14,
+            "inliers_pct": 33.83,
+            "eR_median": 2.98,
+            "eT_median": 16.23,
+            "runtime_ms": 15.43,
+            "n_pairs": 14896
+          },
+          "4p_ours_scale_shift_reproj+12": {
+            "mAA10": 31.4,
+            "inliers_pct": 58.93,
+            "eR_median": 1.09,
+            "eT_median": 8.99,
+            "runtime_ms": 13.4,
+            "n_pairs": 14896
+          },
+          "4p_ours_scale_shift_reproj-s+12": {
+            "mAA10": 35.02,
+            "inliers_pct": 60.65,
+            "eR_median": 1.62,
+            "eT_median": 7.29,
+            "runtime_ms": 15.03,
+            "n_pairs": 14896
+          }
+        },
+        "primary_solver": {
+          "name": "4p_ours_scale_shift+12",
+          "mAA10": 21.14,
+          "inliers_pct": 33.83,
+          "eR_median": 2.98,
+          "eT_median": 16.23,
+          "runtime_ms": 15.43,
+          "n_pairs": 14896
+        }
+      }
+    }
+  },
+  "paths": {
+    "matches": "/home.stud/gorbuden/datagrid/Software-Project-MS/output/matches/dift_t200_up2_ens8_sp_mnn_mp2000",
+    "benchmark_files": [
+      "output/benchmarks/dift_t200_up2_ens8_sp_mnn_mp2000_sacre_coeur.h5"
+    ],
+    "results": "/home.stud/gorbuden/datagrid/Software-Project-MS/output/results/phase1_dift_temporal_t200_up2_s768"
+  }
+}
