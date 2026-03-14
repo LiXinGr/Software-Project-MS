@@ -1,0 +1,9 @@
+method,run_id,config_key,scene,cal_mAA10,sf_mAA10,vf_mAA10,inliers_pct
+fusion,phase1_fusion_a06_pca256,fusion_dinov3b16_dift_t0up2_a06_pca256_sp_mnn_mp2000,sacre_coeur,77.97,59.34,28.11,47.58
+fusion,phase1_fusion_a06_pca256,fusion_dinov3b16_dift_t0up2_a06_pca256_sp_mnn_mp2000,AVERAGE (1 scene),77.97,59.34,28.11,47.58
+fusion,phase1_fusion_pca128,fusion_dinov3b16_dift_t0up2_pca128_sp_mnn_mp2000,sacre_coeur,78.05,59.63,28.69,47.46
+fusion,phase1_fusion_pca128,fusion_dinov3b16_dift_t0up2_pca128_sp_mnn_mp2000,AVERAGE (1 scene),78.05,59.63,28.69,47.46
+fusion,phase1_fusion_pca256,fusion_dinov3b16_dift_t0up2_pca256_sp_mnn_mp2000,sacre_coeur,78.81,60.73,29.71,48.48
+fusion,phase1_fusion_pca256,fusion_dinov3b16_dift_t0up2_pca256_sp_mnn_mp2000,AVERAGE (1 scene),78.81,60.73,29.71,48.48
+fusion,phase1_fusion_raw,fusion_dinov3b16_dift_t0up2_sp_mnn_mp2000,sacre_coeur,79.84,62.8,31.92,50.17
+fusion,phase1_fusion_raw,fusion_dinov3b16_dift_t0up2_sp_mnn_mp2000,AVERAGE (1 scene),79.84,62.8,31.92,50.17

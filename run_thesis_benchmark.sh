@@ -9,7 +9,7 @@
 # 4. Run RePoseD evaluation
 #
 # Usage: ./run_thesis_benchmark.sh <matcher> [--dry-run] [--skip-depth] [--skip-matches]
-#   matcher: dinov3 | dift | ldm | roma | superpoint
+#   matcher: dinov3 | dift | fusion | ldm | roma | superpoint
 #   --dry-run: Process only first 10 pairs
 #   --skip-depth: Skip depth generation step
 #   --skip-matches: Skip match generation step
@@ -42,6 +42,7 @@ ENV_LDM="ldm"
 ENV_ROMA="roma"
 ENV_ROMAV2="romav2"
 ENV_SUPERPOINT="lightglue"
+ENV_FUSION="lightglue"
 ENV_REPOSED="reposed"
 
 # ============================================================================
@@ -73,13 +74,22 @@ ENSEMBLE_SIZE="8"       # DIFT: Number of noise samples to average (2-8)
 ROMA_SETTING="precise"  # RoMaV2: 'precise' (default) or 'fast' mode
 RATIO_THRESH=""         # Lowe's ratio test threshold (empty = use default)
 DINOV3_MODE="sp"        # DINOv3 keypoint mode: sp | snap | dense
+FUSION_PCA_DIM="0"      # Fusion: PCA output dimension (0 = raw concat)
+FUSION_ALPHA="0.5"      # Fusion: DIFT weighting before concatenation
+FUSION_PCA_SAMPLES="50000"  # Fusion: Max descriptors used to fit PCA
+
+EXPLICIT_FEAT_LEVEL=false
+EXPLICIT_UP_FT_INDEX=false
+EXPLICIT_DIFT_T=false
+EXPLICIT_ENSEMBLE_SIZE=false
+EXPLICIT_IMG_SIZE=false
 
 while [[ $# -gt 0 ]]; do
     # Debug: uncomment to see argument parsing
     # echo "DEBUG: Processing arg: $1 (next: $2)"
     
     case "$1" in
-        dinov3|dift|ldm|roma|romav2|superpoint)
+        dinov3|dift|fusion|ldm|roma|romav2|superpoint)
             MATCHER="$1"
             shift
             ;;
@@ -143,14 +153,17 @@ while [[ $# -gt 0 ]]; do
             ;;
         --feat_level|--feat-level)
             FEAT_LEVEL="$2"
+            EXPLICIT_FEAT_LEVEL=true
             shift 2
             ;;
         --up_ft_index|--up-ft-index)
             UP_FT_INDEX="$2"
+            EXPLICIT_UP_FT_INDEX=true
             shift 2
             ;;
         --dift_t|--dift-t)
             DIFT_T="$2"
+            EXPLICIT_DIFT_T=true
             shift 2
             ;;
         --ratio_thresh|--ratio-thresh)
@@ -159,14 +172,28 @@ while [[ $# -gt 0 ]]; do
             ;;
         --ensemble_size|--ensemble-size)
             ENSEMBLE_SIZE="$2"
+            EXPLICIT_ENSEMBLE_SIZE=true
             shift 2
             ;;
         --img_size|--img-size)
             IMG_SIZE="$2"
+            EXPLICIT_IMG_SIZE=true
             shift 2
             ;;
         --roma_setting|--roma-setting)
             ROMA_SETTING="$2"
+            shift 2
+            ;;
+        --fusion_pca_dim|--fusion-pca-dim)
+            FUSION_PCA_DIM="$2"
+            shift 2
+            ;;
+        --fusion_alpha|--fusion-alpha)
+            FUSION_ALPHA="$2"
+            shift 2
+            ;;
+        --fusion_pca_samples|--fusion-pca-samples)
+            FUSION_PCA_SAMPLES="$2"
             shift 2
             ;;
         --dinov3-snap)
@@ -199,16 +226,27 @@ while [[ $# -gt 0 ]]; do
             echo "  --up_ft_index <I>   DIFT UNet layer 0-3 (default: 1)"
             echo "  --dift_t <T>        DIFT diffusion timestep (default: 261)"
             echo "  --ensemble_size <N> DIFT noise ensemble size (default: 8)"
+            echo "  --fusion_pca_dim <D> Fusion PCA dimension (default: 0 = raw concat)"
+            echo "  --fusion_alpha <A>   Fusion DIFT weight alpha (default: 0.5)"
+            echo "  --fusion_pca_samples <N> Fusion PCA fit sample budget (default: 50000)"
             echo "  --ratio_thresh <R>  Lowe's ratio test threshold"
             exit 1
             ;;
     esac
 done
 
+if [ "$MATCHER" = "fusion" ]; then
+    [ "$EXPLICIT_FEAT_LEVEL" = false ] && FEAT_LEVEL="-8"
+    [ "$EXPLICIT_UP_FT_INDEX" = false ] && UP_FT_INDEX="2"
+    [ "$EXPLICIT_DIFT_T" = false ] && DIFT_T="0"
+    [ "$EXPLICIT_ENSEMBLE_SIZE" = false ] && ENSEMBLE_SIZE="8"
+    [ "$EXPLICIT_IMG_SIZE" = false ] && IMG_SIZE="768"
+fi
+
 if [ -z "$MATCHER" ]; then
     echo "Error: No matcher specified"
     echo "Usage: ./run_thesis_benchmark.sh <matcher> --run_id <id> [options]"
-    echo "  matcher: dinov3 | dift | ldm | roma | romav2 | superpoint"
+    echo "  matcher: dinov3 | dift | fusion | ldm | roma | romav2 | superpoint"
     echo "  --run_id <id>   REQUIRED: human label for this run"
     echo "  --device cuda:N Use specific GPU (e.g., cuda:0, cuda:1, cuda:2)"
     echo "  --scene <name>  Scene to process (sacre_coeur, reichstag, st_peters_square)"
@@ -252,6 +290,9 @@ if [ "$ALL_SCENES_MODE" = true ]; then
         args+=("--dift_t" "$DIFT_T")
         args+=("--ensemble_size" "$ENSEMBLE_SIZE")
         args+=("--roma_setting" "$ROMA_SETTING")
+        args+=("--fusion_pca_dim" "$FUSION_PCA_DIM")
+        args+=("--fusion_alpha" "$FUSION_ALPHA")
+        args+=("--fusion_pca_samples" "$FUSION_PCA_SAMPLES")
         [ -n "$RATIO_THRESH" ] && args+=("--ratio_thresh" "$RATIO_THRESH")
         
         echo ""
@@ -347,6 +388,7 @@ get_matcher_env() {
     case "$1" in
         dinov3) echo "$ENV_DINOV3" ;;
         dift) echo "$ENV_DIFT" ;;
+        fusion) echo "$ENV_FUSION" ;;
         ldm) echo "$ENV_LDM" ;;
         roma) echo "$ENV_ROMA" ;;
         romav2) echo "$ENV_ROMAV2" ;;
@@ -398,6 +440,27 @@ get_config_key_for_matcher() {
             ;;
         dift)
             echo "dift_t${DIFT_T}_up${UP_FT_INDEX}_ens${ENSEMBLE_SIZE}_sp_mnn_mp${MAX_POINTS}"
+            ;;
+        fusion)
+            local dino_block="$FEAT_LEVEL"
+            if [ "$dino_block" -lt 0 ]; then
+                dino_block=$((24 + FEAT_LEVEL))
+            fi
+            local ens_suffix=""
+            [ "$ENSEMBLE_SIZE" != "8" ] && ens_suffix="_ens${ENSEMBLE_SIZE}"
+            local size_suffix=""
+            [ "$IMG_SIZE" != "768" ] && size_suffix="_sz${IMG_SIZE}x${IMG_SIZE}"
+            local alpha_suffix=""
+            if [ "$FUSION_ALPHA" != "0.5" ] && [ "$FUSION_ALPHA" != "0.50" ]; then
+                local alpha_tag
+                alpha_tag=$(printf '%s' "$FUSION_ALPHA" | tr -d '.')
+                alpha_suffix="_a${alpha_tag}"
+            fi
+            local pca_suffix=""
+            [ "$FUSION_PCA_DIM" -gt 0 ] && pca_suffix="_pca${FUSION_PCA_DIM}"
+            local rt_suffix=""
+            [ -n "$RATIO_THRESH" ] && rt_suffix="_rt${RATIO_THRESH}"
+            echo "fusion_dinov3b${dino_block}_dift_t${DIFT_T}up${UP_FT_INDEX}${ens_suffix}${size_suffix}${alpha_suffix}${pca_suffix}_sp_mnn${rt_suffix}_mp${MAX_POINTS}"
             ;;
         superpoint)
             echo "superpoint_lg_mp${MAX_POINTS}"
@@ -579,7 +642,7 @@ else
     fi
 
     # Add feature cache keyed by CONFIG_KEY to avoid cross-config contamination
-    if [[ "$MATCHER" == "dinov3" || "$MATCHER" == "dift" || "$MATCHER" == "superpoint" ]]; then
+    if [[ "$MATCHER" == "dinov3" || "$MATCHER" == "dift" || "$MATCHER" == "fusion" || "$MATCHER" == "superpoint" ]]; then
         FEATURE_CACHE_DIR="$PROJECT_ROOT/cache/features/${CONFIG_KEY}/${SCENE}"
         mkdir -p "$FEATURE_CACHE_DIR"
         MATCHER_ARGS="$MATCHER_ARGS --feature_cache $FEATURE_CACHE_DIR"
@@ -590,6 +653,10 @@ else
     if [[ "$MATCHER" == "dift" ]]; then
         MATCHER_ARGS="$MATCHER_ARGS --use_sp_keypoints"
         log "  Using SuperPoint keypoints for fair comparison"
+    fi
+    if [[ "$MATCHER" == "fusion" ]]; then
+        MATCHER_ARGS="$MATCHER_ARGS --scene $SCENE"
+        log "  Using cached DINOv3 + DIFT features at shared SuperPoint keypoints"
     fi
     if [[ "$MATCHER" == "dinov3" ]]; then
         case "$DINOV3_MODE" in
@@ -621,6 +688,10 @@ else
         MATCHER_ARGS="$MATCHER_ARGS --img_size $IMG_SIZE $IMG_SIZE"
         log "  img_size: ${IMG_SIZE}x${IMG_SIZE}"
     fi
+    if [[ "$MATCHER" == "fusion" ]]; then
+        MATCHER_ARGS="$MATCHER_ARGS --img_size $IMG_SIZE $IMG_SIZE"
+        log "  fusion source img_size: ${IMG_SIZE}x${IMG_SIZE}"
+    fi
 
     # DINOv3-specific parameters
     if [[ "$MATCHER" == "dinov3" ]]; then
@@ -632,6 +703,12 @@ else
     if [[ "$MATCHER" == "dift" ]]; then
         MATCHER_ARGS="$MATCHER_ARGS --up_ft_index $UP_FT_INDEX --t $DIFT_T --ensemble_size $ENSEMBLE_SIZE"
         log "  up_ft_index: $UP_FT_INDEX, t: $DIFT_T, ensemble_size: $ENSEMBLE_SIZE"
+    fi
+    if [[ "$MATCHER" == "fusion" ]]; then
+        MATCHER_ARGS="$MATCHER_ARGS --feat_level $FEAT_LEVEL --up_ft_index $UP_FT_INDEX --t $DIFT_T --ensemble_size $ENSEMBLE_SIZE --pca_dim $FUSION_PCA_DIM --alpha $FUSION_ALPHA --max_pca_samples $FUSION_PCA_SAMPLES"
+        log "  fusion source feat_level: $FEAT_LEVEL"
+        log "  fusion source up_ft_index: $UP_FT_INDEX, t: $DIFT_T, ensemble_size: $ENSEMBLE_SIZE"
+        log "  fusion PCA dim: $FUSION_PCA_DIM, alpha: $FUSION_ALPHA, PCA samples: $FUSION_PCA_SAMPLES"
     fi
 
     # RoMaV2-specific parameters
@@ -880,6 +957,7 @@ LOG_ARGS="--run_id $RUN_ID \
     --benchmark $BENCHMARK_FILE \
     --config feat_level=$FEAT_LEVEL img_size=$IMG_SIZE max_points=$MAX_POINTS \
              up_ft_index=$UP_FT_INDEX dift_t=$DIFT_T ensemble_size=$ENSEMBLE_SIZE \
+             fusion_pca_dim=$FUSION_PCA_DIM fusion_alpha=$FUSION_ALPHA fusion_pca_samples=$FUSION_PCA_SAMPLES \
              roma_setting=$ROMA_SETTING"
 [ -n "$RATIO_THRESH" ] && LOG_ARGS="$LOG_ARGS ratio_thresh=$RATIO_THRESH"
 
