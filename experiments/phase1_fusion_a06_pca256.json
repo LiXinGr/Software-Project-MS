@@ -1,0 +1,154 @@
+{
+  "run_id": "phase1_fusion_a06_pca256",
+  "timestamp": "2026-03-14T14:47:10",
+  "git_commit": "unknown",
+  "git_branch": "unknown",
+  "method": "fusion",
+  "config_key": "fusion_dinov3b16_dift_t0up2_a06_pca256_sp_mnn_mp2000",
+  "config": {
+    "feat_level": -8,
+    "img_size": 768,
+    "max_points": 2000,
+    "up_ft_index": 2,
+    "dift_t": 0,
+    "ensemble_size": 8,
+    "fusion_pca_dim": 256,
+    "fusion_alpha": 0.6,
+    "fusion_pca_samples": 50000,
+    "roma_setting": "precise"
+  },
+  "scenes": {
+    "sacre_coeur": {
+      "calibrated": {
+        "mAA10": 64.33,
+        "rot_err": 0.58,
+        "trans_err": 3.03,
+        "inlier_pct": 59.42,
+        "solvers": {
+          "3p_ours_shift_scale+12": {
+            "mAA10": 77.97,
+            "inliers_pct": 47.58,
+            "eR_median": 0.3,
+            "eT_median": 1.21,
+            "runtime_ms": 12.17,
+            "n_pairs": 14896
+          },
+          "3p_ours_shift_scale_hybrid_reproj+12": {
+            "mAA10": 57.52,
+            "inliers_pct": 65.34,
+            "eR_median": 0.79,
+            "eT_median": 3.91,
+            "runtime_ms": 7.23,
+            "n_pairs": 14896
+          },
+          "3p_ours_shift_scale_reproj+12": {
+            "mAA10": 57.52,
+            "inliers_pct": 65.34,
+            "eR_median": 0.79,
+            "eT_median": 3.91,
+            "runtime_ms": 7.27,
+            "n_pairs": 14896
+          }
+        },
+        "primary_solver": {
+          "name": "3p_ours_shift_scale+12",
+          "mAA10": 77.97,
+          "inliers_pct": 47.58,
+          "eR_median": 0.3,
+          "eT_median": 1.21,
+          "runtime_ms": 12.17,
+          "n_pairs": 14896
+        }
+      },
+      "shared_focal": {
+        "mAA10": 51.75,
+        "rot_err": 1.05,
+        "trans_err": 4.32,
+        "inlier_pct": 58.98,
+        "solvers": {
+          "4p_ours_scale_shift+12": {
+            "mAA10": 59.34,
+            "inliers_pct": 45.44,
+            "eR_median": 0.75,
+            "eT_median": 3.0,
+            "runtime_ms": 28.27,
+            "n_pairs": 14896
+          },
+          "4p_ours_scale_shift_reproj+12": {
+            "mAA10": 50.73,
+            "inliers_pct": 64.9,
+            "eR_median": 1.12,
+            "eT_median": 4.57,
+            "runtime_ms": 26.26,
+            "n_pairs": 14896
+          },
+          "4p_ours_scale_shift_reproj-s+12": {
+            "mAA10": 45.19,
+            "inliers_pct": 66.59,
+            "eR_median": 1.29,
+            "eT_median": 5.29,
+            "runtime_ms": 28.33,
+            "n_pairs": 14896
+          }
+        },
+        "primary_solver": {
+          "name": "4p_ours_scale_shift+12",
+          "mAA10": 59.34,
+          "inliers_pct": 45.44,
+          "eR_median": 0.75,
+          "eT_median": 3.0,
+          "runtime_ms": 28.27,
+          "n_pairs": 14896
+        }
+      },
+      "varying_focal": {
+        "mAA10": 33.55,
+        "rot_err": 1.52,
+        "trans_err": 8.05,
+        "inlier_pct": 57.86,
+        "solvers": {
+          "4p_ours_scale_shift+12": {
+            "mAA10": 28.11,
+            "inliers_pct": 40.65,
+            "eR_median": 2.33,
+            "eT_median": 11.18,
+            "runtime_ms": 16.99,
+            "n_pairs": 14896
+          },
+          "4p_ours_scale_shift_reproj+12": {
+            "mAA10": 34.36,
+            "inliers_pct": 65.54,
+            "eR_median": 1.07,
+            "eT_median": 7.9,
+            "runtime_ms": 13.9,
+            "n_pairs": 14896
+          },
+          "4p_ours_scale_shift_reproj-s+12": {
+            "mAA10": 38.19,
+            "inliers_pct": 67.39,
+            "eR_median": 1.58,
+            "eT_median": 6.53,
+            "runtime_ms": 16.24,
+            "n_pairs": 14896
+          }
+        },
+        "primary_solver": {
+          "name": "4p_ours_scale_shift+12",
+          "mAA10": 28.11,
+          "inliers_pct": 40.65,
+          "eR_median": 2.33,
+          "eT_median": 11.18,
+          "runtime_ms": 16.99,
+          "n_pairs": 14896
+        }
+      }
+    }
+  },
+  "paths": {
+    "matches": "/home.stud/gorbuden/datagrid/Software-Project-MS/output/matches/fusion_dinov3b16_dift_t0up2_a06_pca256_sp_mnn_mp2000",
+    "benchmark_files": [
+      "output/benchmarks/fusion_dinov3b16_dift_t0up2_a06_pca256_sp_mnn_mp2000_sacre_coeur.h5"
+    ],
+    "results": "/home.stud/gorbuden/datagrid/Software-Project-MS/output/results/phase1_fusion_a06_pca256"
+  }
+}

@@ -1,0 +1,154 @@
+{
+  "run_id": "phase1_fusion_pca128",
+  "timestamp": "2026-03-14T14:29:55",
+  "git_commit": "unknown",
+  "git_branch": "unknown",
+  "method": "fusion",
+  "config_key": "fusion_dinov3b16_dift_t0up2_pca128_sp_mnn_mp2000",
+  "config": {
+    "feat_level": -8,
+    "img_size": 768,
+    "max_points": 2000,
+    "up_ft_index": 2,
+    "dift_t": 0,
+    "ensemble_size": 8,
+    "fusion_pca_dim": 128,
+    "fusion_alpha": 0.5,
+    "fusion_pca_samples": 50000,
+    "roma_setting": "precise"
+  },
+  "scenes": {
+    "sacre_coeur": {
+      "calibrated": {
+        "mAA10": 64.4,
+        "rot_err": 0.58,
+        "trans_err": 3.02,
+        "inlier_pct": 59.82,
+        "solvers": {
+          "3p_ours_shift_scale+12": {
+            "mAA10": 78.05,
+            "inliers_pct": 47.46,
+            "eR_median": 0.3,
+            "eT_median": 1.18,
+            "runtime_ms": 12.5,
+            "n_pairs": 14896
+          },
+          "3p_ours_shift_scale_hybrid_reproj+12": {
+            "mAA10": 57.58,
+            "inliers_pct": 66.0,
+            "eR_median": 0.79,
+            "eT_median": 3.89,
+            "runtime_ms": 7.42,
+            "n_pairs": 14896
+          },
+          "3p_ours_shift_scale_reproj+12": {
+            "mAA10": 57.58,
+            "inliers_pct": 66.0,
+            "eR_median": 0.79,
+            "eT_median": 3.89,
+            "runtime_ms": 7.45,
+            "n_pairs": 14896
+          }
+        },
+        "primary_solver": {
+          "name": "3p_ours_shift_scale+12",
+          "mAA10": 78.05,
+          "inliers_pct": 47.46,
+          "eR_median": 0.3,
+          "eT_median": 1.18,
+          "runtime_ms": 12.5,
+          "n_pairs": 14896
+        }
+      },
+      "shared_focal": {
+        "mAA10": 51.72,
+        "rot_err": 1.05,
+        "trans_err": 4.33,
+        "inlier_pct": 59.37,
+        "solvers": {
+          "4p_ours_scale_shift+12": {
+            "mAA10": 59.63,
+            "inliers_pct": 45.32,
+            "eR_median": 0.74,
+            "eT_median": 3.0,
+            "runtime_ms": 28.38,
+            "n_pairs": 14896
+          },
+          "4p_ours_scale_shift_reproj+12": {
+            "mAA10": 50.66,
+            "inliers_pct": 65.56,
+            "eR_median": 1.12,
+            "eT_median": 4.59,
+            "runtime_ms": 26.37,
+            "n_pairs": 14896
+          },
+          "4p_ours_scale_shift_reproj-s+12": {
+            "mAA10": 44.86,
+            "inliers_pct": 67.22,
+            "eR_median": 1.29,
+            "eT_median": 5.32,
+            "runtime_ms": 28.56,
+            "n_pairs": 14896
+          }
+        },
+        "primary_solver": {
+          "name": "4p_ours_scale_shift+12",
+          "mAA10": 59.63,
+          "inliers_pct": 45.32,
+          "eR_median": 0.74,
+          "eT_median": 3.0,
+          "runtime_ms": 28.38,
+          "n_pairs": 14896
+        }
+      },
+      "varying_focal": {
+        "mAA10": 33.53,
+        "rot_err": 1.5,
+        "trans_err": 8.08,
+        "inlier_pct": 58.3,
+        "solvers": {
+          "4p_ours_scale_shift+12": {
+            "mAA10": 28.69,
+            "inliers_pct": 40.6,
+            "eR_median": 2.32,
+            "eT_median": 10.83,
+            "runtime_ms": 17.25,
+            "n_pairs": 14896
+          },
+          "4p_ours_scale_shift_reproj+12": {
+            "mAA10": 34.17,
+            "inliers_pct": 66.23,
+            "eR_median": 1.06,
+            "eT_median": 7.97,
+            "runtime_ms": 14.49,
+            "n_pairs": 14896
+          },
+          "4p_ours_scale_shift_reproj-s+12": {
+            "mAA10": 37.72,
+            "inliers_pct": 68.06,
+            "eR_median": 1.59,
+            "eT_median": 6.64,
+            "runtime_ms": 16.82,
+            "n_pairs": 14896
+          }
+        },
+        "primary_solver": {
+          "name": "4p_ours_scale_shift+12",
+          "mAA10": 28.69,
+          "inliers_pct": 40.6,
+          "eR_median": 2.32,
+          "eT_median": 10.83,
+          "runtime_ms": 17.25,
+          "n_pairs": 14896
+        }
+      }
+    }
+  },
+  "paths": {
+    "matches": "/home.stud/gorbuden/datagrid/Software-Project-MS/output/matches/fusion_dinov3b16_dift_t0up2_pca128_sp_mnn_mp2000",
+    "benchmark_files": [
+      "output/benchmarks/fusion_dinov3b16_dift_t0up2_pca128_sp_mnn_mp2000_sacre_coeur.h5"
+    ],
+    "results": "/home.stud/gorbuden/datagrid/Software-Project-MS/output/results/phase1_fusion_pca128"
+  }
+}

@@ -1,0 +1,5 @@
+method,run_id,config_key,scene,cal_mAA10,sf_mAA10,vf_mAA10,inliers_pct
+fusion,phase1_fusion_raw,fusion_dinov3b16_dift_t0up2_sp_mnn_mp2000,sacre_coeur,79.84,62.8,31.92,50.17
+fusion,phase1_fusion_raw,fusion_dinov3b16_dift_t0up2_sp_mnn_mp2000,reichstag,59.32,37.43,17.42,33.3
+fusion,phase1_fusion_raw,fusion_dinov3b16_dift_t0up2_sp_mnn_mp2000,st_peters_square,71.95,57.05,26.63,59.46
+fusion,phase1_fusion_raw,fusion_dinov3b16_dift_t0up2_sp_mnn_mp2000,AVERAGE (3 scenes),70.37,52.43,25.32,47.64

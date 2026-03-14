@@ -1,0 +1,154 @@
+{
+  "run_id": "fusion_smoke",
+  "timestamp": "2026-03-14T12:17:31",
+  "git_commit": "unknown",
+  "git_branch": "unknown",
+  "method": "fusion",
+  "config_key": "fusion_dinov3b16_dift_t0up2_a051_sp_mnn_mp2000",
+  "config": {
+    "feat_level": -8,
+    "img_size": 768,
+    "max_points": 2000,
+    "up_ft_index": 2,
+    "dift_t": 0,
+    "ensemble_size": 8,
+    "fusion_pca_dim": 0,
+    "fusion_alpha": 0.51,
+    "fusion_pca_samples": 50000,
+    "roma_setting": "precise"
+  },
+  "scenes": {
+    "sacre_coeur": {
+      "calibrated": {
+        "mAA10": 44.0,
+        "rot_err": 0.12,
+        "trans_err": 5.32,
+        "inlier_pct": 84.46,
+        "solvers": {
+          "3p_ours_shift_scale+12": {
+            "mAA10": 40.0,
+            "inliers_pct": 69.56,
+            "eR_median": 0.1,
+            "eT_median": 7.52,
+            "runtime_ms": 45.18,
+            "n_pairs": 10
+          },
+          "3p_ours_shift_scale_hybrid_reproj+12": {
+            "mAA10": 46.0,
+            "inliers_pct": 91.91,
+            "eR_median": 0.12,
+            "eT_median": 4.32,
+            "runtime_ms": 18.11,
+            "n_pairs": 10
+          },
+          "3p_ours_shift_scale_reproj+12": {
+            "mAA10": 46.0,
+            "inliers_pct": 91.91,
+            "eR_median": 0.12,
+            "eT_median": 4.32,
+            "runtime_ms": 18.47,
+            "n_pairs": 10
+          }
+        },
+        "primary_solver": {
+          "name": "3p_ours_shift_scale+12",
+          "mAA10": 40.0,
+          "inliers_pct": 69.56,
+          "eR_median": 0.1,
+          "eT_median": 7.52,
+          "runtime_ms": 45.18,
+          "n_pairs": 10
+        }
+      },
+      "shared_focal": {
+        "mAA10": 34.0,
+        "rot_err": 0.28,
+        "trans_err": 8.91,
+        "inlier_pct": 84.22,
+        "solvers": {
+          "4p_ours_scale_shift+12": {
+            "mAA10": 47.0,
+            "inliers_pct": 69.01,
+            "eR_median": 0.23,
+            "eT_median": 5.1,
+            "runtime_ms": 48.78,
+            "n_pairs": 10
+          },
+          "4p_ours_scale_shift_reproj+12": {
+            "mAA10": 40.0,
+            "inliers_pct": 91.71,
+            "eR_median": 0.31,
+            "eT_median": 6.14,
+            "runtime_ms": 36.99,
+            "n_pairs": 10
+          },
+          "4p_ours_scale_shift_reproj-s+12": {
+            "mAA10": 15.0,
+            "inliers_pct": 91.94,
+            "eR_median": 0.33,
+            "eT_median": 14.01,
+            "runtime_ms": 43.9,
+            "n_pairs": 10
+          }
+        },
+        "primary_solver": {
+          "name": "4p_ours_scale_shift+12",
+          "mAA10": 47.0,
+          "inliers_pct": 69.01,
+          "eR_median": 0.23,
+          "eT_median": 5.1,
+          "runtime_ms": 48.78,
+          "n_pairs": 10
+        }
+      },
+      "varying_focal": {
+        "mAA10": 24.67,
+        "rot_err": 0.24,
+        "trans_err": 15.35,
+        "inlier_pct": 85.14,
+        "solvers": {
+          "4p_ours_scale_shift+12": {
+            "mAA10": 24.0,
+            "inliers_pct": 70.22,
+            "eR_median": 0.21,
+            "eT_median": 22.09,
+            "runtime_ms": 38.54,
+            "n_pairs": 10
+          },
+          "4p_ours_scale_shift_reproj+12": {
+            "mAA10": 12.0,
+            "inliers_pct": 92.49,
+            "eR_median": 0.18,
+            "eT_median": 30.09,
+            "runtime_ms": 23.73,
+            "n_pairs": 10
+          },
+          "4p_ours_scale_shift_reproj-s+12": {
+            "mAA10": 38.0,
+            "inliers_pct": 92.71,
+            "eR_median": 0.32,
+            "eT_median": 7.33,
+            "runtime_ms": 28.89,
+            "n_pairs": 10
+          }
+        },
+        "primary_solver": {
+          "name": "4p_ours_scale_shift+12",
+          "mAA10": 24.0,
+          "inliers_pct": 70.22,
+          "eR_median": 0.21,
+          "eT_median": 22.09,
+          "runtime_ms": 38.54,
+          "n_pairs": 10
+        }
+      }
+    }
+  },
+  "paths": {
+    "matches": "/mnt/datagrid/personal/gorbuden/Software-Project-MS/output/matches/fusion_dinov3b16_dift_t0up2_a051_sp_mnn_mp2000",
+    "benchmark_files": [
+      "output/benchmarks/fusion_dinov3b16_dift_t0up2_a051_sp_mnn_mp2000_sacre_coeur.h5"
+    ],
+    "results": "/mnt/datagrid/personal/gorbuden/Software-Project-MS/output/results/fusion_smoke"
+  }
+}
