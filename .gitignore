@@ -8,6 +8,7 @@ __pycache__/
 
 # Large data files
 datasets/phototourism
+data/sparse_train/
 *.tar.gz
 *.npy
 *.h5

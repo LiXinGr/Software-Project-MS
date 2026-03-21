@@ -1,0 +1,2 @@
+[2026-03-21 20:15:01] Starting sparse projection training
+[2026-03-21 20:15:01] Output dir: experiments/p2_projection_v1

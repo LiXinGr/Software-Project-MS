@@ -4,7 +4,10 @@ import torch.nn as nn
 import matplotlib.pyplot as plt
 import numpy as np
 from typing import Any, Callable, Dict, List, Optional, Union
-from diffusers.models.unet_2d_condition import UNet2DConditionModel
+try:
+    from diffusers.models.unet_2d_condition import UNet2DConditionModel
+except ImportError:
+    from diffusers.models.unets.unet_2d_condition import UNet2DConditionModel
 from diffusers import DDIMScheduler
 import gc
 import os
@@ -14,6 +17,24 @@ import warnings
 
 # Suppress diffusers safety checker warning
 warnings.filterwarnings("ignore", message=".*safety checker.*")
+
+
+def encode_prompt_compat(pipe, prompt, device, num_images_per_prompt=1):
+    if hasattr(pipe, "encode_prompt"):
+        prompt_embeds, _ = pipe.encode_prompt(
+            prompt=prompt,
+            device=device,
+            num_images_per_prompt=num_images_per_prompt,
+            do_classifier_free_guidance=False,
+        )
+        return prompt_embeds
+
+    return pipe._encode_prompt(
+        prompt=prompt,
+        device=device,
+        num_images_per_prompt=num_images_per_prompt,
+        do_classifier_free_guidance=False,
+    )
 
 class MyUNet2DConditionModel(UNet2DConditionModel):
     def forward(
@@ -202,11 +223,12 @@ class SDFeaturizer:
         onestep_pipe = onestep_pipe.to(device)
         onestep_pipe.enable_attention_slicing()
         # onestep_pipe.enable_xformers_memory_efficient_attention()
-        null_prompt_embeds = onestep_pipe._encode_prompt(
+        null_prompt_embeds = encode_prompt_compat(
+            onestep_pipe,
             prompt=null_prompt,
             device=device,
             num_images_per_prompt=1,
-            do_classifier_free_guidance=False) # [1, 77, dim]
+        ) # [1, 77, dim]
 
         self.null_prompt_embeds = null_prompt_embeds
         self.null_prompt = null_prompt
@@ -232,11 +254,12 @@ class SDFeaturizer:
         if prompt == self.null_prompt:
             prompt_embeds = self.null_prompt_embeds
         else:
-            prompt_embeds = self.pipe._encode_prompt(
+            prompt_embeds = encode_prompt_compat(
+                self.pipe,
                 prompt=prompt,
                 device=self.device,
                 num_images_per_prompt=1,
-                do_classifier_free_guidance=False) # [1, 77, dim]
+            ) # [1, 77, dim]
         prompt_embeds = prompt_embeds.repeat(ensemble_size, 1, 1)
         unet_ft_all = self.pipe(
             img_tensor=img_tensor,
@@ -255,11 +278,12 @@ class SDFeaturizer4Eval(SDFeaturizer):
             cat2prompt_embeds = {}
             for cat in cat_list:
                 prompt = f"a photo of a {cat}"
-                prompt_embeds = self.pipe._encode_prompt(
+                prompt_embeds = encode_prompt_compat(
+                    self.pipe,
                     prompt=prompt,
                     device=self.device,
                     num_images_per_prompt=1,
-                    do_classifier_free_guidance=False) # [1, 77, dim]
+                ) # [1, 77, dim]
                 cat2prompt_embeds[cat] = prompt_embeds
             self.cat2prompt_embeds = cat2prompt_embeds
 
