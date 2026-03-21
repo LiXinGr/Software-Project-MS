@@ -1,0 +1,61 @@
+{
+  "megadepth_root": "/mnt/datasets/MegaDepth/MegaDepth_v1_SfM",
+  "feature_dir": null,
+  "sparse_dir": "data/sparse_train",
+  "scenes": [
+    "0080",
+    "0042",
+    "0380",
+    "0000",
+    "0366",
+    "0001",
+    "0005",
+    "0237",
+    "0011",
+    "0148"
+  ],
+  "input_dim": 1664,
+  "hidden_dim": 512,
+  "hidden_dims": [
+    512,
+    512
+  ],
+  "output_dim": 256,
+  "alpha": 0.5,
+  "epochs": 10,
+  "pairs_per_epoch": 50000,
+  "val_pairs_per_epoch": 1000,
+  "feature_cache_size": 1000,
+  "sparse_scene_cache_size": 10,
+  "lr": 0.001,
+  "weight_decay": 0.0001,
+  "temperature": 0.07,
+  "num_correspondences": 512,
+  "min_correspondences": 50,
+  "min_covis": 50,
+  "max_covis": 5000,
+  "num_workers": 0,
+  "seed": 42,
+  "device": "cuda:0",
+  "log_interval": 500,
+  "resume": null,
+  "output_dir": "/home.stud/gorbuden/datagrid/Software-Project-MS/experiments/phase2_projection_deep",
+  "num_valid_pairs": 8095843,
+  "pairs_per_epoch_effective": 50000,
+  "val_pairs_per_epoch_effective": 1000,
+  "timestamp": "2026-03-23T08:42:05.807063",
+  "fusion_matches_exact": {
+    "component_normalization": "separate_l2",
+    "component_order": [
+      "dift",
+      "dinov3"
+    ],
+    "weighting": {
+      "dift": 0.5,
+      "dinov3": 0.5
+    },
+    "input_concatenation_l2": false,
+    "projection_output_l2": true,
+    "sampling": "nearest_neighbor"
+  }
+}

@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 from PIL import Image
 from pathlib import Path
 from dataclasses import dataclass
+import os
+import tempfile
 
 
 @dataclass
@@ -508,7 +510,22 @@ def save_matches(output_path, mkpts0, mkpts1):
         mkpts0: [N, 2] numpy array of keypoints in image 1
         mkpts1: [N, 2] numpy array of keypoints in image 2
     """
-    np.savez(output_path, mkpts0=mkpts0, mkpts1=mkpts1)
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    fd, tmp_path = tempfile.mkstemp(
+        prefix=f"{output_path.stem}_",
+        suffix=output_path.suffix,
+        dir=output_path.parent,
+    )
+    os.close(fd)
+    try:
+        np.savez(tmp_path, mkpts0=mkpts0, mkpts1=mkpts1)
+        os.replace(tmp_path, output_path)
+    except Exception:
+        if os.path.exists(tmp_path):
+            os.unlink(tmp_path)
+        raise
 
 
 def load_matches(input_path):
