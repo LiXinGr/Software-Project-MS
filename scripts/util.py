@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 from PIL import Image
 from pathlib import Path
 from dataclasses import dataclass
+import os
+import tempfile
 
 
 @dataclass
@@ -161,11 +163,6 @@ def get_superpoint_keypoints(img_path, device='cuda', max_keypoints=2048, cache_
     Returns:
         kpts: [N, 2] tensor of keypoint coordinates (x, y) in pixel space
     """
-    try:
-        from lightglue import SuperPoint
-    except ImportError:
-        raise ImportError("LightGlue not installed. Run: pip install git+https://github.com/cvg/LightGlue.git")
-    
     img_path = Path(img_path)
     
     # Check cache
@@ -173,6 +170,11 @@ def get_superpoint_keypoints(img_path, device='cuda', max_keypoints=2048, cache_
         cache_path = Path(cache_dir) / f"{img_path.stem}_sp_kpts_k{max_keypoints}.pt"
         if cache_path.exists():
             return torch.load(cache_path, map_location=device)
+
+    try:
+        from lightglue import SuperPoint
+    except ImportError:
+        raise ImportError("LightGlue not installed. Run: pip install git+https://github.com/cvg/LightGlue.git")
     
     # Load image
     img = Image.open(img_path).convert('RGB')
@@ -508,7 +510,22 @@ def save_matches(output_path, mkpts0, mkpts1):
         mkpts0: [N, 2] numpy array of keypoints in image 1
         mkpts1: [N, 2] numpy array of keypoints in image 2
     """
-    np.savez(output_path, mkpts0=mkpts0, mkpts1=mkpts1)
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    fd, tmp_path = tempfile.mkstemp(
+        prefix=f"{output_path.stem}_",
+        suffix=output_path.suffix,
+        dir=output_path.parent,
+    )
+    os.close(fd)
+    try:
+        np.savez(tmp_path, mkpts0=mkpts0, mkpts1=mkpts1)
+        os.replace(tmp_path, output_path)
+    except Exception:
+        if os.path.exists(tmp_path):
+            os.unlink(tmp_path)
+        raise
 
 
 def load_matches(input_path):

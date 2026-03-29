@@ -1,0 +1,835 @@
+Using Anaconda3/2020.07
+[2026-03-22 16:57:51] Starting projection sweep
+[2026-03-22 16:57:51] Project root: /home.stud/gorbuden/datagrid/Software-Project-MS
+[2026-03-22 16:57:51] Host: lie
+[2026-03-22 16:57:51] Device: cuda:0
+[2026-03-22 16:57:51] GPU gate: index=0 max_used=4000MiB max_util=20% poll=300s
+[2026-03-22 16:57:51] Sparse scene cache size: 10
+[2026-03-22 16:57:51] Summary TSV: /home.stud/gorbuden/datagrid/Software-Project-MS/experiments/projection_sweep_summary_20260322_165749.tsv
+[2026-03-22 16:57:51] === Variant: temp003 ===
+[2026-03-22 16:57:51] Output dir: /home.stud/gorbuden/datagrid/Software-Project-MS/experiments/phase2_projection_temp003
+[2026-03-22 16:57:51] Resuming temp003 from /home.stud/gorbuden/datagrid/Software-Project-MS/experiments/phase2_projection_temp003/latest.pt
+[2026-03-22 16:57:51] GPU 0 current state: used=2442MiB util=47%
+[2026-03-22 16:57:51] Starting training for temp003 without GPU gate
+[2026-03-22 16:57:54] [temp003 train] [sparse meta 1/10] 0080: reading pair metadata from data/sparse_train/0080.pt (37.01 GB bundle)
+[2026-03-22 17:02:31] [temp003 train] [sparse meta 1/10] 0080: pairs=2,339,843
+[2026-03-22 17:02:32] [temp003 train] [sparse meta 2/10] 0042: reading pair metadata from data/sparse_train/0042.pt (14.78 GB bundle)
+[2026-03-22 17:05:01] [temp003 train] [sparse meta 2/10] 0042: pairs=611,237
+[2026-03-22 17:05:01] [temp003 train] [sparse meta 3/10] 0380: reading pair metadata from data/sparse_train/0380.pt (10.96 GB bundle)
+[2026-03-22 17:06:52] [temp003 train] [sparse meta 3/10] 0380: pairs=718,993
+[2026-03-22 17:06:52] [temp003 train] [sparse meta 4/10] 0000: reading pair metadata from data/sparse_train/0000.pt (16.17 GB bundle)
+[2026-03-22 17:09:35] [temp003 train] [sparse meta 4/10] 0000: pairs=593,986
+[2026-03-22 17:09:36] [temp003 train] [sparse meta 5/10] 0366: reading pair metadata from data/sparse_train/0366.pt (7.47 GB bundle)
+[2026-03-22 17:10:53] [temp003 train] [sparse meta 5/10] 0366: pairs=1,867,366
+[2026-03-22 17:10:53] [temp003 train] [sparse meta 6/10] 0001: reading pair metadata from data/sparse_train/0001.pt (7.02 GB bundle)
+[2026-03-22 17:12:04] [temp003 train] [sparse meta 6/10] 0001: pairs=262,054
+[2026-03-22 17:12:04] [temp003 train] [sparse meta 7/10] 0005: reading pair metadata from data/sparse_train/0005.pt (7.27 GB bundle)
+[2026-03-22 17:13:17] [temp003 train] [sparse meta 7/10] 0005: pairs=187,378
+[2026-03-22 17:13:18] [temp003 train] [sparse meta 8/10] 0237: reading pair metadata from data/sparse_train/0237.pt (12.98 GB bundle)
+[2026-03-22 17:15:29] [temp003 train] [sparse meta 8/10] 0237: pairs=309,411
+[2026-03-22 17:15:29] [temp003 train] [sparse meta 9/10] 0011: reading pair metadata from data/sparse_train/0011.pt (14.04 GB bundle)
+[2026-03-22 17:17:51] [temp003 train] [sparse meta 9/10] 0011: pairs=514,923
+[2026-03-22 17:17:51] [temp003 train] [sparse meta 10/10] 0148: reading pair metadata from data/sparse_train/0148.pt (11.62 GB bundle)
+[2026-03-22 17:19:48] [temp003 train] [sparse meta 10/10] 0148: pairs=690,652
+[2026-03-22 17:19:49] [temp003 train] Loaded sparse training metadata for 10 scenes, 8095843 pairs (139.32 GB across bundles, cache_size=10)
+[2026-03-22 17:19:49] [temp003 train] Preloading all sparse scene bundles into RAM (10 scenes, cache_size=10)
+[2026-03-22 17:19:49] [temp003 train] [sparse cache miss] 0080: loading full bundle (37.01 GB)
+[2026-03-22 17:24:02] [temp003 train] [sparse cache miss] 0042: loading full bundle (14.78 GB)
+[2026-03-22 17:26:31] [temp003 train] [sparse cache miss] 0380: loading full bundle (10.96 GB)
+[2026-03-22 17:28:22] [temp003 train] [sparse cache miss] 0000: loading full bundle (16.17 GB)
+[2026-03-22 17:31:08] [temp003 train] [sparse cache miss] 0366: loading full bundle (7.47 GB)
+[2026-03-22 17:32:28] [temp003 train] [sparse cache miss] 0001: loading full bundle (7.02 GB)
+[2026-03-22 17:33:41] [temp003 train] [sparse cache miss] 0005: loading full bundle (7.27 GB)
+[2026-03-22 17:34:58] [temp003 train] [sparse cache miss] 0237: loading full bundle (12.98 GB)
+[2026-03-22 17:37:14] [temp003 train] [sparse cache miss] 0011: loading full bundle (14.04 GB)
+[2026-03-22 17:39:41] [temp003 train] [sparse cache miss] 0148: loading full bundle (11.62 GB)
+[2026-03-22 17:41:30] [temp003 train] Finished preloading sparse scene bundles
+[2026-03-22 17:41:30] [temp003 train] Feature sampling sanity check:
+[2026-03-22 17:41:30] [temp003 train] {
+[2026-03-22 17:41:30] [temp003 train]   "features_1_shape": [
+[2026-03-22 17:41:30] [temp003 train]     9309,
+[2026-03-22 17:41:30] [temp003 train]     1664
+[2026-03-22 17:41:30] [temp003 train]   ],
+[2026-03-22 17:41:30] [temp003 train]   "features_2_shape": [
+[2026-03-22 17:41:30] [temp003 train]     10746,
+[2026-03-22 17:41:30] [temp003 train]     1664
+[2026-03-22 17:41:30] [temp003 train]   ],
+[2026-03-22 17:41:30] [temp003 train]   "dtype_1": "torch.float16",
+[2026-03-22 17:41:30] [temp003 train]   "dtype_2": "torch.float16",
+[2026-03-22 17:41:30] [temp003 train]   "num_positives": 512,
+[2026-03-22 17:41:30] [temp003 train]   "nan_1": false,
+[2026-03-22 17:41:30] [temp003 train]   "nan_2": false,
+[2026-03-22 17:41:30] [temp003 train]   "positive_norm_mean_1": 0.7071080803871155,
+[2026-03-22 17:41:30] [temp003 train]   "positive_norm_mean_2": 0.707106351852417
+[2026-03-22 17:41:30] [temp003 train] }
+[2026-03-22 17:41:38] [temp003 train] Model parameters: 983,808
+[2026-03-22 17:41:38] [temp003 train] Training pairs available: 8,095,843
+[2026-03-22 17:41:38] [temp003 train] Pairs per epoch: 50,000
+[2026-03-22 17:41:38] [temp003 train] Validation pairs per epoch: 1,000
+[2026-03-22 17:41:41] [temp003 train] Warning: skipping CUDA RNG restore because checkpoint has 2 CUDA state(s) but current host has 1 visible CUDA device(s).
+[2026-03-22 17:41:41] [temp003 train] Resumed from /home.stud/gorbuden/datagrid/Software-Project-MS/experiments/phase2_projection_temp003/latest.pt at epoch 3
+[2026-03-22 17:41:42] [temp003 train]   [train 0/50000] loss=3.5273 acc=0.2500 positives=64 bank1=2212 bank2=1543 lr=7.96e-04
+[2026-03-22 17:41:47] [temp003 train]   [train 500/50000] loss=2.4279 acc=0.3272 positives=298 bank1=3729 bank2=1334 lr=7.95e-04
+[2026-03-22 17:41:52] [temp003 train]   [train 1000/50000] loss=2.3111 acc=0.2866 positives=157 bank1=3875 bank2=884 lr=7.93e-04
+[2026-03-22 17:41:57] [temp003 train]   [train 1500/50000] loss=2.5390 acc=0.2985 positives=67 bank1=3585 bank2=898 lr=7.92e-04
+[2026-03-22 17:42:01] [temp003 train]   [train 2000/50000] loss=2.7390 acc=0.2986 positives=139 bank1=1792 bank2=1799 lr=7.91e-04
+[2026-03-22 17:42:06] [temp003 train]   [train 2500/50000] loss=4.7161 acc=0.0707 positives=99 bank1=1941 bank2=2967 lr=7.90e-04
+[2026-03-22 17:42:11] [temp003 train]   [train 3000/50000] loss=2.5984 acc=0.3093 positives=118 bank1=1301 bank2=700 lr=7.88e-04
+[2026-03-22 17:42:16] [temp003 train]   [train 3500/50000] loss=2.0098 acc=0.3333 positives=69 bank1=4481 bank2=710 lr=7.87e-04
+[2026-03-22 17:42:21] [temp003 train]   [train 4000/50000] loss=1.7395 acc=0.3550 positives=100 bank1=743 bank2=834 lr=7.86e-04
+[2026-03-22 17:42:26] [temp003 train]   [train 4500/50000] loss=1.3968 acc=0.4929 positives=70 bank1=943 bank2=544 lr=7.85e-04
+[2026-03-22 17:42:31] [temp003 train]   [train 5000/50000] loss=2.0347 acc=0.4138 positives=58 bank1=1038 bank2=495 lr=7.83e-04
+[2026-03-22 17:42:35] [temp003 train]   [train 5500/50000] loss=1.5555 acc=0.3692 positives=65 bank1=879 bank2=872 lr=7.82e-04
+[2026-03-22 17:42:40] [temp003 train]   [train 6000/50000] loss=2.1593 acc=0.2802 positives=91 bank1=1188 bank2=1627 lr=7.81e-04
+[2026-03-22 17:42:45] [temp003 train]   [train 6500/50000] loss=4.7546 acc=0.0904 positives=94 bank1=2167 bank2=572 lr=7.79e-04
+[2026-03-22 17:42:50] [temp003 train]   [train 7000/50000] loss=1.1957 acc=0.4835 positives=91 bank1=518 bank2=567 lr=7.78e-04
+[2026-03-22 17:42:55] [temp003 train]   [train 7500/50000] loss=2.7589 acc=0.2357 positives=140 bank1=665 bank2=5040 lr=7.77e-04
+[2026-03-22 17:42:59] [temp003 train]   [train 8000/50000] loss=2.5600 acc=0.1993 positives=138 bank1=1211 bank2=888 lr=7.75e-04
+[2026-03-22 17:43:04] [temp003 train]   [train 8500/50000] loss=2.3488 acc=0.2739 positives=115 bank1=2125 bank2=1286 lr=7.74e-04
+[2026-03-22 17:43:09] [temp003 train]   [train 9000/50000] loss=2.2194 acc=0.2900 positives=512 bank1=2497 bank2=3584 lr=7.73e-04
+[2026-03-22 17:43:13] [temp003 train]   [train 9500/50000] loss=3.3922 acc=0.1000 positives=165 bank1=5419 bank2=819 lr=7.72e-04
+[2026-03-22 17:43:18] [temp003 train]   [train 10000/50000] loss=2.0523 acc=0.4214 positives=159 bank1=1621 bank2=2407 lr=7.70e-04
+[2026-03-22 17:43:23] [temp003 train]   [train 10500/50000] loss=3.1457 acc=0.2615 positives=65 bank1=3105 bank2=1358 lr=7.69e-04
+[2026-03-22 17:43:27] [temp003 train]   [train 11000/50000] loss=1.7703 acc=0.4867 positives=75 bank1=1011 bank2=2778 lr=7.68e-04
+[2026-03-22 17:43:32] [temp003 train]   [train 11500/50000] loss=2.0050 acc=0.3942 positives=52 bank1=2146 bank2=825 lr=7.66e-04
+[2026-03-22 17:43:37] [temp003 train]   [train 12000/50000] loss=2.7038 acc=0.2444 positives=90 bank1=1477 bank2=3010 lr=7.65e-04
+[2026-03-22 17:43:41] [temp003 train]   [train 12500/50000] loss=1.5032 acc=0.5156 positives=96 bank1=731 bank2=4720 lr=7.64e-04
+[2026-03-22 17:43:46] [temp003 train]   [train 13000/50000] loss=2.7021 acc=0.2325 positives=228 bank1=3796 bank2=1264 lr=7.62e-04
+[2026-03-22 17:43:51] [temp003 train]   [train 13500/50000] loss=1.2465 acc=0.5505 positives=99 bank1=3383 bank2=1468 lr=7.61e-04
+[2026-03-22 17:43:55] [temp003 train]   [train 14000/50000] loss=2.7405 acc=0.1983 positives=290 bank1=2136 bank2=6124 lr=7.60e-04
+[2026-03-22 17:44:00] [temp003 train]   [train 14500/50000] loss=2.2324 acc=0.2826 positives=322 bank1=2566 bank2=6348 lr=7.58e-04
+[2026-03-22 17:44:05] [temp003 train]   [train 15000/50000] loss=1.5199 acc=0.3932 positives=370 bank1=5346 bank2=2836 lr=7.57e-04
+[2026-03-22 17:44:10] [temp003 train]   [train 15500/50000] loss=1.3665 acc=0.4222 positives=135 bank1=2203 bank2=3777 lr=7.56e-04
+[2026-03-22 17:44:15] [temp003 train]   [train 16000/50000] loss=1.7458 acc=0.4195 positives=236 bank1=3305 bank2=1321 lr=7.54e-04
+[2026-03-22 17:44:20] [temp003 train]   [train 16500/50000] loss=1.5384 acc=0.4036 positives=394 bank1=3065 bank2=1809 lr=7.53e-04
+[2026-03-22 17:44:24] [temp003 train]   [train 17000/50000] loss=1.7047 acc=0.3763 positives=198 bank1=3632 bank2=3457 lr=7.52e-04
+[2026-03-22 17:44:29] [temp003 train]   [train 17500/50000] loss=2.0742 acc=0.2805 positives=410 bank1=4029 bank2=4697 lr=7.50e-04
+[2026-03-22 17:44:34] [temp003 train]   [train 18000/50000] loss=1.0153 acc=0.5479 positives=219 bank1=1950 bank2=1035 lr=7.49e-04
+[2026-03-22 17:44:39] [temp003 train]   [train 18500/50000] loss=1.6916 acc=0.3306 positives=62 bank1=2345 bank2=5148 lr=7.48e-04
+[2026-03-22 17:44:46] [temp003 train]   [train 19000/50000] loss=1.5642 acc=0.4215 positives=427 bank1=2683 bank2=7821 lr=7.46e-04
+[2026-03-22 17:44:53] [temp003 train]   [train 19500/50000] loss=1.0860 acc=0.5705 positives=78 bank1=1169 bank2=932 lr=7.45e-04
+[2026-03-22 17:45:00] [temp003 train]   [train 20000/50000] loss=1.5807 acc=0.3938 positives=113 bank1=1265 bank2=6708 lr=7.43e-04
+[2026-03-22 17:45:07] [temp003 train]   [train 20500/50000] loss=1.0484 acc=0.5410 positives=512 bank1=2355 bank2=4099 lr=7.42e-04
+[2026-03-22 17:45:13] [temp003 train]   [train 21000/50000] loss=1.0711 acc=0.5137 positives=73 bank1=1658 bank2=1152 lr=7.41e-04
+[2026-03-22 17:45:20] [temp003 train]   [train 21500/50000] loss=1.0768 acc=0.5452 positives=221 bank1=1026 bank2=1995 lr=7.39e-04
+[2026-03-22 17:45:26] [temp003 train]   [train 22000/50000] loss=1.0112 acc=0.5874 positives=246 bank1=1707 bank2=3017 lr=7.38e-04
+[2026-03-22 17:45:32] [temp003 train]   [train 22500/50000] loss=1.8890 acc=0.2998 positives=512 bank1=3975 bank2=8422 lr=7.37e-04
+[2026-03-22 17:45:39] [temp003 train]   [train 23000/50000] loss=1.8096 acc=0.3477 positives=512 bank1=2629 bank2=4093 lr=7.35e-04
+[2026-03-22 17:45:46] [temp003 train]   [train 23500/50000] loss=1.0196 acc=0.5605 positives=124 bank1=2833 bank2=1401 lr=7.34e-04
+[2026-03-22 17:45:52] [temp003 train]   [train 24000/50000] loss=1.1655 acc=0.5186 positives=512 bank1=2827 bank2=4142 lr=7.32e-04
+[2026-03-22 17:45:59] [temp003 train]   [train 24500/50000] loss=2.1902 acc=0.3843 positives=121 bank1=6073 bank2=685 lr=7.31e-04
+[2026-03-22 17:46:06] [temp003 train]   [train 25000/50000] loss=0.8842 acc=0.5815 positives=178 bank1=2167 bank2=1467 lr=7.30e-04
+[2026-03-22 17:46:12] [temp003 train]   [train 25500/50000] loss=1.0297 acc=0.5721 positives=215 bank1=3021 bank2=2189 lr=7.28e-04
+[2026-03-22 17:46:18] [temp003 train]   [train 26000/50000] loss=0.6696 acc=0.6632 positives=144 bank1=945 bank2=1638 lr=7.27e-04
+[2026-03-22 17:46:25] [temp003 train]   [train 26500/50000] loss=1.6176 acc=0.3973 positives=297 bank1=1254 bank2=7344 lr=7.26e-04
+[2026-03-22 17:46:31] [temp003 train]   [train 27000/50000] loss=1.1561 acc=0.4969 positives=163 bank1=1641 bank2=1935 lr=7.24e-04
+[2026-03-22 17:46:38] [temp003 train]   [train 27500/50000] loss=1.8713 acc=0.3369 positives=512 bank1=1892 bank2=9047 lr=7.23e-04
+[2026-03-22 17:46:44] [temp003 train]   [train 28000/50000] loss=1.8425 acc=0.3582 positives=67 bank1=1873 bank2=1023 lr=7.21e-04
+[2026-03-22 17:46:50] [temp003 train]   [train 28500/50000] loss=2.1355 acc=0.3942 positives=52 bank1=942 bank2=2970 lr=7.20e-04
+[2026-03-22 17:46:56] [temp003 train]   [train 29000/50000] loss=1.1547 acc=0.5490 positives=51 bank1=1915 bank2=1023 lr=7.19e-04
+[2026-03-22 17:47:02] [temp003 train]   [train 29500/50000] loss=1.6826 acc=0.4253 positives=87 bank1=740 bank2=4173 lr=7.17e-04
+[2026-03-22 17:47:09] [temp003 train]   [train 30000/50000] loss=1.5268 acc=0.4214 positives=70 bank1=462 bank2=595 lr=7.16e-04
+[2026-03-22 17:47:14] [temp003 train]   [train 30500/50000] loss=1.6998 acc=0.4107 positives=84 bank1=2871 bank2=1575 lr=7.14e-04
+[2026-03-22 17:47:20] [temp003 train]   [train 31000/50000] loss=1.9286 acc=0.3133 positives=75 bank1=1415 bank2=2015 lr=7.13e-04
+[2026-03-22 17:47:27] [temp003 train]   [train 31500/50000] loss=1.0291 acc=0.5515 positives=68 bank1=1369 bank2=2468 lr=7.12e-04
+[2026-03-22 17:47:33] [temp003 train]   [train 32000/50000] loss=1.5231 acc=0.3654 positives=104 bank1=1203 bank2=3394 lr=7.10e-04
+[2026-03-22 17:47:39] [temp003 train]   [train 32500/50000] loss=5.4087 acc=0.0333 positives=75 bank1=3867 bank2=649 lr=7.09e-04
+[2026-03-22 17:47:45] [temp003 train]   [train 33000/50000] loss=3.8072 acc=0.1975 positives=81 bank1=819 bank2=4055 lr=7.07e-04
+[2026-03-22 17:47:51] [temp003 train]   [train 33500/50000] loss=2.2801 acc=0.3287 positives=108 bank1=891 bank2=1515 lr=7.06e-04
+[2026-03-22 17:47:57] [temp003 train]   [train 34000/50000] loss=2.0619 acc=0.3468 positives=124 bank1=1916 bank2=552 lr=7.04e-04
+[2026-03-22 17:48:02] [temp003 train]   [train 34500/50000] loss=1.8714 acc=0.4211 positives=95 bank1=745 bank2=586 lr=7.03e-04
+[2026-03-22 17:48:07] [temp003 train]   [train 35000/50000] loss=1.5450 acc=0.3974 positives=78 bank1=600 bank2=449 lr=7.02e-04
+[2026-03-22 17:48:12] [temp003 train]   [train 35500/50000] loss=1.7527 acc=0.4211 positives=114 bank1=1800 bank2=883 lr=7.00e-04
+[2026-03-22 17:48:17] [temp003 train]   [train 36000/50000] loss=1.3419 acc=0.5268 positives=56 bank1=665 bank2=447 lr=6.99e-04
+[2026-03-22 17:48:22] [temp003 train]   [train 36500/50000] loss=2.1556 acc=0.3605 positives=172 bank1=1884 bank2=799 lr=6.97e-04
+[2026-03-22 17:48:27] [temp003 train]   [train 37000/50000] loss=1.7179 acc=0.4487 positives=117 bank1=548 bank2=1033 lr=6.96e-04
+[2026-03-22 17:48:32] [temp003 train]   [train 37500/50000] loss=1.5614 acc=0.3649 positives=74 bank1=508 bank2=577 lr=6.94e-04
+[2026-03-22 17:48:38] [temp003 train]   [train 38000/50000] loss=1.2839 acc=0.5118 positives=85 bank1=826 bank2=1815 lr=6.93e-04
+[2026-03-22 17:48:43] [temp003 train]   [train 38500/50000] loss=1.0980 acc=0.5435 positives=92 bank1=518 bank2=533 lr=6.92e-04
+[2026-03-22 17:48:48] [temp003 train]   [train 39000/50000] loss=1.2351 acc=0.5487 positives=113 bank1=908 bank2=1424 lr=6.90e-04
+[2026-03-22 17:48:53] [temp003 train]   [train 39500/50000] loss=1.2679 acc=0.4368 positives=95 bank1=678 bank2=918 lr=6.89e-04
+[2026-03-22 17:48:58] [temp003 train]   [train 40000/50000] loss=2.0327 acc=0.3663 positives=258 bank1=1369 bank2=1630 lr=6.87e-04
+[2026-03-22 17:49:03] [temp003 train]   [train 40500/50000] loss=0.9387 acc=0.6159 positives=69 bank1=400 bank2=1473 lr=6.86e-04
+[2026-03-22 17:49:08] [temp003 train]   [train 41000/50000] loss=1.7597 acc=0.3721 positives=172 bank1=629 bank2=1001 lr=6.84e-04
+[2026-03-22 17:49:13] [temp003 train]   [train 41500/50000] loss=1.5011 acc=0.4212 positives=203 bank1=661 bank2=1986 lr=6.83e-04
+[2026-03-22 17:49:19] [temp003 train]   [train 42000/50000] loss=1.6354 acc=0.4375 positives=72 bank1=558 bank2=813 lr=6.81e-04
+[2026-03-22 17:49:24] [temp003 train]   [train 42500/50000] loss=1.2277 acc=0.5048 positives=105 bank1=640 bank2=712 lr=6.80e-04
+[2026-03-22 17:49:29] [temp003 train]   [train 43000/50000] loss=1.5560 acc=0.4109 positives=129 bank1=781 bank2=589 lr=6.79e-04
+[2026-03-22 17:49:34] [temp003 train]   [train 43500/50000] loss=0.7987 acc=0.6507 positives=73 bank1=629 bank2=640 lr=6.77e-04
+[2026-03-22 17:49:39] [temp003 train]   [train 44000/50000] loss=1.3713 acc=0.4926 positives=68 bank1=627 bank2=508 lr=6.76e-04
+[2026-03-22 17:49:44] [temp003 train]   [train 44500/50000] loss=1.0573 acc=0.5896 positives=134 bank1=984 bank2=816 lr=6.74e-04
+[2026-03-22 17:49:49] [temp003 train]   [train 45000/50000] loss=2.0094 acc=0.3769 positives=65 bank1=705 bank2=1904 lr=6.73e-04
+[2026-03-22 17:49:55] [temp003 train]   [train 45500/50000] loss=0.8221 acc=0.6694 positives=62 bank1=459 bank2=545 lr=6.71e-04
+[2026-03-22 17:50:00] [temp003 train]   [train 46000/50000] loss=3.0937 acc=0.1624 positives=157 bank1=1319 bank2=5031 lr=6.70e-04
+[2026-03-22 17:50:06] [temp003 train]   [train 46500/50000] loss=0.9207 acc=0.5267 positives=75 bank1=556 bank2=583 lr=6.68e-04
+[2026-03-22 17:50:11] [temp003 train]   [train 47000/50000] loss=1.2877 acc=0.4664 positives=149 bank1=1108 bank2=684 lr=6.67e-04
+[2026-03-22 17:50:16] [temp003 train]   [train 47500/50000] loss=2.9090 acc=0.1610 positives=295 bank1=6246 bank2=2057 lr=6.65e-04
+[2026-03-22 17:50:21] [temp003 train]   [train 48000/50000] loss=1.1718 acc=0.4940 positives=84 bank1=626 bank2=847 lr=6.64e-04
+[2026-03-22 17:50:26] [temp003 train]   [train 48500/50000] loss=2.0988 acc=0.2540 positives=63 bank1=2711 bank2=1756 lr=6.62e-04
+[2026-03-22 17:50:32] [temp003 train]   [train 49000/50000] loss=1.1011 acc=0.4732 positives=56 bank1=642 bank2=534 lr=6.61e-04
+[2026-03-22 17:50:37] [temp003 train]   [train 49500/50000] loss=1.2898 acc=0.4500 positives=100 bank1=625 bank2=1223 lr=6.59e-04
+[2026-03-22 17:50:42] [temp003 train]   [val 0/1000] loss=1.6859 acc=0.5056 positives=356 bank1=1046 bank2=1351
+[2026-03-22 17:50:44] [temp003 train]   [val 500/1000] loss=1.4335 acc=0.4141 positives=512 bank1=1625 bank2=6003
+[2026-03-22 17:50:46] [temp003 train] Epoch 4/10: train_loss=1.8001 train_acc=0.4030 val_loss=2.0957 val_acc=0.3667
+[2026-03-22 17:50:46] [temp003 train]   train: time=540.6s pairs/s=92.49 cache_hit_rate=1.000
+[2026-03-22 17:50:46] [temp003 train]   val:   time=4.3s pairs/s=234.32 cache_hit_rate=1.000
+[2026-03-22 17:50:46] [temp003 train]   RAM maxrss=141.53 GB
+[2026-03-22 17:50:46] [temp003 train]   GPU peak: alloc=0.278 GB reserved=0.998 GB
+[2026-03-22 17:50:46] [temp003 train]   -> Saved best model (monitor_loss=2.0957)
+[2026-03-22 17:50:47] [temp003 train]   [train 0/50000] loss=3.5362 acc=0.1700 positives=50 bank1=439 bank2=2387 lr=6.58e-04
+[2026-03-22 17:50:53] [temp003 train]   [train 500/50000] loss=2.0776 acc=0.3720 positives=168 bank1=3729 bank2=3412 lr=6.56e-04
+[2026-03-22 17:50:58] [temp003 train]   [train 1000/50000] loss=2.5375 acc=0.2578 positives=64 bank1=2206 bank2=1553 lr=6.55e-04
+[2026-03-22 17:51:04] [temp003 train]   [train 1500/50000] loss=5.8269 acc=0.0571 positives=105 bank1=3585 bank2=764 lr=6.54e-04
+[2026-03-22 17:51:10] [temp003 train]   [train 2000/50000] loss=3.2093 acc=0.2328 positives=58 bank1=3405 bank2=722 lr=6.52e-04
+[2026-03-22 17:51:16] [temp003 train]   [train 2500/50000] loss=1.2742 acc=0.5176 positives=142 bank1=2099 bank2=1242 lr=6.51e-04
+[2026-03-22 17:51:22] [temp003 train]   [train 3000/50000] loss=1.7055 acc=0.3961 positives=308 bank1=1767 bank2=1291 lr=6.49e-04
+[2026-03-22 17:51:28] [temp003 train]   [train 3500/50000] loss=1.8990 acc=0.3730 positives=512 bank1=3112 bank2=3295 lr=6.48e-04
+[2026-03-22 17:51:33] [temp003 train]   [train 4000/50000] loss=1.6521 acc=0.3849 positives=139 bank1=1139 bank2=1001 lr=6.46e-04
+[2026-03-22 17:51:38] [temp003 train]   [train 4500/50000] loss=1.5027 acc=0.4357 positives=171 bank1=1194 bank2=1019 lr=6.45e-04
+[2026-03-22 17:51:43] [temp003 train]   [train 5000/50000] loss=1.0895 acc=0.5391 positives=64 bank1=1285 bank2=418 lr=6.43e-04
+[2026-03-22 17:51:49] [temp003 train]   [train 5500/50000] loss=1.6396 acc=0.4545 positives=88 bank1=494 bank2=846 lr=6.42e-04
+[2026-03-22 17:51:54] [temp003 train]   [train 6000/50000] loss=1.6666 acc=0.4211 positives=228 bank1=1090 bank2=1551 lr=6.40e-04
+[2026-03-22 17:52:00] [temp003 train]   [train 6500/50000] loss=3.1982 acc=0.1851 positives=235 bank1=1009 bank2=2152 lr=6.39e-04
+[2026-03-22 17:52:06] [temp003 train]   [train 7000/50000] loss=1.0561 acc=0.5976 positives=82 bank1=700 bank2=507 lr=6.37e-04
+[2026-03-22 17:52:11] [temp003 train]   [train 7500/50000] loss=2.3779 acc=0.2634 positives=224 bank1=1376 bank2=1141 lr=6.36e-04
+[2026-03-22 17:52:17] [temp003 train]   [train 8000/50000] loss=4.7687 acc=0.0500 positives=160 bank1=4583 bank2=1019 lr=6.34e-04
+[2026-03-22 17:52:24] [temp003 train]   [train 8500/50000] loss=2.8928 acc=0.2080 positives=512 bank1=3381 bank2=1749 lr=6.33e-04
+[2026-03-22 17:52:30] [temp003 train]   [train 9000/50000] loss=2.9970 acc=0.1938 positives=387 bank1=1024 bank2=4222 lr=6.31e-04
+[2026-03-22 17:52:36] [temp003 train]   [train 9500/50000] loss=3.2663 acc=0.1454 positives=502 bank1=2097 bank2=2939 lr=6.30e-04
+[2026-03-22 17:52:42] [temp003 train]   [train 10000/50000] loss=1.1891 acc=0.5411 positives=73 bank1=456 bank2=1222 lr=6.28e-04
+[2026-03-22 17:52:48] [temp003 train]   [train 10500/50000] loss=2.2999 acc=0.2965 positives=430 bank1=1558 bank2=5534 lr=6.27e-04
+[2026-03-22 17:52:54] [temp003 train]   [train 11000/50000] loss=1.1222 acc=0.5646 positives=147 bank1=592 bank2=5202 lr=6.25e-04
+[2026-03-22 17:53:00] [temp003 train]   [train 11500/50000] loss=4.2922 acc=0.0752 positives=153 bank1=1362 bank2=1271 lr=6.24e-04
+[2026-03-22 17:53:06] [temp003 train]   [train 12000/50000] loss=2.0898 acc=0.3206 positives=340 bank1=3685 bank2=1337 lr=6.22e-04
+[2026-03-22 17:53:11] [temp003 train]   [train 12500/50000] loss=3.2684 acc=0.1354 positives=96 bank1=1167 bank2=1293 lr=6.21e-04
+[2026-03-22 17:53:17] [temp003 train]   [train 13000/50000] loss=1.4259 acc=0.4746 positives=59 bank1=755 bank2=519 lr=6.19e-04
+[2026-03-22 17:53:23] [temp003 train]   [train 13500/50000] loss=2.9161 acc=0.1618 positives=68 bank1=641 bank2=1465 lr=6.18e-04
+[2026-03-22 17:53:29] [temp003 train]   [train 14000/50000] loss=1.9630 acc=0.2891 positives=512 bank1=6736 bank2=3384 lr=6.16e-04
+[2026-03-22 17:53:36] [temp003 train]   [train 14500/50000] loss=2.2345 acc=0.2247 positives=89 bank1=1181 bank2=6768 lr=6.14e-04
+[2026-03-22 17:53:42] [temp003 train]   [train 15000/50000] loss=1.9533 acc=0.3105 positives=248 bank1=2262 bank2=4356 lr=6.13e-04
+[2026-03-22 17:53:48] [temp003 train]   [train 15500/50000] loss=2.0176 acc=0.3171 positives=492 bank1=3980 bank2=2504 lr=6.11e-04
+[2026-03-22 17:53:55] [temp003 train]   [train 16000/50000] loss=1.1619 acc=0.5500 positives=60 bank1=610 bank2=2127 lr=6.10e-04
+[2026-03-22 17:54:01] [temp003 train]   [train 16500/50000] loss=2.0771 acc=0.2490 positives=512 bank1=5609 bank2=4403 lr=6.08e-04
+[2026-03-22 17:54:08] [temp003 train]   [train 17000/50000] loss=1.2292 acc=0.5093 positives=54 bank1=5656 bank2=880 lr=6.07e-04
+[2026-03-22 17:54:15] [temp003 train]   [train 17500/50000] loss=1.8955 acc=0.2611 positives=113 bank1=5644 bank2=2040 lr=6.05e-04
+[2026-03-22 17:54:22] [temp003 train]   [train 18000/50000] loss=1.7626 acc=0.3073 positives=449 bank1=5049 bank2=4702 lr=6.04e-04
+[2026-03-22 17:54:28] [temp003 train]   [train 18500/50000] loss=1.2694 acc=0.4541 positives=512 bank1=3253 bank2=2093 lr=6.02e-04
+[2026-03-22 17:54:35] [temp003 train]   [train 19000/50000] loss=1.7802 acc=0.4211 positives=57 bank1=2071 bank2=1321 lr=6.01e-04
+[2026-03-22 17:54:41] [temp003 train]   [train 19500/50000] loss=1.8839 acc=0.3208 positives=53 bank1=3447 bank2=743 lr=5.99e-04
+[2026-03-22 17:54:47] [temp003 train]   [train 20000/50000] loss=1.6526 acc=0.3470 positives=134 bank1=2992 bank2=2775 lr=5.98e-04
+[2026-03-22 17:54:54] [temp003 train]   [train 20500/50000] loss=2.6267 acc=0.2458 positives=240 bank1=6476 bank2=2372 lr=5.96e-04
+[2026-03-22 17:55:00] [temp003 train]   [train 21000/50000] loss=2.3034 acc=0.2410 positives=249 bank1=5109 bank2=3146 lr=5.95e-04
+[2026-03-22 17:55:07] [temp003 train]   [train 21500/50000] loss=1.5220 acc=0.4082 positives=512 bank1=3684 bank2=3810 lr=5.93e-04
+[2026-03-22 17:55:13] [temp003 train]   [train 22000/50000] loss=1.7412 acc=0.3203 positives=512 bank1=6065 bank2=4839 lr=5.92e-04
+[2026-03-22 17:55:20] [temp003 train]   [train 22500/50000] loss=0.8712 acc=0.5857 positives=70 bank1=2512 bank2=1884 lr=5.90e-04
+[2026-03-22 17:55:26] [temp003 train]   [train 23000/50000] loss=1.4817 acc=0.3945 positives=512 bank1=5677 bank2=4142 lr=5.89e-04
+[2026-03-22 17:55:33] [temp003 train]   [train 23500/50000] loss=1.0486 acc=0.5392 positives=306 bank1=1669 bank2=2655 lr=5.87e-04
+[2026-03-22 17:55:39] [temp003 train]   [train 24000/50000] loss=1.5364 acc=0.4529 positives=170 bank1=2893 bank2=3973 lr=5.86e-04
+[2026-03-22 17:55:46] [temp003 train]   [train 24500/50000] loss=1.5119 acc=0.4184 positives=374 bank1=1658 bank2=4219 lr=5.84e-04
+[2026-03-22 17:55:52] [temp003 train]   [train 25000/50000] loss=1.7334 acc=0.3548 positives=489 bank1=2285 bank2=4979 lr=5.82e-04
+[2026-03-22 17:55:59] [temp003 train]   [train 25500/50000] loss=2.3181 acc=0.2908 positives=98 bank1=6759 bank2=3321 lr=5.81e-04
+[2026-03-22 17:56:05] [temp003 train]   [train 26000/50000] loss=1.9028 acc=0.3027 positives=512 bank1=7426 bank2=4580 lr=5.79e-04
+[2026-03-22 17:56:11] [temp003 train]   [train 26500/50000] loss=0.9526 acc=0.5682 positives=66 bank1=1322 bank2=2294 lr=5.78e-04
+[2026-03-22 17:56:17] [temp003 train]   [train 27000/50000] loss=1.9415 acc=0.3125 positives=256 bank1=4301 bank2=1476 lr=5.76e-04
+[2026-03-22 17:56:24] [temp003 train]   [train 27500/50000] loss=1.3654 acc=0.4634 positives=82 bank1=7032 bank2=1510 lr=5.75e-04
+[2026-03-22 17:56:30] [temp003 train]   [train 28000/50000] loss=2.7140 acc=0.2433 positives=261 bank1=5526 bank2=2819 lr=5.73e-04
+[2026-03-22 17:56:36] [temp003 train]   [train 28500/50000] loss=0.9775 acc=0.5675 positives=200 bank1=1298 bank2=2036 lr=5.72e-04
+[2026-03-22 17:56:41] [temp003 train]   [train 29000/50000] loss=1.8201 acc=0.3372 positives=304 bank1=3629 bank2=2337 lr=5.70e-04
+[2026-03-22 17:56:48] [temp003 train]   [train 29500/50000] loss=1.2273 acc=0.5296 positives=186 bank1=2571 bank2=1497 lr=5.69e-04
+[2026-03-22 17:56:54] [temp003 train]   [train 30000/50000] loss=1.7592 acc=0.3269 positives=78 bank1=1122 bank2=2000 lr=5.67e-04
+[2026-03-22 17:56:59] [temp003 train]   [train 30500/50000] loss=1.6799 acc=0.3654 positives=182 bank1=4260 bank2=1653 lr=5.65e-04
+[2026-03-22 17:57:05] [temp003 train]   [train 31000/50000] loss=1.0229 acc=0.5531 positives=179 bank1=1585 bank2=1725 lr=5.64e-04
+[2026-03-22 17:57:11] [temp003 train]   [train 31500/50000] loss=0.6316 acc=0.7246 positives=69 bank1=670 bank2=1028 lr=5.62e-04
+[2026-03-22 17:57:17] [temp003 train]   [train 32000/50000] loss=1.2777 acc=0.4875 positives=120 bank1=1036 bank2=1946 lr=5.61e-04
+[2026-03-22 17:57:23] [temp003 train]   [train 32500/50000] loss=4.3587 acc=0.0986 positives=512 bank1=3162 bank2=8023 lr=5.59e-04
+[2026-03-22 17:57:29] [temp003 train]   [train 33000/50000] loss=1.8011 acc=0.3720 positives=125 bank1=1447 bank2=1147 lr=5.58e-04
+[2026-03-22 17:57:35] [temp003 train]   [train 33500/50000] loss=2.1752 acc=0.3117 positives=454 bank1=1967 bank2=3999 lr=5.56e-04
+[2026-03-22 17:57:40] [temp003 train]   [train 34000/50000] loss=6.4867 acc=0.0098 positives=512 bank1=5493 bank2=9207 lr=5.55e-04
+[2026-03-22 17:57:46] [temp003 train]   [train 34500/50000] loss=1.3540 acc=0.5391 positives=64 bank1=754 bank2=1038 lr=5.53e-04
+[2026-03-22 17:57:51] [temp003 train]   [train 35000/50000] loss=2.7460 acc=0.2682 positives=179 bank1=664 bank2=1732 lr=5.52e-04
+[2026-03-22 17:57:56] [temp003 train]   [train 35500/50000] loss=1.1360 acc=0.6429 positives=70 bank1=430 bank2=1837 lr=5.50e-04
+[2026-03-22 17:58:01] [temp003 train]   [train 36000/50000] loss=1.8906 acc=0.3750 positives=120 bank1=1183 bank2=860 lr=5.48e-04
+[2026-03-22 17:58:06] [temp003 train]   [train 36500/50000] loss=1.6491 acc=0.4186 positives=86 bank1=912 bank2=772 lr=5.47e-04
+[2026-03-22 17:58:12] [temp003 train]   [train 37000/50000] loss=1.0918 acc=0.5781 positives=96 bank1=1184 bank2=511 lr=5.45e-04
+[2026-03-22 17:58:17] [temp003 train]   [train 37500/50000] loss=1.2554 acc=0.5765 positives=85 bank1=877 bank2=1008 lr=5.44e-04
+[2026-03-22 17:58:22] [temp003 train]   [train 38000/50000] loss=1.2273 acc=0.4854 positives=103 bank1=864 bank2=831 lr=5.42e-04
+[2026-03-22 17:58:27] [temp003 train]   [train 38500/50000] loss=1.2425 acc=0.5229 positives=109 bank1=763 bank2=587 lr=5.41e-04
+[2026-03-22 17:58:33] [temp003 train]   [train 39000/50000] loss=1.6590 acc=0.4528 positives=53 bank1=2137 bank2=860 lr=5.39e-04
+[2026-03-22 17:58:38] [temp003 train]   [train 39500/50000] loss=1.2062 acc=0.5547 positives=64 bank1=1129 bank2=739 lr=5.38e-04
+[2026-03-22 17:58:43] [temp003 train]   [train 40000/50000] loss=1.7141 acc=0.3649 positives=74 bank1=1444 bank2=875 lr=5.36e-04
+[2026-03-22 17:58:48] [temp003 train]   [train 40500/50000] loss=0.8111 acc=0.7100 positives=50 bank1=887 bank2=504 lr=5.35e-04
+[2026-03-22 17:58:54] [temp003 train]   [train 41000/50000] loss=1.2646 acc=0.5590 positives=144 bank1=1384 bank2=928 lr=5.33e-04
+[2026-03-22 17:58:59] [temp003 train]   [train 41500/50000] loss=1.8241 acc=0.4524 positives=63 bank1=771 bank2=468 lr=5.31e-04
+[2026-03-22 17:59:04] [temp003 train]   [train 42000/50000] loss=1.5209 acc=0.4737 positives=57 bank1=573 bank2=1778 lr=5.30e-04
+[2026-03-22 17:59:09] [temp003 train]   [train 42500/50000] loss=0.7620 acc=0.7183 positives=71 bank1=521 bank2=1374 lr=5.28e-04
+[2026-03-22 17:59:14] [temp003 train]   [train 43000/50000] loss=1.2360 acc=0.5368 positives=95 bank1=551 bank2=751 lr=5.27e-04
+[2026-03-22 17:59:19] [temp003 train]   [train 43500/50000] loss=1.4116 acc=0.5096 positives=104 bank1=1069 bank2=865 lr=5.25e-04
+[2026-03-22 17:59:25] [temp003 train]   [train 44000/50000] loss=1.6648 acc=0.3947 positives=57 bank1=865 bank2=825 lr=5.24e-04
+[2026-03-22 17:59:30] [temp003 train]   [train 44500/50000] loss=1.4123 acc=0.4600 positives=75 bank1=422 bank2=1246 lr=5.22e-04
+[2026-03-22 17:59:35] [temp003 train]   [train 45000/50000] loss=1.3188 acc=0.4808 positives=104 bank1=657 bank2=1057 lr=5.21e-04
+[2026-03-22 17:59:40] [temp003 train]   [train 45500/50000] loss=2.6502 acc=0.2492 positives=307 bank1=1002 bank2=1904 lr=5.19e-04
+[2026-03-22 17:59:46] [temp003 train]   [train 46000/50000] loss=2.6526 acc=0.2197 positives=66 bank1=1640 bank2=410 lr=5.17e-04
+[2026-03-22 17:59:51] [temp003 train]   [train 46500/50000] loss=1.7569 acc=0.3052 positives=77 bank1=1080 bank2=1257 lr=5.16e-04
+[2026-03-22 17:59:57] [temp003 train]   [train 47000/50000] loss=1.4317 acc=0.3678 positives=121 bank1=2389 bank2=784 lr=5.14e-04
+[2026-03-22 18:00:02] [temp003 train]   [train 47500/50000] loss=1.2091 acc=0.4030 positives=67 bank1=737 bank2=460 lr=5.13e-04
+[2026-03-22 18:00:08] [temp003 train]   [train 48000/50000] loss=1.2932 acc=0.3889 positives=54 bank1=813 bank2=530 lr=5.11e-04
+[2026-03-22 18:00:13] [temp003 train]   [train 48500/50000] loss=1.1497 acc=0.5000 positives=94 bank1=808 bank2=551 lr=5.10e-04
+[2026-03-22 18:00:19] [temp003 train]   [train 49000/50000] loss=1.2246 acc=0.4741 positives=135 bank1=662 bank2=743 lr=5.08e-04
+[2026-03-22 18:00:24] [temp003 train]   [train 49500/50000] loss=1.1837 acc=0.4667 positives=135 bank1=882 bank2=756 lr=5.07e-04
+[2026-03-22 18:00:29] [temp003 train]   [val 0/1000] loss=1.4365 acc=0.4941 positives=512 bank1=2200 bank2=1848
+[2026-03-22 18:00:32] [temp003 train]   [val 500/1000] loss=1.3085 acc=0.4756 positives=512 bank1=2806 bank2=4892
+[2026-03-22 18:00:34] [temp003 train] Epoch 5/10: train_loss=1.7661 train_acc=0.4082 val_loss=2.0068 val_acc=0.3756
+[2026-03-22 18:00:34] [temp003 train]   train: time=582.6s pairs/s=85.83 cache_hit_rate=1.000
+[2026-03-22 18:00:34] [temp003 train]   val:   time=4.5s pairs/s=224.54 cache_hit_rate=1.000
+[2026-03-22 18:00:34] [temp003 train]   RAM maxrss=141.53 GB
+[2026-03-22 18:00:34] [temp003 train]   GPU peak: alloc=0.275 GB reserved=0.998 GB
+[2026-03-22 18:00:34] [temp003 train]   -> Saved best model (monitor_loss=2.0068)
+[2026-03-22 18:00:34] [temp003 train]   [train 0/50000] loss=3.3979 acc=0.2371 positives=97 bank1=439 bank2=5580 lr=5.05e-04
+[2026-03-22 18:00:40] [temp003 train]   [train 500/50000] loss=4.0988 acc=0.1593 positives=91 bank1=1943 bank2=1011 lr=5.03e-04
+[2026-03-22 18:00:46] [temp003 train]   [train 1000/50000] loss=1.7420 acc=0.4385 positives=512 bank1=2648 bank2=2128 lr=5.02e-04
+[2026-03-22 18:00:52] [temp003 train]   [train 1500/50000] loss=1.1074 acc=0.5618 positives=251 bank1=629 bank2=2302 lr=5.00e-04
+[2026-03-22 18:00:58] [temp003 train]   [train 2000/50000] loss=2.2270 acc=0.2888 positives=116 bank1=2618 bank2=1183 lr=4.99e-04
+[2026-03-22 18:01:03] [temp003 train]   [train 2500/50000] loss=2.0747 acc=0.2358 positives=53 bank1=1254 bank2=810 lr=4.97e-04
+[2026-03-22 18:01:09] [temp003 train]   [train 3000/50000] loss=1.0849 acc=0.5612 positives=98 bank1=807 bank2=1119 lr=4.96e-04
+[2026-03-22 18:01:15] [temp003 train]   [train 3500/50000] loss=2.4252 acc=0.2623 positives=61 bank1=614 bank2=2415 lr=4.94e-04
+[2026-03-22 18:01:20] [temp003 train]   [train 4000/50000] loss=1.1812 acc=0.5800 positives=50 bank1=520 bank2=383 lr=4.93e-04
+[2026-03-22 18:01:25] [temp003 train]   [train 4500/50000] loss=1.1747 acc=0.5192 positives=52 bank1=754 bank2=989 lr=4.91e-04
+[2026-03-22 18:01:30] [temp003 train]   [train 5000/50000] loss=1.1578 acc=0.5164 positives=61 bank1=581 bank2=779 lr=4.89e-04
+[2026-03-22 18:01:36] [temp003 train]   [train 5500/50000] loss=1.7193 acc=0.3708 positives=271 bank1=837 bank2=1244 lr=4.88e-04
+[2026-03-22 18:01:41] [temp003 train]   [train 6000/50000] loss=1.5335 acc=0.5079 positives=63 bank1=2828 bank2=668 lr=4.86e-04
+[2026-03-22 18:01:46] [temp003 train]   [train 6500/50000] loss=4.1701 acc=0.0840 positives=512 bank1=2236 bank2=4532 lr=4.85e-04
+[2026-03-22 18:01:52] [temp003 train]   [train 7000/50000] loss=3.8465 acc=0.0820 positives=512 bank1=2621 bank2=1198 lr=4.83e-04
+[2026-03-22 18:01:58] [temp003 train]   [train 7500/50000] loss=1.3931 acc=0.5058 positives=86 bank1=423 bank2=2802 lr=4.82e-04
+[2026-03-22 18:02:04] [temp003 train]   [train 8000/50000] loss=2.3901 acc=0.2680 positives=153 bank1=2045 bank2=777 lr=4.80e-04
+[2026-03-22 18:02:10] [temp003 train]   [train 8500/50000] loss=2.6229 acc=0.2500 positives=102 bank1=6100 bank2=580 lr=4.79e-04
+[2026-03-22 18:02:16] [temp003 train]   [train 9000/50000] loss=3.6404 acc=0.1236 positives=89 bank1=3125 bank2=498 lr=4.77e-04
+[2026-03-22 18:02:22] [temp003 train]   [train 9500/50000] loss=3.6486 acc=0.1810 positives=58 bank1=8819 bank2=1234 lr=4.75e-04
+[2026-03-22 18:02:28] [temp003 train]   [train 10000/50000] loss=2.6685 acc=0.2130 positives=54 bank1=1260 bank2=578 lr=4.74e-04
+[2026-03-22 18:02:34] [temp003 train]   [train 10500/50000] loss=2.8759 acc=0.2366 positives=93 bank1=5272 bank2=1539 lr=4.72e-04
+[2026-03-22 18:02:40] [temp003 train]   [train 11000/50000] loss=2.5115 acc=0.3143 positives=140 bank1=687 bank2=2146 lr=4.71e-04
+[2026-03-22 18:02:46] [temp003 train]   [train 11500/50000] loss=2.3912 acc=0.2692 positives=78 bank1=3148 bank2=570 lr=4.69e-04
+[2026-03-22 18:02:52] [temp003 train]   [train 12000/50000] loss=1.7121 acc=0.4035 positives=57 bank1=1684 bank2=461 lr=4.68e-04
+[2026-03-22 18:02:58] [temp003 train]   [train 12500/50000] loss=2.7907 acc=0.1929 positives=70 bank1=782 bank2=2890 lr=4.66e-04
+[2026-03-22 18:03:03] [temp003 train]   [train 13000/50000] loss=1.6097 acc=0.4424 positives=191 bank1=1952 bank2=821 lr=4.65e-04
+[2026-03-22 18:03:10] [temp003 train]   [train 13500/50000] loss=1.3583 acc=0.4453 positives=512 bank1=3061 bank2=5169 lr=4.63e-04
+[2026-03-22 18:03:16] [temp003 train]   [train 14000/50000] loss=1.8848 acc=0.3846 positives=52 bank1=419 bank2=3730 lr=4.62e-04
+[2026-03-22 18:03:23] [temp003 train]   [train 14500/50000] loss=1.2335 acc=0.5789 positives=76 bank1=579 bank2=6036 lr=4.60e-04
+[2026-03-22 18:03:29] [temp003 train]   [train 15000/50000] loss=1.4726 acc=0.4092 positives=512 bank1=2866 bank2=3730 lr=4.58e-04
+[2026-03-22 18:03:36] [temp003 train]   [train 15500/50000] loss=1.4557 acc=0.4297 positives=64 bank1=921 bank2=4345 lr=4.57e-04
+[2026-03-22 18:03:43] [temp003 train]   [train 16000/50000] loss=1.8905 acc=0.2783 positives=512 bank1=3581 bank2=6222 lr=4.55e-04
+[2026-03-22 18:03:49] [temp003 train]   [train 16500/50000] loss=1.9607 acc=0.2773 positives=512 bank1=7013 bank2=4758 lr=4.54e-04
+[2026-03-22 18:03:56] [temp003 train]   [train 17000/50000] loss=1.4672 acc=0.4430 positives=79 bank1=1517 bank2=2079 lr=4.52e-04
+[2026-03-22 18:04:02] [temp003 train]   [train 17500/50000] loss=1.2762 acc=0.5371 positives=175 bank1=2001 bank2=1810 lr=4.51e-04
+[2026-03-22 18:04:09] [temp003 train]   [train 18000/50000] loss=1.8377 acc=0.3410 positives=327 bank1=2613 bank2=3810 lr=4.49e-04
+[2026-03-22 18:04:15] [temp003 train]   [train 18500/50000] loss=1.9396 acc=0.4082 positives=98 bank1=1978 bank2=1718 lr=4.48e-04
+[2026-03-22 18:04:21] [temp003 train]   [train 19000/50000] loss=1.4224 acc=0.4795 positives=293 bank1=2065 bank2=7877 lr=4.46e-04
+[2026-03-22 18:04:28] [temp003 train]   [train 19500/50000] loss=1.8011 acc=0.3750 positives=140 bank1=995 bank2=2299 lr=4.45e-04
+[2026-03-22 18:04:34] [temp003 train]   [train 20000/50000] loss=2.1284 acc=0.3333 positives=51 bank1=2878 bank2=2108 lr=4.43e-04
+[2026-03-22 18:04:41] [temp003 train]   [train 20500/50000] loss=0.5453 acc=0.7559 positives=213 bank1=1388 bank2=2603 lr=4.41e-04
+[2026-03-22 18:04:47] [temp003 train]   [train 21000/50000] loss=1.1021 acc=0.6012 positives=84 bank1=1242 bank2=1641 lr=4.40e-04
+[2026-03-22 18:04:54] [temp003 train]   [train 21500/50000] loss=1.4154 acc=0.4227 positives=181 bank1=1558 bank2=2878 lr=4.38e-04
+[2026-03-22 18:05:00] [temp003 train]   [train 22000/50000] loss=1.6899 acc=0.3510 positives=433 bank1=1858 bank2=7364 lr=4.37e-04
+[2026-03-22 18:05:06] [temp003 train]   [train 22500/50000] loss=1.0141 acc=0.5577 positives=104 bank1=1851 bank2=2285 lr=4.35e-04
+[2026-03-22 18:05:13] [temp003 train]   [train 23000/50000] loss=1.0645 acc=0.6301 positives=73 bank1=2922 bank2=1886 lr=4.34e-04
+[2026-03-22 18:05:19] [temp003 train]   [train 23500/50000] loss=0.7661 acc=0.6000 positives=65 bank1=795 bank2=1717 lr=4.32e-04
+[2026-03-22 18:05:25] [temp003 train]   [train 24000/50000] loss=1.6383 acc=0.3682 positives=512 bank1=5821 bank2=4009 lr=4.31e-04
+[2026-03-22 18:05:32] [temp003 train]   [train 24500/50000] loss=1.5476 acc=0.4169 positives=367 bank1=2036 bank2=1958 lr=4.29e-04
+[2026-03-22 18:05:39] [temp003 train]   [train 25000/50000] loss=1.0542 acc=0.5570 positives=114 bank1=2806 bank2=3684 lr=4.28e-04
+[2026-03-22 18:05:45] [temp003 train]   [train 25500/50000] loss=1.7535 acc=0.3706 positives=143 bank1=1321 bank2=4520 lr=4.26e-04
+[2026-03-22 18:05:51] [temp003 train]   [train 26000/50000] loss=0.8863 acc=0.6261 positives=111 bank1=3640 bank2=1362 lr=4.24e-04
+[2026-03-22 18:05:58] [temp003 train]   [train 26500/50000] loss=1.4729 acc=0.4767 positives=300 bank1=2960 bank2=1420 lr=4.23e-04
+[2026-03-22 18:06:04] [temp003 train]   [train 27000/50000] loss=3.0776 acc=0.2081 positives=197 bank1=2312 bank2=1553 lr=4.21e-04
+[2026-03-22 18:06:11] [temp003 train]   [train 27500/50000] loss=1.0082 acc=0.5982 positives=112 bank1=1612 bank2=1886 lr=4.20e-04
+[2026-03-22 18:06:17] [temp003 train]   [train 28000/50000] loss=1.1698 acc=0.5265 positives=264 bank1=2577 bank2=2100 lr=4.18e-04
+[2026-03-22 18:06:23] [temp003 train]   [train 28500/50000] loss=2.8466 acc=0.2456 positives=57 bank1=4901 bank2=562 lr=4.17e-04
+[2026-03-22 18:06:29] [temp003 train]   [train 29000/50000] loss=1.7090 acc=0.3534 positives=191 bank1=1967 bank2=1553 lr=4.15e-04
+[2026-03-22 18:06:35] [temp003 train]   [train 29500/50000] loss=2.0433 acc=0.3193 positives=512 bank1=4741 bank2=3546 lr=4.14e-04
+[2026-03-22 18:06:41] [temp003 train]   [train 30000/50000] loss=1.5211 acc=0.4160 positives=256 bank1=1530 bank2=3137 lr=4.12e-04
+[2026-03-22 18:06:47] [temp003 train]   [train 30500/50000] loss=1.5683 acc=0.3571 positives=84 bank1=1065 bank2=2062 lr=4.11e-04
+[2026-03-22 18:06:53] [temp003 train]   [train 31000/50000] loss=1.8296 acc=0.3925 positives=107 bank1=1852 bank2=2254 lr=4.09e-04
+[2026-03-22 18:06:59] [temp003 train]   [train 31500/50000] loss=1.4232 acc=0.4059 positives=85 bank1=2582 bank2=2676 lr=4.08e-04
+[2026-03-22 18:07:05] [temp003 train]   [train 32000/50000] loss=5.0573 acc=0.0541 positives=74 bank1=3720 bank2=676 lr=4.06e-04
+[2026-03-22 18:07:11] [temp003 train]   [train 32500/50000] loss=3.5521 acc=0.1310 positives=126 bank1=1041 bank2=643 lr=4.05e-04
+[2026-03-22 18:07:16] [temp003 train]   [train 33000/50000] loss=1.5657 acc=0.4113 positives=62 bank1=560 bank2=941 lr=4.03e-04
+[2026-03-22 18:07:22] [temp003 train]   [train 33500/50000] loss=4.5259 acc=0.1228 positives=57 bank1=3818 bank2=3425 lr=4.02e-04
+[2026-03-22 18:07:28] [temp003 train]   [train 34000/50000] loss=1.4892 acc=0.3839 positives=56 bank1=493 bank2=568 lr=4.00e-04
+[2026-03-22 18:07:33] [temp003 train]   [train 34500/50000] loss=0.9332 acc=0.6111 positives=72 bank1=446 bank2=722 lr=3.99e-04
+[2026-03-22 18:07:38] [temp003 train]   [train 35000/50000] loss=1.3191 acc=0.5000 positives=83 bank1=776 bank2=810 lr=3.97e-04
+[2026-03-22 18:07:43] [temp003 train]   [train 35500/50000] loss=0.9792 acc=0.5357 positives=70 bank1=491 bank2=531 lr=3.95e-04
+[2026-03-22 18:07:49] [temp003 train]   [train 36000/50000] loss=1.3704 acc=0.4554 positives=101 bank1=984 bank2=594 lr=3.94e-04
+[2026-03-22 18:07:54] [temp003 train]   [train 36500/50000] loss=1.5468 acc=0.4545 positives=209 bank1=1884 bank2=752 lr=3.92e-04
+[2026-03-22 18:08:00] [temp003 train]   [train 37000/50000] loss=1.4258 acc=0.4491 positives=108 bank1=1628 bank2=684 lr=3.91e-04
+[2026-03-22 18:08:05] [temp003 train]   [train 37500/50000] loss=1.1603 acc=0.6076 positives=79 bank1=456 bank2=2239 lr=3.89e-04
+[2026-03-22 18:08:10] [temp003 train]   [train 38000/50000] loss=1.2081 acc=0.5188 positives=80 bank1=1238 bank2=593 lr=3.88e-04
+[2026-03-22 18:08:16] [temp003 train]   [train 38500/50000] loss=1.3895 acc=0.4684 positives=95 bank1=450 bank2=672 lr=3.86e-04
+[2026-03-22 18:08:21] [temp003 train]   [train 39000/50000] loss=0.8687 acc=0.6268 positives=71 bank1=506 bank2=1021 lr=3.85e-04
+[2026-03-22 18:08:26] [temp003 train]   [train 39500/50000] loss=1.4380 acc=0.4467 positives=122 bank1=1452 bank2=840 lr=3.83e-04
+[2026-03-22 18:08:31] [temp003 train]   [train 40000/50000] loss=1.4661 acc=0.4063 positives=96 bank1=638 bank2=1228 lr=3.82e-04
+[2026-03-22 18:08:36] [temp003 train]   [train 40500/50000] loss=1.4128 acc=0.5147 positives=68 bank1=1073 bank2=989 lr=3.80e-04
+[2026-03-22 18:08:42] [temp003 train]   [train 41000/50000] loss=1.1253 acc=0.5822 positives=73 bank1=825 bank2=865 lr=3.79e-04
+[2026-03-22 18:08:47] [temp003 train]   [train 41500/50000] loss=0.6188 acc=0.6786 positives=70 bank1=565 bank2=528 lr=3.77e-04
+[2026-03-22 18:08:52] [temp003 train]   [train 42000/50000] loss=1.2026 acc=0.5452 positives=199 bank1=1296 bank2=722 lr=3.76e-04
+[2026-03-22 18:08:57] [temp003 train]   [train 42500/50000] loss=1.0001 acc=0.5090 positives=111 bank1=554 bank2=567 lr=3.74e-04
+[2026-03-22 18:09:02] [temp003 train]   [train 43000/50000] loss=1.4278 acc=0.4337 positives=98 bank1=1529 bank2=508 lr=3.73e-04
+[2026-03-22 18:09:07] [temp003 train]   [train 43500/50000] loss=1.5313 acc=0.4150 positives=100 bank1=545 bank2=827 lr=3.71e-04
+[2026-03-22 18:09:12] [temp003 train]   [train 44000/50000] loss=1.1966 acc=0.4951 positives=102 bank1=865 bank2=506 lr=3.70e-04
+[2026-03-22 18:09:17] [temp003 train]   [train 44500/50000] loss=2.0872 acc=0.3534 positives=116 bank1=1584 bank2=568 lr=3.68e-04
+[2026-03-22 18:09:22] [temp003 train]   [train 45000/50000] loss=1.2064 acc=0.5070 positives=215 bank1=859 bank2=751 lr=3.67e-04
+[2026-03-22 18:09:28] [temp003 train]   [train 45500/50000] loss=1.7528 acc=0.3841 positives=82 bank1=773 bank2=746 lr=3.65e-04
+[2026-03-22 18:09:33] [temp003 train]   [train 46000/50000] loss=1.8088 acc=0.3411 positives=107 bank1=1033 bank2=706 lr=3.64e-04
+[2026-03-22 18:09:39] [temp003 train]   [train 46500/50000] loss=1.5743 acc=0.3750 positives=68 bank1=840 bank2=2624 lr=3.62e-04
+[2026-03-22 18:09:44] [temp003 train]   [train 47000/50000] loss=1.1882 acc=0.3750 positives=96 bank1=692 bank2=960 lr=3.61e-04
+[2026-03-22 18:09:49] [temp003 train]   [train 47500/50000] loss=1.1753 acc=0.4363 positives=102 bank1=930 bank2=551 lr=3.59e-04
+[2026-03-22 18:09:55] [temp003 train]   [train 48000/50000] loss=2.0634 acc=0.3169 positives=172 bank1=1658 bank2=1054 lr=3.58e-04
+[2026-03-22 18:10:00] [temp003 train]   [train 48500/50000] loss=1.8445 acc=0.3670 positives=94 bank1=1721 bank2=631 lr=3.56e-04
+[2026-03-22 18:10:05] [temp003 train]   [train 49000/50000] loss=1.8377 acc=0.3400 positives=50 bank1=545 bank2=1199 lr=3.55e-04
+[2026-03-22 18:10:11] [temp003 train]   [train 49500/50000] loss=1.0891 acc=0.4694 positives=147 bank1=1107 bank2=534 lr=3.54e-04
+[2026-03-22 18:10:16] [temp003 train]   [val 0/1000] loss=2.2250 acc=0.3217 positives=258 bank1=2200 bank2=2207
+[2026-03-22 18:10:19] [temp003 train]   [val 500/1000] loss=0.6677 acc=0.6923 positives=182 bank1=2520 bank2=999
+[2026-03-22 18:10:21] [temp003 train] Epoch 6/10: train_loss=1.7392 train_acc=0.4127 val_loss=1.9907 val_acc=0.3774
+[2026-03-22 18:10:21] [temp003 train]   train: time=582.2s pairs/s=85.87 cache_hit_rate=1.000
+[2026-03-22 18:10:21] [temp003 train]   val:   time=4.3s pairs/s=231.09 cache_hit_rate=1.000
+[2026-03-22 18:10:21] [temp003 train]   RAM maxrss=141.53 GB
+[2026-03-22 18:10:21] [temp003 train]   GPU peak: alloc=0.290 GB reserved=1.000 GB
+[2026-03-22 18:10:21] [temp003 train]   -> Saved best model (monitor_loss=1.9907)
+[2026-03-22 18:10:21] [temp003 train]   [train 0/50000] loss=1.2217 acc=0.6007 positives=149 bank1=2212 bank2=661 lr=3.52e-04
+[2026-03-22 18:10:27] [temp003 train]   [train 500/50000] loss=1.9060 acc=0.3102 positives=137 bank1=1713 bank2=1577 lr=3.51e-04
+[2026-03-22 18:10:33] [temp003 train]   [train 1000/50000] loss=2.3845 acc=0.1571 positives=70 bank1=555 bank2=2297 lr=3.49e-04
+[2026-03-22 18:10:39] [temp003 train]   [train 1500/50000] loss=2.3064 acc=0.3542 positives=96 bank1=1794 bank2=5982 lr=3.48e-04
+[2026-03-22 18:10:45] [temp003 train]   [train 2000/50000] loss=1.4705 acc=0.4620 positives=92 bank1=517 bank2=1274 lr=3.46e-04
+[2026-03-22 18:10:51] [temp003 train]   [train 2500/50000] loss=1.7394 acc=0.4462 positives=437 bank1=1912 bank2=3335 lr=3.45e-04
+[2026-03-22 18:10:57] [temp003 train]   [train 3000/50000] loss=1.7762 acc=0.4153 positives=59 bank1=4092 bank2=919 lr=3.43e-04
+[2026-03-22 18:11:03] [temp003 train]   [train 3500/50000] loss=1.4436 acc=0.4091 positives=55 bank1=690 bank2=1297 lr=3.42e-04
+[2026-03-22 18:11:08] [temp003 train]   [train 4000/50000] loss=1.5038 acc=0.4542 positives=120 bank1=856 bank2=831 lr=3.40e-04
+[2026-03-22 18:11:14] [temp003 train]   [train 4500/50000] loss=1.3463 acc=0.4632 positives=68 bank1=457 bank2=753 lr=3.39e-04
+[2026-03-22 18:11:19] [temp003 train]   [train 5000/50000] loss=1.1916 acc=0.5376 positives=213 bank1=1121 bank2=1255 lr=3.37e-04
+[2026-03-22 18:11:24] [temp003 train]   [train 5500/50000] loss=2.3945 acc=0.2324 positives=71 bank1=2375 bank2=883 lr=3.36e-04
+[2026-03-22 18:11:30] [temp003 train]   [train 6000/50000] loss=1.6318 acc=0.4598 positives=112 bank1=1059 bank2=1013 lr=3.34e-04
+[2026-03-22 18:11:35] [temp003 train]   [train 6500/50000] loss=1.9248 acc=0.3103 positives=58 bank1=2244 bank2=472 lr=3.33e-04
+[2026-03-22 18:11:41] [temp003 train]   [train 7000/50000] loss=3.7392 acc=0.1064 positives=512 bank1=5297 bank2=1149 lr=3.31e-04
+[2026-03-22 18:11:47] [temp003 train]   [train 7500/50000] loss=3.2505 acc=0.1560 positives=109 bank1=2792 bank2=425 lr=3.30e-04
+[2026-03-22 18:11:53] [temp003 train]   [train 8000/50000] loss=2.2010 acc=0.3396 positives=159 bank1=2037 bank2=839 lr=3.29e-04
+[2026-03-22 18:11:59] [temp003 train]   [train 8500/50000] loss=3.3633 acc=0.1250 positives=512 bank1=4706 bank2=3929 lr=3.27e-04
+[2026-03-22 18:12:05] [temp003 train]   [train 9000/50000] loss=2.4397 acc=0.3210 positives=81 bank1=846 bank2=5010 lr=3.26e-04
+[2026-03-22 18:12:11] [temp003 train]   [train 9500/50000] loss=3.7925 acc=0.0908 positives=512 bank1=3820 bank2=4066 lr=3.24e-04
+[2026-03-22 18:12:17] [temp003 train]   [train 10000/50000] loss=1.2264 acc=0.5357 positives=70 bank1=1269 bank2=1038 lr=3.23e-04
+[2026-03-22 18:12:23] [temp003 train]   [train 10500/50000] loss=1.1903 acc=0.5314 positives=159 bank1=1154 bank2=988 lr=3.21e-04
+[2026-03-22 18:12:29] [temp003 train]   [train 11000/50000] loss=2.4393 acc=0.3120 positives=117 bank1=1361 bank2=4478 lr=3.20e-04
+[2026-03-22 18:12:35] [temp003 train]   [train 11500/50000] loss=2.7134 acc=0.2629 positives=194 bank1=9627 bank2=1083 lr=3.18e-04
+[2026-03-22 18:12:40] [temp003 train]   [train 12000/50000] loss=1.2216 acc=0.5392 positives=102 bank1=1765 bank2=805 lr=3.17e-04
+[2026-03-22 18:12:46] [temp003 train]   [train 12500/50000] loss=3.1040 acc=0.2727 positives=55 bank1=3794 bank2=826 lr=3.16e-04
+[2026-03-22 18:12:52] [temp003 train]   [train 13000/50000] loss=1.4471 acc=0.5000 positives=85 bank1=737 bank2=1960 lr=3.14e-04
+[2026-03-22 18:12:58] [temp003 train]   [train 13500/50000] loss=3.4188 acc=0.1777 positives=512 bank1=9309 bank2=3803 lr=3.13e-04
+[2026-03-22 18:13:05] [temp003 train]   [train 14000/50000] loss=1.0881 acc=0.5732 positives=82 bank1=1227 bank2=1225 lr=3.11e-04
+[2026-03-22 18:13:11] [temp003 train]   [train 14500/50000] loss=1.8770 acc=0.3524 positives=254 bank1=1399 bank2=3723 lr=3.10e-04
+[2026-03-22 18:13:18] [temp003 train]   [train 15000/50000] loss=1.4790 acc=0.4209 positives=158 bank1=5346 bank2=1866 lr=3.08e-04
+[2026-03-22 18:13:24] [temp003 train]   [train 15500/50000] loss=1.2480 acc=0.4870 positives=115 bank1=991 bank2=5308 lr=3.07e-04
+[2026-03-22 18:13:31] [temp003 train]   [train 16000/50000] loss=2.5695 acc=0.2403 positives=231 bank1=3312 bank2=1421 lr=3.06e-04
+[2026-03-22 18:13:37] [temp003 train]   [train 16500/50000] loss=2.7757 acc=0.2857 positives=63 bank1=898 bank2=3107 lr=3.04e-04
+[2026-03-22 18:13:44] [temp003 train]   [train 17000/50000] loss=1.8132 acc=0.3045 positives=289 bank1=1822 bank2=4488 lr=3.03e-04
+[2026-03-22 18:13:50] [temp003 train]   [train 17500/50000] loss=1.3677 acc=0.4651 positives=215 bank1=4938 bank2=1707 lr=3.01e-04
+[2026-03-22 18:13:57] [temp003 train]   [train 18000/50000] loss=1.6752 acc=0.3866 positives=119 bank1=884 bank2=8876 lr=3.00e-04
+[2026-03-22 18:14:03] [temp003 train]   [train 18500/50000] loss=3.3552 acc=0.1759 positives=54 bank1=6305 bank2=2843 lr=2.98e-04
+[2026-03-22 18:14:10] [temp003 train]   [train 19000/50000] loss=2.0944 acc=0.2943 positives=158 bank1=2634 bank2=1476 lr=2.97e-04
+[2026-03-22 18:14:16] [temp003 train]   [train 19500/50000] loss=1.5066 acc=0.4040 positives=125 bank1=1974 bank2=1425 lr=2.96e-04
+[2026-03-22 18:14:22] [temp003 train]   [train 20000/50000] loss=1.7255 acc=0.3205 positives=117 bank1=1656 bank2=2155 lr=2.94e-04
+[2026-03-22 18:14:29] [temp003 train]   [train 20500/50000] loss=1.1612 acc=0.5331 positives=121 bank1=1792 bank2=4375 lr=2.93e-04
+[2026-03-22 18:14:35] [temp003 train]   [train 21000/50000] loss=1.1855 acc=0.5424 positives=59 bank1=4215 bank2=1068 lr=2.91e-04
+[2026-03-22 18:14:42] [temp003 train]   [train 21500/50000] loss=1.5365 acc=0.3966 positives=203 bank1=1754 bank2=4598 lr=2.90e-04
+[2026-03-22 18:14:48] [temp003 train]   [train 22000/50000] loss=2.0713 acc=0.3000 positives=160 bank1=5617 bank2=3812 lr=2.89e-04
+[2026-03-22 18:14:55] [temp003 train]   [train 22500/50000] loss=2.2769 acc=0.3278 positives=241 bank1=2598 bank2=5235 lr=2.87e-04
+[2026-03-22 18:15:01] [temp003 train]   [train 23000/50000] loss=1.4382 acc=0.4248 positives=512 bank1=6056 bank2=3783 lr=2.86e-04
+[2026-03-22 18:15:08] [temp003 train]   [train 23500/50000] loss=1.1833 acc=0.5312 positives=208 bank1=2019 bank2=3929 lr=2.84e-04
+[2026-03-22 18:15:15] [temp003 train]   [train 24000/50000] loss=1.4763 acc=0.4273 positives=55 bank1=1017 bank2=7426 lr=2.83e-04
+[2026-03-22 18:15:22] [temp003 train]   [train 24500/50000] loss=1.0842 acc=0.5247 positives=486 bank1=2210 bank2=3814 lr=2.82e-04
+[2026-03-22 18:15:28] [temp003 train]   [train 25000/50000] loss=1.4838 acc=0.4356 positives=435 bank1=3372 bank2=3392 lr=2.80e-04
+[2026-03-22 18:15:35] [temp003 train]   [train 25500/50000] loss=0.8860 acc=0.6297 positives=158 bank1=1881 bank2=1520 lr=2.79e-04
+[2026-03-22 18:15:41] [temp003 train]   [train 26000/50000] loss=0.9865 acc=0.6250 positives=52 bank1=806 bank2=1113 lr=2.78e-04
+[2026-03-22 18:15:48] [temp003 train]   [train 26500/50000] loss=1.4407 acc=0.4255 positives=208 bank1=4160 bank2=1692 lr=2.76e-04
+[2026-03-22 18:15:54] [temp003 train]   [train 27000/50000] loss=1.0988 acc=0.5488 positives=82 bank1=1975 bank2=2333 lr=2.75e-04
+[2026-03-22 18:16:01] [temp003 train]   [train 27500/50000] loss=1.8186 acc=0.3447 positives=206 bank1=6381 bank2=1158 lr=2.73e-04
+[2026-03-22 18:16:07] [temp003 train]   [train 28000/50000] loss=1.2311 acc=0.4988 positives=414 bank1=2670 bank2=1647 lr=2.72e-04
+[2026-03-22 18:16:13] [temp003 train]   [train 28500/50000] loss=2.4477 acc=0.3143 positives=70 bank1=723 bank2=1295 lr=2.71e-04
+[2026-03-22 18:16:19] [temp003 train]   [train 29000/50000] loss=1.7402 acc=0.3352 positives=179 bank1=3629 bank2=1175 lr=2.69e-04
+[2026-03-22 18:16:26] [temp003 train]   [train 29500/50000] loss=1.1693 acc=0.5403 positives=62 bank1=1824 bank2=1900 lr=2.68e-04
+[2026-03-22 18:16:32] [temp003 train]   [train 30000/50000] loss=1.8380 acc=0.3492 positives=358 bank1=4191 bank2=1383 lr=2.67e-04
+[2026-03-22 18:16:38] [temp003 train]   [train 30500/50000] loss=1.6991 acc=0.3438 positives=144 bank1=2244 bank2=1668 lr=2.65e-04
+[2026-03-22 18:16:44] [temp003 train]   [train 31000/50000] loss=1.6011 acc=0.3906 positives=224 bank1=726 bank2=4262 lr=2.64e-04
+[2026-03-22 18:16:50] [temp003 train]   [train 31500/50000] loss=0.9126 acc=0.6350 positives=100 bank1=665 bank2=2852 lr=2.62e-04
+[2026-03-22 18:16:57] [temp003 train]   [train 32000/50000] loss=1.6919 acc=0.2889 positives=90 bank1=2134 bank2=2132 lr=2.61e-04
+[2026-03-22 18:17:03] [temp003 train]   [train 32500/50000] loss=4.3620 acc=0.0294 positives=68 bank1=1176 bank2=1775 lr=2.60e-04
+[2026-03-22 18:17:09] [temp003 train]   [train 33000/50000] loss=1.4834 acc=0.4571 positives=175 bank1=1447 bank2=1295 lr=2.58e-04
+[2026-03-22 18:17:15] [temp003 train]   [train 33500/50000] loss=2.1321 acc=0.2873 positives=181 bank1=737 bank2=1503 lr=2.57e-04
+[2026-03-22 18:17:21] [temp003 train]   [train 34000/50000] loss=3.3833 acc=0.1883 positives=77 bank1=2848 bank2=6927 lr=2.56e-04
+[2026-03-22 18:17:26] [temp003 train]   [train 34500/50000] loss=1.4922 acc=0.4757 positives=206 bank1=857 bank2=866 lr=2.54e-04
+[2026-03-22 18:17:32] [temp003 train]   [train 35000/50000] loss=1.3697 acc=0.5083 positives=60 bank1=443 bank2=614 lr=2.53e-04
+[2026-03-22 18:17:37] [temp003 train]   [train 35500/50000] loss=1.2635 acc=0.5455 positives=77 bank1=552 bank2=1093 lr=2.52e-04
+[2026-03-22 18:17:42] [temp003 train]   [train 36000/50000] loss=1.5574 acc=0.3939 positives=66 bank1=656 bank2=534 lr=2.50e-04
+[2026-03-22 18:17:48] [temp003 train]   [train 36500/50000] loss=0.9766 acc=0.5966 positives=88 bank1=530 bank2=844 lr=2.49e-04
+[2026-03-22 18:17:53] [temp003 train]   [train 37000/50000] loss=1.1323 acc=0.5347 positives=72 bank1=497 bank2=701 lr=2.48e-04
+[2026-03-22 18:17:58] [temp003 train]   [train 37500/50000] loss=1.3060 acc=0.5000 positives=57 bank1=1904 bank2=401 lr=2.46e-04
+[2026-03-22 18:18:03] [temp003 train]   [train 38000/50000] loss=1.3727 acc=0.3868 positives=53 bank1=1238 bank2=543 lr=2.45e-04
+[2026-03-22 18:18:09] [temp003 train]   [train 38500/50000] loss=1.1530 acc=0.5464 positives=97 bank1=447 bank2=936 lr=2.44e-04
+[2026-03-22 18:18:14] [temp003 train]   [train 39000/50000] loss=1.5454 acc=0.4240 positives=204 bank1=985 bank2=808 lr=2.42e-04
+[2026-03-22 18:18:19] [temp003 train]   [train 39500/50000] loss=1.2503 acc=0.5179 positives=84 bank1=656 bank2=970 lr=2.41e-04
+[2026-03-22 18:18:24] [temp003 train]   [train 40000/50000] loss=1.6499 acc=0.3885 positives=130 bank1=1084 bank2=471 lr=2.40e-04
+[2026-03-22 18:18:29] [temp003 train]   [train 40500/50000] loss=1.4937 acc=0.4254 positives=134 bank1=846 bank2=859 lr=2.38e-04
+[2026-03-22 18:18:34] [temp003 train]   [train 41000/50000] loss=1.3978 acc=0.4916 positives=179 bank1=741 bank2=1069 lr=2.37e-04
+[2026-03-22 18:18:40] [temp003 train]   [train 41500/50000] loss=0.9651 acc=0.5852 positives=88 bank1=627 bank2=502 lr=2.36e-04
+[2026-03-22 18:18:45] [temp003 train]   [train 42000/50000] loss=1.9047 acc=0.3200 positives=75 bank1=581 bank2=479 lr=2.35e-04
+[2026-03-22 18:18:50] [temp003 train]   [train 42500/50000] loss=1.0942 acc=0.5577 positives=78 bank1=483 bank2=817 lr=2.33e-04
+[2026-03-22 18:18:55] [temp003 train]   [train 43000/50000] loss=1.4183 acc=0.4615 positives=91 bank1=1460 bank2=968 lr=2.32e-04
+[2026-03-22 18:19:00] [temp003 train]   [train 43500/50000] loss=1.2265 acc=0.5312 positives=80 bank1=733 bank2=653 lr=2.31e-04
+[2026-03-22 18:19:06] [temp003 train]   [train 44000/50000] loss=1.4168 acc=0.5022 positives=227 bank1=1593 bank2=918 lr=2.29e-04
+[2026-03-22 18:19:11] [temp003 train]   [train 44500/50000] loss=0.9685 acc=0.6517 positives=145 bank1=558 bank2=1388 lr=2.28e-04
+[2026-03-22 18:19:16] [temp003 train]   [train 45000/50000] loss=1.4785 acc=0.5000 positives=54 bank1=581 bank2=3008 lr=2.27e-04
+[2026-03-22 18:19:21] [temp003 train]   [train 45500/50000] loss=1.0758 acc=0.6538 positives=52 bank1=892 bank2=596 lr=2.25e-04
+[2026-03-22 18:19:27] [temp003 train]   [train 46000/50000] loss=1.2848 acc=0.4156 positives=154 bank1=1063 bank2=713 lr=2.24e-04
+[2026-03-22 18:19:32] [temp003 train]   [train 46500/50000] loss=0.9410 acc=0.5000 positives=63 bank1=614 bank2=589 lr=2.23e-04
+[2026-03-22 18:19:37] [temp003 train]   [train 47000/50000] loss=1.0673 acc=0.5741 positives=54 bank1=785 bank2=739 lr=2.22e-04
+[2026-03-22 18:19:43] [temp003 train]   [train 47500/50000] loss=1.3576 acc=0.4322 positives=118 bank1=665 bank2=1498 lr=2.20e-04
+[2026-03-22 18:19:48] [temp003 train]   [train 48000/50000] loss=1.1510 acc=0.4455 positives=110 bank1=957 bank2=611 lr=2.19e-04
+[2026-03-22 18:19:53] [temp003 train]   [train 48500/50000] loss=2.6645 acc=0.2589 positives=56 bank1=5565 bank2=1167 lr=2.18e-04
+[2026-03-22 18:19:59] [temp003 train]   [train 49000/50000] loss=1.1045 acc=0.4671 positives=76 bank1=852 bank2=454 lr=2.17e-04
+[2026-03-22 18:20:04] [temp003 train]   [train 49500/50000] loss=6.2043 acc=0.0229 positives=240 bank1=1325 bank2=4047 lr=2.15e-04
+[2026-03-22 18:20:09] [temp003 train]   [val 0/1000] loss=1.6102 acc=0.3895 positives=86 bank1=2078 bank2=626
+[2026-03-22 18:20:12] [temp003 train]   [val 500/1000] loss=2.1655 acc=0.2383 positives=512 bank1=3707 bank2=6348
+[2026-03-22 18:20:13] [temp003 train] Epoch 7/10: train_loss=1.7336 train_acc=0.4136 val_loss=1.8450 val_acc=0.4002
+[2026-03-22 18:20:13] [temp003 train]   train: time=588.1s pairs/s=85.02 cache_hit_rate=1.000
+[2026-03-22 18:20:13] [temp003 train]   val:   time=4.3s pairs/s=232.24 cache_hit_rate=1.000
+[2026-03-22 18:20:13] [temp003 train]   RAM maxrss=141.53 GB
+[2026-03-22 18:20:13] [temp003 train]   GPU peak: alloc=0.289 GB reserved=1.000 GB
+[2026-03-22 18:20:14] [temp003 train]   -> Saved best model (monitor_loss=1.8450)
+[2026-03-22 18:20:14] [temp003 train]   [train 0/50000] loss=2.6449 acc=0.3467 positives=75 bank1=2212 bank2=680 lr=2.14e-04
+[2026-03-22 18:20:20] [temp003 train]   [train 500/50000] loss=2.7339 acc=0.3192 positives=130 bank1=1446 bank2=1995 lr=2.13e-04
+[2026-03-22 18:20:25] [temp003 train]   [train 1000/50000] loss=1.7796 acc=0.4541 positives=512 bank1=3472 bank2=1451 lr=2.12e-04
+[2026-03-22 18:20:31] [temp003 train]   [train 1500/50000] loss=2.3937 acc=0.2500 positives=156 bank1=3143 bank2=550 lr=2.10e-04
+[2026-03-22 18:20:37] [temp003 train]   [train 2000/50000] loss=1.6852 acc=0.4013 positives=76 bank1=2833 bank2=1436 lr=2.09e-04
+[2026-03-22 18:20:43] [temp003 train]   [train 2500/50000] loss=1.7103 acc=0.3551 positives=107 bank1=853 bank2=2690 lr=2.08e-04
+[2026-03-22 18:20:49] [temp003 train]   [train 3000/50000] loss=2.1751 acc=0.2603 positives=73 bank1=578 bank2=1993 lr=2.07e-04
+[2026-03-22 18:20:55] [temp003 train]   [train 3500/50000] loss=2.5671 acc=0.3519 positives=54 bank1=3885 bank2=1805 lr=2.05e-04
+[2026-03-22 18:21:00] [temp003 train]   [train 4000/50000] loss=2.1609 acc=0.2302 positives=63 bank1=743 bank2=1276 lr=2.04e-04
+[2026-03-22 18:21:06] [temp003 train]   [train 4500/50000] loss=0.9799 acc=0.5656 positives=61 bank1=417 bank2=706 lr=2.03e-04
+[2026-03-22 18:21:11] [temp003 train]   [train 5000/50000] loss=1.6246 acc=0.3892 positives=176 bank1=1132 bank2=1179 lr=2.02e-04
+[2026-03-22 18:21:16] [temp003 train]   [train 5500/50000] loss=1.4748 acc=0.4521 positives=94 bank1=749 bank2=934 lr=2.00e-04
+[2026-03-22 18:21:22] [temp003 train]   [train 6000/50000] loss=1.4743 acc=0.4916 positives=119 bank1=1519 bank2=811 lr=1.99e-04
+[2026-03-22 18:21:27] [temp003 train]   [train 6500/50000] loss=2.1264 acc=0.3105 positives=512 bank1=2451 bank2=2988 lr=1.98e-04
+[2026-03-22 18:21:34] [temp003 train]   [train 7000/50000] loss=3.2658 acc=0.2006 positives=157 bank1=3014 bank2=646 lr=1.97e-04
+[2026-03-22 18:21:40] [temp003 train]   [train 7500/50000] loss=3.3194 acc=0.1124 positives=209 bank1=1328 bank2=6656 lr=1.96e-04
+[2026-03-22 18:21:46] [temp003 train]   [train 8000/50000] loss=3.1460 acc=0.1484 positives=512 bank1=1555 bank2=4693 lr=1.94e-04
+[2026-03-22 18:21:53] [temp003 train]   [train 8500/50000] loss=2.1217 acc=0.3244 positives=225 bank1=1030 bank2=1522 lr=1.93e-04
+[2026-03-22 18:21:59] [temp003 train]   [train 9000/50000] loss=2.5231 acc=0.2469 positives=81 bank1=846 bank2=5072 lr=1.92e-04
+[2026-03-22 18:22:05] [temp003 train]   [train 9500/50000] loss=2.3541 acc=0.2275 positives=233 bank1=896 bank2=660 lr=1.91e-04
+[2026-03-22 18:22:10] [temp003 train]   [train 10000/50000] loss=2.0120 acc=0.3824 positives=51 bank1=794 bank2=422 lr=1.89e-04
+[2026-03-22 18:22:16] [temp003 train]   [train 10500/50000] loss=1.4133 acc=0.4667 positives=135 bank1=534 bank2=1105 lr=1.88e-04
+[2026-03-22 18:22:22] [temp003 train]   [train 11000/50000] loss=1.8034 acc=0.4135 positives=208 bank1=2146 bank2=1662 lr=1.87e-04
+[2026-03-22 18:22:28] [temp003 train]   [train 11500/50000] loss=2.7236 acc=0.3689 positives=122 bank1=916 bank2=1845 lr=1.86e-04
+[2026-03-22 18:22:34] [temp003 train]   [train 12000/50000] loss=1.4753 acc=0.5272 positives=92 bank1=1893 bank2=805 lr=1.85e-04
+[2026-03-22 18:22:39] [temp003 train]   [train 12500/50000] loss=1.4468 acc=0.4844 positives=257 bank1=1105 bank2=2780 lr=1.84e-04
+[2026-03-22 18:22:46] [temp003 train]   [train 13000/50000] loss=1.1798 acc=0.5705 positives=319 bank1=2288 bank2=1542 lr=1.82e-04
+[2026-03-22 18:22:52] [temp003 train]   [train 13500/50000] loss=1.8526 acc=0.4130 positives=247 bank1=2863 bank2=3665 lr=1.81e-04
+[2026-03-22 18:22:59] [temp003 train]   [train 14000/50000] loss=1.9282 acc=0.2992 positives=259 bank1=3431 bank2=2972 lr=1.80e-04
+[2026-03-22 18:23:06] [temp003 train]   [train 14500/50000] loss=1.4418 acc=0.4336 positives=512 bank1=3843 bank2=3909 lr=1.79e-04
+[2026-03-22 18:23:12] [temp003 train]   [train 15000/50000] loss=1.5444 acc=0.4439 positives=312 bank1=2430 bank2=4799 lr=1.78e-04
+[2026-03-22 18:23:19] [temp003 train]   [train 15500/50000] loss=0.7588 acc=0.6272 positives=173 bank1=1436 bank2=3435 lr=1.76e-04
+[2026-03-22 18:23:25] [temp003 train]   [train 16000/50000] loss=1.3212 acc=0.5203 positives=148 bank1=3305 bank2=2476 lr=1.75e-04
+[2026-03-22 18:23:32] [temp003 train]   [train 16500/50000] loss=1.6404 acc=0.3701 positives=512 bank1=3065 bank2=4164 lr=1.74e-04
+[2026-03-22 18:23:39] [temp003 train]   [train 17000/50000] loss=1.1420 acc=0.5329 positives=471 bank1=3115 bank2=2967 lr=1.73e-04
+[2026-03-22 18:23:46] [temp003 train]   [train 17500/50000] loss=2.0190 acc=0.2979 positives=282 bank1=4029 bank2=3400 lr=1.72e-04
+[2026-03-22 18:23:52] [temp003 train]   [train 18000/50000] loss=1.1378 acc=0.5735 positives=102 bank1=1495 bank2=5064 lr=1.71e-04
+[2026-03-22 18:23:59] [temp003 train]   [train 18500/50000] loss=1.8711 acc=0.3133 positives=375 bank1=2763 bank2=5571 lr=1.70e-04
+[2026-03-22 18:24:06] [temp003 train]   [train 19000/50000] loss=1.5744 acc=0.3333 positives=66 bank1=2966 bank2=2541 lr=1.68e-04
+[2026-03-22 18:24:12] [temp003 train]   [train 19500/50000] loss=1.7858 acc=0.3423 positives=111 bank1=2219 bank2=1645 lr=1.67e-04
+[2026-03-22 18:24:19] [temp003 train]   [train 20000/50000] loss=1.6116 acc=0.3913 positives=115 bank1=3880 bank2=2796 lr=1.66e-04
+[2026-03-22 18:24:25] [temp003 train]   [train 20500/50000] loss=1.3383 acc=0.4592 positives=98 bank1=4098 bank2=2012 lr=1.65e-04
+[2026-03-22 18:24:32] [temp003 train]   [train 21000/50000] loss=1.3523 acc=0.4340 positives=288 bank1=1451 bank2=2964 lr=1.64e-04
+[2026-03-22 18:24:38] [temp003 train]   [train 21500/50000] loss=0.8496 acc=0.6250 positives=180 bank1=6282 bank2=1098 lr=1.63e-04
+[2026-03-22 18:24:45] [temp003 train]   [train 22000/50000] loss=0.7997 acc=0.6374 positives=273 bank1=4260 bank2=1117 lr=1.62e-04
+[2026-03-22 18:24:52] [temp003 train]   [train 22500/50000] loss=0.8621 acc=0.5928 positives=167 bank1=2110 bank2=2729 lr=1.61e-04
+[2026-03-22 18:24:58] [temp003 train]   [train 23000/50000] loss=2.1232 acc=0.3198 positives=222 bank1=6056 bank2=2059 lr=1.59e-04
+[2026-03-22 18:25:05] [temp003 train]   [train 23500/50000] loss=2.9083 acc=0.1895 positives=512 bank1=3630 bank2=5447 lr=1.58e-04
+[2026-03-22 18:25:11] [temp003 train]   [train 24000/50000] loss=1.2737 acc=0.4772 positives=219 bank1=6124 bank2=2482 lr=1.57e-04
+[2026-03-22 18:25:18] [temp003 train]   [train 24500/50000] loss=1.0581 acc=0.5754 positives=272 bank1=5574 bank2=1303 lr=1.56e-04
+[2026-03-22 18:25:25] [temp003 train]   [train 25000/50000] loss=1.5409 acc=0.4171 positives=356 bank1=5168 bank2=2262 lr=1.55e-04
+[2026-03-22 18:25:32] [temp003 train]   [train 25500/50000] loss=1.7870 acc=0.3618 positives=76 bank1=3021 bank2=3084 lr=1.54e-04
+[2026-03-22 18:25:38] [temp003 train]   [train 26000/50000] loss=1.2552 acc=0.4561 positives=512 bank1=4157 bank2=4046 lr=1.53e-04
+[2026-03-22 18:25:44] [temp003 train]   [train 26500/50000] loss=1.7738 acc=0.4286 positives=91 bank1=2776 bank2=1613 lr=1.52e-04
+[2026-03-22 18:25:51] [temp003 train]   [train 27000/50000] loss=0.7705 acc=0.6475 positives=322 bank1=2247 bank2=1467 lr=1.51e-04
+[2026-03-22 18:25:57] [temp003 train]   [train 27500/50000] loss=1.9358 acc=0.3506 positives=512 bank1=6712 bank2=5076 lr=1.50e-04
+[2026-03-22 18:26:03] [temp003 train]   [train 28000/50000] loss=1.1392 acc=0.4740 positives=77 bank1=1780 bank2=1018 lr=1.48e-04
+[2026-03-22 18:26:09] [temp003 train]   [train 28500/50000] loss=1.0728 acc=0.5750 positives=80 bank1=1729 bank2=1118 lr=1.47e-04
+[2026-03-22 18:26:15] [temp003 train]   [train 29000/50000] loss=0.7206 acc=0.6936 positives=346 bank1=2051 bank2=1237 lr=1.46e-04
+[2026-03-22 18:26:21] [temp003 train]   [train 29500/50000] loss=1.9020 acc=0.3566 positives=136 bank1=1618 bank2=4346 lr=1.45e-04
+[2026-03-22 18:26:27] [temp003 train]   [train 30000/50000] loss=1.2578 acc=0.5014 positives=346 bank1=5551 bank2=1560 lr=1.44e-04
+[2026-03-22 18:26:34] [temp003 train]   [train 30500/50000] loss=2.0257 acc=0.2766 positives=94 bank1=2100 bank2=1821 lr=1.43e-04
+[2026-03-22 18:26:40] [temp003 train]   [train 31000/50000] loss=1.0536 acc=0.5500 positives=90 bank1=834 bank2=584 lr=1.42e-04
+[2026-03-22 18:26:46] [temp003 train]   [train 31500/50000] loss=1.5666 acc=0.4207 positives=82 bank1=991 bank2=3575 lr=1.41e-04
+[2026-03-22 18:26:51] [temp003 train]   [train 32000/50000] loss=3.2606 acc=0.1471 positives=51 bank1=7572 bank2=1209 lr=1.40e-04
+[2026-03-22 18:26:57] [temp003 train]   [train 32500/50000] loss=4.8150 acc=0.0549 positives=91 bank1=1254 bank2=4075 lr=1.39e-04
+[2026-03-22 18:27:03] [temp003 train]   [train 33000/50000] loss=1.8207 acc=0.3580 positives=81 bank1=961 bank2=2572 lr=1.38e-04
+[2026-03-22 18:27:09] [temp003 train]   [train 33500/50000] loss=2.1742 acc=0.3234 positives=167 bank1=1078 bank2=1080 lr=1.37e-04
+[2026-03-22 18:27:15] [temp003 train]   [train 34000/50000] loss=1.8470 acc=0.3975 positives=239 bank1=1157 bank2=943 lr=1.36e-04
+[2026-03-22 18:27:20] [temp003 train]   [train 34500/50000] loss=2.1398 acc=0.3241 positives=54 bank1=663 bank2=819 lr=1.35e-04
+[2026-03-22 18:27:25] [temp003 train]   [train 35000/50000] loss=1.5646 acc=0.4314 positives=51 bank1=381 bank2=780 lr=1.34e-04
+[2026-03-22 18:27:30] [temp003 train]   [train 35500/50000] loss=1.3353 acc=0.4612 positives=103 bank1=646 bank2=589 lr=1.33e-04
+[2026-03-22 18:27:36] [temp003 train]   [train 36000/50000] loss=1.5316 acc=0.4537 positives=54 bank1=1534 bank2=667 lr=1.32e-04
+[2026-03-22 18:27:41] [temp003 train]   [train 36500/50000] loss=2.3440 acc=0.3365 positives=52 bank1=543 bank2=1949 lr=1.31e-04
+[2026-03-22 18:27:46] [temp003 train]   [train 37000/50000] loss=1.1381 acc=0.5900 positives=50 bank1=1252 bank2=514 lr=1.30e-04
+[2026-03-22 18:27:52] [temp003 train]   [train 37500/50000] loss=1.5798 acc=0.4310 positives=87 bank1=1048 bank2=500 lr=1.29e-04
+[2026-03-22 18:27:57] [temp003 train]   [train 38000/50000] loss=1.1885 acc=0.4831 positives=59 bank1=481 bank2=606 lr=1.28e-04
+[2026-03-22 18:28:02] [temp003 train]   [train 38500/50000] loss=1.6922 acc=0.4097 positives=144 bank1=1129 bank2=929 lr=1.27e-04
+[2026-03-22 18:28:08] [temp003 train]   [train 39000/50000] loss=1.3687 acc=0.4474 positives=57 bank1=1090 bank2=736 lr=1.26e-04
+[2026-03-22 18:28:13] [temp003 train]   [train 39500/50000] loss=1.2092 acc=0.5288 positives=52 bank1=701 bank2=496 lr=1.25e-04
+[2026-03-22 18:28:19] [temp003 train]   [train 40000/50000] loss=1.2496 acc=0.5198 positives=126 bank1=852 bank2=1215 lr=1.24e-04
+[2026-03-22 18:28:24] [temp003 train]   [train 40500/50000] loss=0.6931 acc=0.6901 positives=71 bank1=617 bank2=720 lr=1.23e-04
+[2026-03-22 18:28:29] [temp003 train]   [train 41000/50000] loss=1.4643 acc=0.4459 positives=74 bank1=469 bank2=560 lr=1.22e-04
+[2026-03-22 18:28:34] [temp003 train]   [train 41500/50000] loss=1.2515 acc=0.5297 positives=118 bank1=869 bank2=1250 lr=1.21e-04
+[2026-03-22 18:28:40] [temp003 train]   [train 42000/50000] loss=1.3329 acc=0.5217 positives=299 bank1=1732 bank2=928 lr=1.20e-04
+[2026-03-22 18:28:45] [temp003 train]   [train 42500/50000] loss=1.1533 acc=0.5053 positives=94 bank1=723 bank2=595 lr=1.19e-04
+[2026-03-22 18:28:50] [temp003 train]   [train 43000/50000] loss=2.1882 acc=0.2898 positives=88 bank1=545 bank2=876 lr=1.18e-04
+[2026-03-22 18:28:55] [temp003 train]   [train 43500/50000] loss=1.1023 acc=0.5776 positives=58 bank1=881 bank2=473 lr=1.17e-04
+[2026-03-22 18:29:00] [temp003 train]   [train 44000/50000] loss=0.9447 acc=0.6343 positives=242 bank1=756 bank2=1020 lr=1.16e-04
+[2026-03-22 18:29:05] [temp003 train]   [train 44500/50000] loss=1.8912 acc=0.3508 positives=181 bank1=1484 bank2=1039 lr=1.15e-04
+[2026-03-22 18:29:10] [temp003 train]   [train 45000/50000] loss=1.4914 acc=0.4423 positives=52 bank1=1033 bank2=859 lr=1.14e-04
+[2026-03-22 18:29:15] [temp003 train]   [train 45500/50000] loss=1.3658 acc=0.4261 positives=88 bank1=977 bank2=1304 lr=1.13e-04
+[2026-03-22 18:29:21] [temp003 train]   [train 46000/50000] loss=0.9216 acc=0.6182 positives=55 bank1=566 bank2=379 lr=1.12e-04
+[2026-03-22 18:29:26] [temp003 train]   [train 46500/50000] loss=0.9882 acc=0.4932 positives=73 bank1=687 bank2=409 lr=1.11e-04
+[2026-03-22 18:29:31] [temp003 train]   [train 47000/50000] loss=1.2238 acc=0.4608 positives=51 bank1=314 bank2=851 lr=1.10e-04
+[2026-03-22 18:29:37] [temp003 train]   [train 47500/50000] loss=1.1773 acc=0.5294 positives=51 bank1=571 bank2=610 lr=1.09e-04
+[2026-03-22 18:29:42] [temp003 train]   [train 48000/50000] loss=1.4338 acc=0.3684 positives=171 bank1=937 bank2=874 lr=1.08e-04
+[2026-03-22 18:29:48] [temp003 train]   [train 48500/50000] loss=1.4046 acc=0.4286 positives=70 bank1=975 bank2=1097 lr=1.07e-04
+[2026-03-22 18:29:53] [temp003 train]   [train 49000/50000] loss=2.7558 acc=0.2129 positives=512 bank1=5200 bank2=4564 lr=1.06e-04
+[2026-03-22 18:29:58] [temp003 train]   [train 49500/50000] loss=1.5055 acc=0.4110 positives=427 bank1=1539 bank2=1461 lr=1.05e-04
+[2026-03-22 18:30:03] [temp003 train]   [val 0/1000] loss=1.8196 acc=0.3799 positives=512 bank1=2078 bank2=2692
+[2026-03-22 18:30:06] [temp003 train]   [val 500/1000] loss=1.4292 acc=0.4590 positives=512 bank1=3328 bank2=3929
+[2026-03-22 18:30:08] [temp003 train] Epoch 8/10: train_loss=1.7333 train_acc=0.4137 val_loss=1.7928 val_acc=0.4081
+[2026-03-22 18:30:08] [temp003 train]   train: time=589.4s pairs/s=84.83 cache_hit_rate=1.000
+[2026-03-22 18:30:08] [temp003 train]   val:   time=4.5s pairs/s=224.19 cache_hit_rate=1.000
+[2026-03-22 18:30:08] [temp003 train]   RAM maxrss=141.53 GB
+[2026-03-22 18:30:08] [temp003 train]   GPU peak: alloc=0.298 GB reserved=1.000 GB
+[2026-03-22 18:30:08] [temp003 train]   -> Saved best model (monitor_loss=1.7928)
+[2026-03-22 18:30:08] [temp003 train]   [train 0/50000] loss=3.0805 acc=0.2029 positives=69 bank1=439 bank2=3173 lr=1.05e-04
+[2026-03-22 18:30:14] [temp003 train]   [train 500/50000] loss=1.7935 acc=0.3772 positives=57 bank1=2229 bank2=788 lr=1.04e-04
+[2026-03-22 18:30:20] [temp003 train]   [train 1000/50000] loss=1.5311 acc=0.4788 positives=353 bank1=3206 bank2=2052 lr=1.03e-04
+[2026-03-22 18:30:26] [temp003 train]   [train 1500/50000] loss=2.4027 acc=0.3548 positives=62 bank1=2069 bank2=2671 lr=1.02e-04
+[2026-03-22 18:30:32] [temp003 train]   [train 2000/50000] loss=2.2930 acc=0.3252 positives=369 bank1=2800 bank2=1164 lr=1.01e-04
+[2026-03-22 18:30:37] [temp003 train]   [train 2500/50000] loss=2.4434 acc=0.2874 positives=127 bank1=4254 bank2=978 lr=1.00e-04
+[2026-03-22 18:30:43] [temp003 train]   [train 3000/50000] loss=2.4619 acc=0.3689 positives=61 bank1=963 bank2=2299 lr=9.91e-05
+[2026-03-22 18:30:49] [temp003 train]   [train 3500/50000] loss=2.7442 acc=0.2701 positives=187 bank1=3056 bank2=5817 lr=9.82e-05
+[2026-03-22 18:30:54] [temp003 train]   [train 4000/50000] loss=1.3815 acc=0.4671 positives=152 bank1=710 bank2=1228 lr=9.73e-05
+[2026-03-22 18:30:59] [temp003 train]   [train 4500/50000] loss=3.8553 acc=0.0976 positives=82 bank1=1547 bank2=1689 lr=9.65e-05
+[2026-03-22 18:31:05] [temp003 train]   [train 5000/50000] loss=1.1256 acc=0.5756 positives=119 bank1=572 bank2=589 lr=9.56e-05
+[2026-03-22 18:31:10] [temp003 train]   [train 5500/50000] loss=1.1139 acc=0.5882 positives=51 bank1=1672 bank2=803 lr=9.47e-05
+[2026-03-22 18:31:16] [temp003 train]   [train 6000/50000] loss=1.8049 acc=0.4199 positives=512 bank1=2046 bank2=1237 lr=9.39e-05
+[2026-03-22 18:31:21] [temp003 train]   [train 6500/50000] loss=3.8996 acc=0.1150 positives=313 bank1=1180 bank2=6280 lr=9.30e-05
+[2026-03-22 18:31:27] [temp003 train]   [train 7000/50000] loss=3.8421 acc=0.1318 positives=512 bank1=3014 bank2=5582 lr=9.21e-05
+[2026-03-22 18:31:33] [temp003 train]   [train 7500/50000] loss=2.2402 acc=0.2739 positives=199 bank1=1228 bank2=2328 lr=9.13e-05
+[2026-03-22 18:31:39] [temp003 train]   [train 8000/50000] loss=1.9732 acc=0.3219 positives=247 bank1=1228 bank2=2213 lr=9.04e-05
+[2026-03-22 18:31:45] [temp003 train]   [train 8500/50000] loss=3.5866 acc=0.1104 positives=512 bank1=3985 bank2=4612 lr=8.96e-05
+[2026-03-22 18:31:51] [temp003 train]   [train 9000/50000] loss=2.3089 acc=0.3860 positives=57 bank1=647 bank2=2557 lr=8.87e-05
+[2026-03-22 18:31:57] [temp003 train]   [train 9500/50000] loss=3.0672 acc=0.1641 positives=512 bank1=3907 bank2=3123 lr=8.79e-05
+[2026-03-22 18:32:02] [temp003 train]   [train 10000/50000] loss=2.3390 acc=0.2105 positives=57 bank1=1188 bank2=3847 lr=8.71e-05
+[2026-03-22 18:32:08] [temp003 train]   [train 10500/50000] loss=1.3109 acc=0.5167 positives=90 bank1=1629 bank2=899 lr=8.62e-05
+[2026-03-22 18:32:14] [temp003 train]   [train 11000/50000] loss=2.3475 acc=0.3122 positives=205 bank1=2101 bank2=2750 lr=8.54e-05
+[2026-03-22 18:32:19] [temp003 train]   [train 11500/50000] loss=0.7583 acc=0.6613 positives=93 bank1=731 bank2=1193 lr=8.46e-05
+[2026-03-22 18:32:25] [temp003 train]   [train 12000/50000] loss=2.3276 acc=0.4044 positives=136 bank1=4248 bank2=1536 lr=8.38e-05
+[2026-03-22 18:32:31] [temp003 train]   [train 12500/50000] loss=2.5675 acc=0.4083 positives=120 bank1=6333 bank2=2285 lr=8.29e-05
+[2026-03-22 18:32:37] [temp003 train]   [train 13000/50000] loss=1.7862 acc=0.5057 positives=88 bank1=1514 bank2=1067 lr=8.21e-05
+[2026-03-22 18:32:43] [temp003 train]   [train 13500/50000] loss=1.2311 acc=0.5000 positives=182 bank1=2461 bank2=3314 lr=8.13e-05
+[2026-03-22 18:32:49] [temp003 train]   [train 14000/50000] loss=1.3560 acc=0.4970 positives=164 bank1=2256 bank2=2171 lr=8.05e-05
+[2026-03-22 18:32:56] [temp003 train]   [train 14500/50000] loss=1.5397 acc=0.4478 positives=134 bank1=6206 bank2=1549 lr=7.97e-05
+[2026-03-22 18:33:02] [temp003 train]   [train 15000/50000] loss=1.4900 acc=0.4161 positives=477 bank1=5346 bank2=2889 lr=7.89e-05
+[2026-03-22 18:33:09] [temp003 train]   [train 15500/50000] loss=0.9123 acc=0.6146 positives=362 bank1=1436 bank2=8927 lr=7.81e-05
+[2026-03-22 18:33:16] [temp003 train]   [train 16000/50000] loss=1.3326 acc=0.4718 positives=71 bank1=3437 bank2=1347 lr=7.74e-05
+[2026-03-22 18:33:23] [temp003 train]   [train 16500/50000] loss=1.1357 acc=0.5484 positives=186 bank1=2392 bank2=2438 lr=7.66e-05
+[2026-03-22 18:33:30] [temp003 train]   [train 17000/50000] loss=0.9520 acc=0.5679 positives=81 bank1=2500 bank2=3355 lr=7.58e-05
+[2026-03-22 18:33:36] [temp003 train]   [train 17500/50000] loss=1.0015 acc=0.5527 positives=256 bank1=1026 bank2=2790 lr=7.50e-05
+[2026-03-22 18:33:42] [temp003 train]   [train 18000/50000] loss=1.4057 acc=0.4640 positives=125 bank1=3032 bank2=1881 lr=7.43e-05
+[2026-03-22 18:33:49] [temp003 train]   [train 18500/50000] loss=1.5757 acc=0.3740 positives=512 bank1=3664 bank2=4216 lr=7.35e-05
+[2026-03-22 18:33:55] [temp003 train]   [train 19000/50000] loss=1.1318 acc=0.5000 positives=391 bank1=2822 bank2=1922 lr=7.27e-05
+[2026-03-22 18:34:02] [temp003 train]   [train 19500/50000] loss=1.6416 acc=0.4358 positives=288 bank1=1785 bank2=3754 lr=7.20e-05
+[2026-03-22 18:34:08] [temp003 train]   [train 20000/50000] loss=1.0152 acc=0.5465 positives=86 bank1=2622 bank2=945 lr=7.12e-05
+[2026-03-22 18:34:15] [temp003 train]   [train 20500/50000] loss=1.5817 acc=0.3857 positives=512 bank1=3053 bank2=6751 lr=7.05e-05
+[2026-03-22 18:34:21] [temp003 train]   [train 21000/50000] loss=1.9916 acc=0.2854 positives=403 bank1=5109 bank2=6368 lr=6.97e-05
+[2026-03-22 18:34:28] [temp003 train]   [train 21500/50000] loss=1.3773 acc=0.4561 positives=512 bank1=3516 bank2=3172 lr=6.90e-05
+[2026-03-22 18:34:34] [temp003 train]   [train 22000/50000] loss=1.0895 acc=0.5160 positives=187 bank1=2147 bank2=950 lr=6.83e-05
+[2026-03-22 18:34:41] [temp003 train]   [train 22500/50000] loss=1.1902 acc=0.5225 positives=512 bank1=2512 bank2=7821 lr=6.75e-05
+[2026-03-22 18:34:47] [temp003 train]   [train 23000/50000] loss=0.7205 acc=0.6715 positives=242 bank1=1220 bank2=1667 lr=6.68e-05
+[2026-03-22 18:34:54] [temp003 train]   [train 23500/50000] loss=2.0018 acc=0.2568 positives=512 bank1=4675 bank2=5299 lr=6.61e-05
+[2026-03-22 18:35:00] [temp003 train]   [train 24000/50000] loss=0.6328 acc=0.6228 positives=57 bank1=748 bank2=988 lr=6.54e-05
+[2026-03-22 18:35:07] [temp003 train]   [train 24500/50000] loss=1.5511 acc=0.3944 positives=71 bank1=5941 bank2=1214 lr=6.47e-05
+[2026-03-22 18:35:14] [temp003 train]   [train 25000/50000] loss=1.6241 acc=0.3866 positives=119 bank1=2712 bank2=1138 lr=6.40e-05
+[2026-03-22 18:35:20] [temp003 train]   [train 25500/50000] loss=1.0779 acc=0.5500 positives=50 bank1=1532 bank2=2716 lr=6.32e-05
+[2026-03-22 18:35:26] [temp003 train]   [train 26000/50000] loss=0.8865 acc=0.5625 positives=176 bank1=1248 bank2=2008 lr=6.25e-05
+[2026-03-22 18:35:33] [temp003 train]   [train 26500/50000] loss=2.3092 acc=0.2650 positives=100 bank1=1009 bank2=3879 lr=6.19e-05
+[2026-03-22 18:35:39] [temp003 train]   [train 27000/50000] loss=1.1638 acc=0.4923 positives=65 bank1=1891 bank2=979 lr=6.12e-05
+[2026-03-22 18:35:46] [temp003 train]   [train 27500/50000] loss=0.5787 acc=0.7029 positives=170 bank1=1321 bank2=1390 lr=6.05e-05
+[2026-03-22 18:35:52] [temp003 train]   [train 28000/50000] loss=1.3035 acc=0.5584 positives=77 bank1=1185 bank2=1564 lr=5.98e-05
+[2026-03-22 18:35:58] [temp003 train]   [train 28500/50000] loss=1.6043 acc=0.3962 positives=130 bank1=3060 bank2=1917 lr=5.91e-05
+[2026-03-22 18:36:04] [temp003 train]   [train 29000/50000] loss=2.5838 acc=0.2829 positives=76 bank1=1705 bank2=3070 lr=5.84e-05
+[2026-03-22 18:36:10] [temp003 train]   [train 29500/50000] loss=1.9052 acc=0.3750 positives=124 bank1=1124 bank2=3043 lr=5.78e-05
+[2026-03-22 18:36:16] [temp003 train]   [train 30000/50000] loss=1.6573 acc=0.3497 positives=183 bank1=2170 bank2=2961 lr=5.71e-05
+[2026-03-22 18:36:22] [temp003 train]   [train 30500/50000] loss=1.3406 acc=0.4622 positives=476 bank1=3485 bank2=1737 lr=5.64e-05
+[2026-03-22 18:36:28] [temp003 train]   [train 31000/50000] loss=1.9334 acc=0.3287 positives=400 bank1=2176 bank2=3213 lr=5.58e-05
+[2026-03-22 18:36:34] [temp003 train]   [train 31500/50000] loss=1.5541 acc=0.3902 positives=82 bank1=1564 bank2=1946 lr=5.51e-05
+[2026-03-22 18:36:40] [temp003 train]   [train 32000/50000] loss=1.8923 acc=0.3167 positives=90 bank1=2337 bank2=1095 lr=5.45e-05
+[2026-03-22 18:36:46] [temp003 train]   [train 32500/50000] loss=2.8910 acc=0.2831 positives=136 bank1=2180 bank2=1304 lr=5.39e-05
+[2026-03-22 18:36:53] [temp003 train]   [train 33000/50000] loss=4.2601 acc=0.0603 positives=58 bank1=2682 bank2=2688 lr=5.32e-05
+[2026-03-22 18:36:59] [temp003 train]   [train 33500/50000] loss=1.7524 acc=0.4502 positives=512 bank1=1640 bank2=1881 lr=5.26e-05
+[2026-03-22 18:37:05] [temp003 train]   [train 34000/50000] loss=2.0060 acc=0.3919 positives=74 bank1=998 bank2=1035 lr=5.20e-05
+[2026-03-22 18:37:10] [temp003 train]   [train 34500/50000] loss=1.3327 acc=0.4817 positives=82 bank1=932 bank2=508 lr=5.13e-05
+[2026-03-22 18:37:16] [temp003 train]   [train 35000/50000] loss=2.0207 acc=0.3593 positives=295 bank1=1334 bank2=1106 lr=5.07e-05
+[2026-03-22 18:37:21] [temp003 train]   [train 35500/50000] loss=2.1346 acc=0.3197 positives=294 bank1=2145 bank2=1246 lr=5.01e-05
+[2026-03-22 18:37:26] [temp003 train]   [train 36000/50000] loss=1.3794 acc=0.4776 positives=67 bank1=1011 bank2=749 lr=4.95e-05
+[2026-03-22 18:37:31] [temp003 train]   [train 36500/50000] loss=1.5368 acc=0.4226 positives=84 bank1=481 bank2=2116 lr=4.89e-05
+[2026-03-22 18:37:37] [temp003 train]   [train 37000/50000] loss=1.6189 acc=0.5291 positives=86 bank1=1055 bank2=1652 lr=4.83e-05
+[2026-03-22 18:37:42] [temp003 train]   [train 37500/50000] loss=0.9779 acc=0.6111 positives=72 bank1=895 bank2=661 lr=4.77e-05
+[2026-03-22 18:37:47] [temp003 train]   [train 38000/50000] loss=1.5852 acc=0.3864 positives=198 bank1=1238 bank2=809 lr=4.71e-05
+[2026-03-22 18:37:52] [temp003 train]   [train 38500/50000] loss=1.3308 acc=0.4895 positives=95 bank1=518 bank2=558 lr=4.65e-05
+[2026-03-22 18:37:57] [temp003 train]   [train 39000/50000] loss=1.2440 acc=0.5312 positives=80 bank1=632 bank2=395 lr=4.59e-05
+[2026-03-22 18:38:03] [temp003 train]   [train 39500/50000] loss=1.2853 acc=0.5149 positives=101 bank1=678 bank2=976 lr=4.53e-05
+[2026-03-22 18:38:08] [temp003 train]   [train 40000/50000] loss=1.2216 acc=0.5167 positives=90 bank1=638 bank2=775 lr=4.48e-05
+[2026-03-22 18:38:13] [temp003 train]   [train 40500/50000] loss=1.6073 acc=0.3700 positives=50 bank1=469 bank2=595 lr=4.42e-05
+[2026-03-22 18:38:18] [temp003 train]   [train 41000/50000] loss=1.5821 acc=0.3923 positives=209 bank1=951 bank2=838 lr=4.36e-05
+[2026-03-22 18:38:23] [temp003 train]   [train 41500/50000] loss=1.9750 acc=0.3662 positives=198 bank1=661 bank2=1927 lr=4.31e-05
+[2026-03-22 18:38:28] [temp003 train]   [train 42000/50000] loss=0.9523 acc=0.6062 positives=80 bank1=456 bank2=739 lr=4.25e-05
+[2026-03-22 18:38:34] [temp003 train]   [train 42500/50000] loss=0.8570 acc=0.6267 positives=75 bank1=495 bank2=537 lr=4.20e-05
+[2026-03-22 18:38:39] [temp003 train]   [train 43000/50000] loss=1.1197 acc=0.5489 positives=133 bank1=767 bank2=824 lr=4.14e-05
+[2026-03-22 18:38:44] [temp003 train]   [train 43500/50000] loss=1.5566 acc=0.4381 positives=97 bank1=813 bank2=922 lr=4.09e-05
+[2026-03-22 18:38:49] [temp003 train]   [train 44000/50000] loss=1.0357 acc=0.5556 positives=63 bank1=631 bank2=466 lr=4.03e-05
+[2026-03-22 18:38:54] [temp003 train]   [train 44500/50000] loss=1.3229 acc=0.5000 positives=113 bank1=1515 bank2=1100 lr=3.98e-05
+[2026-03-22 18:38:59] [temp003 train]   [train 45000/50000] loss=0.9791 acc=0.5887 positives=62 bank1=530 bank2=793 lr=3.93e-05
+[2026-03-22 18:39:05] [temp003 train]   [train 45500/50000] loss=1.3241 acc=0.5141 positives=142 bank1=810 bank2=1073 lr=3.87e-05
+[2026-03-22 18:39:10] [temp003 train]   [train 46000/50000] loss=1.3978 acc=0.4294 positives=85 bank1=1324 bank2=555 lr=3.82e-05
+[2026-03-22 18:39:15] [temp003 train]   [train 46500/50000] loss=4.3126 acc=0.0696 positives=115 bank1=982 bank2=2700 lr=3.77e-05
+[2026-03-22 18:39:21] [temp003 train]   [train 47000/50000] loss=1.8324 acc=0.3672 positives=64 bank1=881 bank2=877 lr=3.72e-05
+[2026-03-22 18:39:26] [temp003 train]   [train 47500/50000] loss=1.1333 acc=0.4722 positives=72 bank1=930 bank2=743 lr=3.67e-05
+[2026-03-22 18:39:32] [temp003 train]   [train 48000/50000] loss=2.1769 acc=0.2428 positives=208 bank1=851 bank2=1385 lr=3.62e-05
+[2026-03-22 18:39:37] [temp003 train]   [train 48500/50000] loss=1.4268 acc=0.4167 positives=78 bank1=634 bank2=724 lr=3.57e-05
+[2026-03-22 18:39:43] [temp003 train]   [train 49000/50000] loss=1.4128 acc=0.4203 positives=69 bank1=677 bank2=1413 lr=3.52e-05
+[2026-03-22 18:39:48] [temp003 train]   [train 49500/50000] loss=4.3029 acc=0.0941 positives=186 bank1=2543 bank2=4704 lr=3.47e-05
+[2026-03-22 18:39:53] [temp003 train]   [val 0/1000] loss=1.9830 acc=0.4181 positives=171 bank1=813 bank2=1640
+[2026-03-22 18:39:56] [temp003 train]   [val 500/1000] loss=1.9935 acc=0.2742 positives=93 bank1=1872 bank2=5366
+[2026-03-22 18:39:57] [temp003 train] Epoch 9/10: train_loss=1.7236 train_acc=0.4151 val_loss=1.8063 val_acc=0.4051
+[2026-03-22 18:39:57] [temp003 train]   train: time=584.9s pairs/s=85.48 cache_hit_rate=1.000
+[2026-03-22 18:39:57] [temp003 train]   val:   time=4.4s pairs/s=229.56 cache_hit_rate=1.000
+[2026-03-22 18:39:57] [temp003 train]   RAM maxrss=141.53 GB
+[2026-03-22 18:39:57] [temp003 train]   GPU peak: alloc=0.272 GB reserved=1.000 GB
+[2026-03-22 18:39:58] [temp003 train]   [train 0/50000] loss=2.7717 acc=0.2708 positives=120 bank1=439 bank2=4391 lr=3.42e-05
+[2026-03-22 18:40:04] [temp003 train]   [train 500/50000] loss=4.2506 acc=0.1176 positives=51 bank1=1386 bank2=1874 lr=3.37e-05
+[2026-03-22 18:40:10] [temp003 train]   [train 1000/50000] loss=2.0941 acc=0.2932 positives=249 bank1=2653 bank2=2420 lr=3.33e-05
+[2026-03-22 18:40:16] [temp003 train]   [train 1500/50000] loss=1.4504 acc=0.3909 positives=55 bank1=739 bank2=995 lr=3.28e-05
+[2026-03-22 18:40:22] [temp003 train]   [train 2000/50000] loss=1.9359 acc=0.4417 positives=60 bank1=1008 bank2=1864 lr=3.23e-05
+[2026-03-22 18:40:28] [temp003 train]   [train 2500/50000] loss=4.0425 acc=0.1174 positives=115 bank1=3849 bank2=1992 lr=3.19e-05
+[2026-03-22 18:40:34] [temp003 train]   [train 3000/50000] loss=2.3515 acc=0.2167 positives=60 bank1=1956 bank2=896 lr=3.14e-05
+[2026-03-22 18:40:40] [temp003 train]   [train 3500/50000] loss=3.4249 acc=0.1818 positives=77 bank1=4896 bank2=2527 lr=3.10e-05
+[2026-03-22 18:40:46] [temp003 train]   [train 4000/50000] loss=1.4305 acc=0.4818 positives=55 bank1=1133 bank2=869 lr=3.05e-05
+[2026-03-22 18:40:51] [temp003 train]   [train 4500/50000] loss=2.0200 acc=0.4107 positives=112 bank1=1339 bank2=805 lr=3.01e-05
+[2026-03-22 18:40:57] [temp003 train]   [train 5000/50000] loss=2.1994 acc=0.3833 positives=60 bank1=973 bank2=1034 lr=2.97e-05
+[2026-03-22 18:41:02] [temp003 train]   [train 5500/50000] loss=1.3618 acc=0.5000 positives=61 bank1=657 bank2=580 lr=2.92e-05
+[2026-03-22 18:41:07] [temp003 train]   [train 6000/50000] loss=1.4932 acc=0.4714 positives=70 bank1=1671 bank2=908 lr=2.88e-05
+[2026-03-22 18:41:13] [temp003 train]   [train 6500/50000] loss=2.0963 acc=0.3553 positives=76 bank1=1130 bank2=2222 lr=2.84e-05
+[2026-03-22 18:41:19] [temp003 train]   [train 7000/50000] loss=3.2617 acc=0.1514 positives=512 bank1=1646 bank2=3569 lr=2.80e-05
+[2026-03-22 18:41:25] [temp003 train]   [train 7500/50000] loss=3.0116 acc=0.1927 positives=288 bank1=1024 bank2=5185 lr=2.75e-05
+[2026-03-22 18:41:31] [temp003 train]   [train 8000/50000] loss=3.5849 acc=0.0719 positives=139 bank1=2818 bank2=1262 lr=2.71e-05
+[2026-03-22 18:41:37] [temp003 train]   [train 8500/50000] loss=1.1408 acc=0.5170 positives=88 bank1=490 bank2=1095 lr=2.67e-05
+[2026-03-22 18:41:44] [temp003 train]   [train 9000/50000] loss=2.2795 acc=0.3326 positives=227 bank1=6177 bank2=1377 lr=2.63e-05
+[2026-03-22 18:41:50] [temp003 train]   [train 9500/50000] loss=3.2275 acc=0.1426 positives=512 bank1=2612 bank2=2507 lr=2.59e-05
+[2026-03-22 18:41:56] [temp003 train]   [train 10000/50000] loss=1.5898 acc=0.4495 positives=317 bank1=1312 bank2=1071 lr=2.56e-05
+[2026-03-22 18:42:01] [temp003 train]   [train 10500/50000] loss=0.9399 acc=0.6834 positives=199 bank1=1964 bank2=877 lr=2.52e-05
+[2026-03-22 18:42:08] [temp003 train]   [train 11000/50000] loss=1.4658 acc=0.4659 positives=88 bank1=1076 bank2=2108 lr=2.48e-05
+[2026-03-22 18:42:13] [temp003 train]   [train 11500/50000] loss=2.0697 acc=0.3878 positives=156 bank1=1018 bank2=4610 lr=2.44e-05
+[2026-03-22 18:42:19] [temp003 train]   [train 12000/50000] loss=1.4683 acc=0.4565 positives=69 bank1=617 bank2=2382 lr=2.40e-05
+[2026-03-22 18:42:25] [temp003 train]   [train 12500/50000] loss=2.2494 acc=0.3167 positives=150 bank1=997 bank2=985 lr=2.37e-05
+[2026-03-22 18:42:31] [temp003 train]   [train 13000/50000] loss=2.5200 acc=0.2964 positives=167 bank1=755 bank2=3372 lr=2.33e-05
+[2026-03-22 18:42:37] [temp003 train]   [train 13500/50000] loss=1.1149 acc=0.5086 positives=58 bank1=542 bank2=1922 lr=2.30e-05
+[2026-03-22 18:42:43] [temp003 train]   [train 14000/50000] loss=0.9738 acc=0.5823 positives=468 bank1=2141 bank2=2888 lr=2.26e-05
+[2026-03-22 18:42:50] [temp003 train]   [train 14500/50000] loss=2.3663 acc=0.2840 positives=206 bank1=1181 bank2=4533 lr=2.23e-05
+[2026-03-22 18:42:56] [temp003 train]   [train 15000/50000] loss=1.6899 acc=0.3529 positives=204 bank1=5339 bank2=1823 lr=2.19e-05
+[2026-03-22 18:43:03] [temp003 train]   [train 15500/50000] loss=1.2335 acc=0.5000 positives=66 bank1=7458 bank2=1248 lr=2.16e-05
+[2026-03-22 18:43:09] [temp003 train]   [train 16000/50000] loss=0.9659 acc=0.5667 positives=105 bank1=5335 bank2=819 lr=2.13e-05
+[2026-03-22 18:43:16] [temp003 train]   [train 16500/50000] loss=1.8668 acc=0.3105 positives=512 bank1=8329 bank2=3382 lr=2.09e-05
+[2026-03-22 18:43:23] [temp003 train]   [train 17000/50000] loss=0.8268 acc=0.6118 positives=76 bank1=2617 bank2=697 lr=2.06e-05
+[2026-03-22 18:43:29] [temp003 train]   [train 17500/50000] loss=1.6230 acc=0.4600 positives=50 bank1=2057 bank2=2520 lr=2.03e-05
+[2026-03-22 18:43:36] [temp003 train]   [train 18000/50000] loss=1.4451 acc=0.4160 positives=512 bank1=6401 bank2=5169 lr=2.00e-05
+[2026-03-22 18:43:43] [temp003 train]   [train 18500/50000] loss=1.5949 acc=0.3963 positives=434 bank1=2064 bank2=6073 lr=1.97e-05
+[2026-03-22 18:43:49] [temp003 train]   [train 19000/50000] loss=1.4600 acc=0.4234 positives=333 bank1=1889 bank2=2508 lr=1.94e-05
+[2026-03-22 18:43:56] [temp003 train]   [train 19500/50000] loss=1.7172 acc=0.3263 positives=262 bank1=2648 bank2=2205 lr=1.91e-05
+[2026-03-22 18:44:02] [temp003 train]   [train 20000/50000] loss=1.7275 acc=0.3354 positives=401 bank1=6256 bank2=2316 lr=1.88e-05
+[2026-03-22 18:44:09] [temp003 train]   [train 20500/50000] loss=1.8286 acc=0.2989 positives=281 bank1=2408 bank2=3500 lr=1.85e-05
+[2026-03-22 18:44:15] [temp003 train]   [train 21000/50000] loss=1.8066 acc=0.3630 positives=303 bank1=5443 bank2=1720 lr=1.82e-05
+[2026-03-22 18:44:22] [temp003 train]   [train 21500/50000] loss=1.8655 acc=0.3828 positives=64 bank1=440 bank2=3756 lr=1.79e-05
+[2026-03-22 18:44:28] [temp003 train]   [train 22000/50000] loss=1.0569 acc=0.5488 positives=123 bank1=1990 bank2=988 lr=1.76e-05
+[2026-03-22 18:44:35] [temp003 train]   [train 22500/50000] loss=1.5090 acc=0.4797 positives=74 bank1=1322 bank2=2708 lr=1.74e-05
+[2026-03-22 18:44:41] [temp003 train]   [train 23000/50000] loss=1.2493 acc=0.4511 positives=92 bank1=5381 bank2=748 lr=1.71e-05
+[2026-03-22 18:44:48] [temp003 train]   [train 23500/50000] loss=1.5740 acc=0.4053 positives=512 bank1=5537 bank2=3336 lr=1.68e-05
+[2026-03-22 18:44:54] [temp003 train]   [train 24000/50000] loss=0.9844 acc=0.5772 positives=123 bank1=679 bank2=2883 lr=1.66e-05
+[2026-03-22 18:45:01] [temp003 train]   [train 24500/50000] loss=1.9879 acc=0.2512 positives=215 bank1=2264 bank2=3548 lr=1.63e-05
+[2026-03-22 18:45:07] [temp003 train]   [train 25000/50000] loss=1.6236 acc=0.4259 positives=81 bank1=2115 bank2=2570 lr=1.61e-05
+[2026-03-22 18:45:14] [temp003 train]   [train 25500/50000] loss=1.5701 acc=0.3406 positives=276 bank1=3753 bank2=1503 lr=1.59e-05
+[2026-03-22 18:45:20] [temp003 train]   [train 26000/50000] loss=0.4570 acc=0.7500 positives=52 bank1=1809 bank2=385 lr=1.56e-05
+[2026-03-22 18:45:27] [temp003 train]   [train 26500/50000] loss=0.8273 acc=0.6649 positives=94 bank1=1747 bank2=1943 lr=1.54e-05
+[2026-03-22 18:45:33] [temp003 train]   [train 27000/50000] loss=0.9876 acc=0.5890 positives=264 bank1=4912 bank2=1152 lr=1.52e-05
+[2026-03-22 18:45:40] [temp003 train]   [train 27500/50000] loss=1.0753 acc=0.5127 positives=79 bank1=1378 bank2=1133 lr=1.49e-05
+[2026-03-22 18:45:47] [temp003 train]   [train 28000/50000] loss=0.9822 acc=0.5529 positives=104 bank1=1140 bank2=1965 lr=1.47e-05
+[2026-03-22 18:45:53] [temp003 train]   [train 28500/50000] loss=1.4698 acc=0.3796 positives=54 bank1=2003 bank2=1506 lr=1.45e-05
+[2026-03-22 18:45:59] [temp003 train]   [train 29000/50000] loss=1.2416 acc=0.4729 positives=277 bank1=2839 bank2=1582 lr=1.43e-05
+[2026-03-22 18:46:05] [temp003 train]   [train 29500/50000] loss=0.9944 acc=0.6010 positives=104 bank1=1021 bank2=1885 lr=1.41e-05
+[2026-03-22 18:46:11] [temp003 train]   [train 30000/50000] loss=1.0759 acc=0.5781 positives=128 bank1=1810 bank2=1662 lr=1.39e-05
+[2026-03-22 18:46:17] [temp003 train]   [train 30500/50000] loss=1.3836 acc=0.4701 positives=67 bank1=1681 bank2=944 lr=1.37e-05
+[2026-03-22 18:46:22] [temp003 train]   [train 31000/50000] loss=1.3246 acc=0.4690 positives=129 bank1=2436 bank2=1057 lr=1.35e-05
+[2026-03-22 18:46:28] [temp003 train]   [train 31500/50000] loss=0.8624 acc=0.6178 positives=174 bank1=1027 bank2=2044 lr=1.33e-05
+[2026-03-22 18:46:34] [temp003 train]   [train 32000/50000] loss=1.3600 acc=0.4300 positives=307 bank1=1047 bank2=1264 lr=1.32e-05
+[2026-03-22 18:46:40] [temp003 train]   [train 32500/50000] loss=1.6320 acc=0.4492 positives=512 bank1=1236 bank2=2694 lr=1.30e-05
+[2026-03-22 18:46:46] [temp003 train]   [train 33000/50000] loss=1.2236 acc=0.4808 positives=52 bank1=662 bank2=1354 lr=1.28e-05
+[2026-03-22 18:46:52] [temp003 train]   [train 33500/50000] loss=2.2660 acc=0.2727 positives=99 bank1=699 bank2=1425 lr=1.27e-05
+[2026-03-22 18:46:58] [temp003 train]   [train 34000/50000] loss=2.2693 acc=0.2781 positives=347 bank1=1752 bank2=1915 lr=1.25e-05
+[2026-03-22 18:47:04] [temp003 train]   [train 34500/50000] loss=1.3432 acc=0.5377 positives=53 bank1=726 bank2=712 lr=1.23e-05
+[2026-03-22 18:47:09] [temp003 train]   [train 35000/50000] loss=1.2160 acc=0.5390 positives=77 bank1=857 bank2=697 lr=1.22e-05
+[2026-03-22 18:47:14] [temp003 train]   [train 35500/50000] loss=2.0545 acc=0.3087 positives=149 bank1=1760 bank2=824 lr=1.21e-05
+[2026-03-22 18:47:19] [temp003 train]   [train 36000/50000] loss=1.5173 acc=0.4406 positives=143 bank1=801 bank2=649 lr=1.19e-05
+[2026-03-22 18:47:25] [temp003 train]   [train 36500/50000] loss=1.1624 acc=0.5882 positives=68 bank1=1227 bank2=451 lr=1.18e-05
+[2026-03-22 18:47:30] [temp003 train]   [train 37000/50000] loss=1.3315 acc=0.4783 positives=69 bank1=680 bank2=552 lr=1.17e-05
+[2026-03-22 18:47:35] [temp003 train]   [train 37500/50000] loss=1.1772 acc=0.5514 positives=146 bank1=886 bank2=922 lr=1.15e-05
+[2026-03-22 18:47:40] [temp003 train]   [train 38000/50000] loss=1.3717 acc=0.5149 positives=67 bank1=1238 bank2=522 lr=1.14e-05
+[2026-03-22 18:47:46] [temp003 train]   [train 38500/50000] loss=0.8728 acc=0.6667 positives=75 bank1=447 bank2=551 lr=1.13e-05
+[2026-03-22 18:47:51] [temp003 train]   [train 39000/50000] loss=1.5273 acc=0.4431 positives=123 bank1=717 bank2=667 lr=1.12e-05
+[2026-03-22 18:47:56] [temp003 train]   [train 39500/50000] loss=1.4472 acc=0.4968 positives=156 bank1=1087 bank2=812 lr=1.11e-05
+[2026-03-22 18:48:01] [temp003 train]   [train 40000/50000] loss=1.1433 acc=0.5577 positives=52 bank1=503 bank2=1067 lr=1.10e-05
+[2026-03-22 18:48:06] [temp003 train]   [train 40500/50000] loss=0.7858 acc=0.6639 positives=61 bank1=436 bank2=638 lr=1.09e-05
+[2026-03-22 18:48:11] [temp003 train]   [train 41000/50000] loss=1.6199 acc=0.4535 positives=86 bank1=699 bank2=700 lr=1.08e-05
+[2026-03-22 18:48:17] [temp003 train]   [train 41500/50000] loss=2.4313 acc=0.2596 positives=52 bank1=821 bank2=533 lr=1.07e-05
+[2026-03-22 18:48:22] [temp003 train]   [train 42000/50000] loss=1.0770 acc=0.5602 positives=108 bank1=500 bank2=1217 lr=1.06e-05
+[2026-03-22 18:48:27] [temp003 train]   [train 42500/50000] loss=1.5389 acc=0.4062 positives=80 bank1=554 bank2=593 lr=1.05e-05
+[2026-03-22 18:48:32] [temp003 train]   [train 43000/50000] loss=1.2504 acc=0.4681 positives=188 bank1=651 bank2=1267 lr=1.05e-05
+[2026-03-22 18:48:38] [temp003 train]   [train 43500/50000] loss=1.7033 acc=0.4095 positives=105 bank1=586 bank2=860 lr=1.04e-05
+[2026-03-22 18:48:43] [temp003 train]   [train 44000/50000] loss=0.9781 acc=0.6111 positives=54 bank1=1503 bank2=407 lr=1.04e-05
+[2026-03-22 18:48:48] [temp003 train]   [train 44500/50000] loss=1.4787 acc=0.4480 positives=125 bank1=715 bank2=745 lr=1.03e-05
+[2026-03-22 18:48:53] [temp003 train]   [train 45000/50000] loss=1.4609 acc=0.4397 positives=141 bank1=654 bank2=705 lr=1.02e-05
+[2026-03-22 18:48:58] [temp003 train]   [train 45500/50000] loss=1.5520 acc=0.4027 positives=149 bank1=764 bank2=638 lr=1.02e-05
+[2026-03-22 18:49:04] [temp003 train]   [train 46000/50000] loss=1.5768 acc=0.4183 positives=104 bank1=771 bank2=587 lr=1.02e-05
+[2026-03-22 18:49:09] [temp003 train]   [train 46500/50000] loss=1.1889 acc=0.4478 positives=67 bank1=361 bank2=544 lr=1.01e-05
+[2026-03-22 18:49:14] [temp003 train]   [train 47000/50000] loss=1.8511 acc=0.3318 positives=107 bank1=479 bank2=1721 lr=1.01e-05
+[2026-03-22 18:49:19] [temp003 train]   [train 47500/50000] loss=1.8328 acc=0.3438 positives=80 bank1=2108 bank2=954 lr=1.01e-05
+[2026-03-22 18:49:25] [temp003 train]   [train 48000/50000] loss=0.8141 acc=0.5973 positives=113 bank1=545 bank2=558 lr=1.00e-05
+[2026-03-22 18:49:30] [temp003 train]   [train 48500/50000] loss=1.6357 acc=0.3796 positives=54 bank1=940 bank2=597 lr=1.00e-05
+[2026-03-22 18:49:36] [temp003 train]   [train 49000/50000] loss=1.0479 acc=0.5400 positives=50 bank1=454 bank2=593 lr=1.00e-05
+[2026-03-22 18:49:41] [temp003 train]   [train 49500/50000] loss=1.9873 acc=0.2727 positives=66 bank1=494 bank2=854 lr=1.00e-05
+[2026-03-22 18:49:46] [temp003 train]   [val 0/1000] loss=2.5620 acc=0.3343 positives=501 bank1=2377 bank2=3444
+[2026-03-22 18:49:49] [temp003 train]   [val 500/1000] loss=0.8630 acc=0.6181 positives=144 bank1=3601 bank2=860
+[2026-03-22 18:49:51] [temp003 train] Epoch 10/10: train_loss=1.7431 train_acc=0.4123 val_loss=1.7502 val_acc=0.4102
+[2026-03-22 18:49:51] [temp003 train]   train: time=588.6s pairs/s=84.95 cache_hit_rate=1.000
+[2026-03-22 18:49:51] [temp003 train]   val:   time=4.3s pairs/s=234.43 cache_hit_rate=1.000
+[2026-03-22 18:49:51] [temp003 train]   RAM maxrss=141.53 GB
+[2026-03-22 18:49:51] [temp003 train]   GPU peak: alloc=0.289 GB reserved=1.000 GB
+[2026-03-22 18:49:51] [temp003 train]   -> Saved best model (monitor_loss=1.7502)
+[2026-03-22 18:49:51] [temp003 train] 
+[2026-03-22 18:49:51] [temp003 train] Training complete. Best monitored loss: 1.7502
+[2026-03-22 18:49:51] [temp003 train] Checkpoints saved to: /home.stud/gorbuden/datagrid/Software-Project-MS/experiments/phase2_projection_temp003
+[2026-03-22 18:50:00] Training complete for temp003
+[2026-03-22 18:50:00] Evaluating temp003 on sacre_coeur
+[2026-03-22 18:50:00] GPU 0 busy: used=2442MiB util=32% (thresholds 4000MiB/20%). Sleeping 300s.
+[2026-03-22 18:55:00] GPU 0 busy: used=2442MiB util=37% (thresholds 4000MiB/20%). Sleeping 300s.
+[2026-03-22 19:00:00] GPU 0 busy: used=2442MiB util=64% (thresholds 4000MiB/20%). Sleeping 300s.
+[2026-03-22 19:05:00] GPU 0 busy: used=2442MiB util=64% (thresholds 4000MiB/20%). Sleeping 300s.
+[2026-03-22 19:10:00] GPU 0 busy: used=2442MiB util=39% (thresholds 4000MiB/20%). Sleeping 300s.

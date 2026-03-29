@@ -227,9 +227,23 @@ def main():
                     skipped += 1
                     continue
             
-            match_data = np.load(match_file)
-            mkpts0 = match_data['mkpts0']
-            mkpts1 = match_data['mkpts1']
+            try:
+                with np.load(match_file) as match_data:
+                    files = set(match_data.files)
+                    if "mkpts0" in files and "mkpts1" in files:
+                        mkpts0 = match_data["mkpts0"]
+                        mkpts1 = match_data["mkpts1"]
+                    elif "keypoints0" in files and "keypoints1" in files:
+                        mkpts0 = match_data["keypoints0"]
+                        mkpts1 = match_data["keypoints1"]
+                    else:
+                        raise KeyError(
+                            f"missing expected match arrays; found keys {sorted(files)}"
+                        )
+            except Exception as e:
+                print(f"[Pack] Skipping malformed match file {match_file}: {e}")
+                skipped += 1
+                continue
             
             if len(mkpts0) < 5:
                 skipped += 1

@@ -1,0 +1,665 @@
+[2026-03-21 12:10:58] Starting Phase 2A pipeline
+[2026-03-21 12:10:58] Sparse bundles missing; running extraction first
+[2026-03-21 12:19:24] Scene 0080: recon=manhattan/0, 6494 images, 901733 points3D, 2340784 kept pairs
+[2026-03-21 12:19:24] 
+[2026-03-21 12:19:24] Total: 1 scenes, 2340784 training pairs
+[2026-03-21 12:19:25] Scene 0080: extracting sparse features for 5119 candidate images
+[2026-03-21 12:20:43]   [0080 100/5119] extracted=100 missing=0 failed=0
+[2026-03-21 12:21:57]   [0080 200/5119] extracted=200 missing=0 failed=0
+[2026-03-21 12:23:08]   [0080 300/5119] extracted=299 missing=1 failed=0
+[2026-03-21 12:24:04]   [0080 400/5119] extracted=399 missing=1 failed=0
+[2026-03-21 12:25:00]   [0080 500/5119] extracted=499 missing=1 failed=0
+[2026-03-21 12:26:15]   [0080 600/5119] extracted=599 missing=1 failed=0
+[2026-03-21 12:27:44]   [0080 700/5119] extracted=699 missing=1 failed=0
+[2026-03-21 12:29:39]   [0080 800/5119] extracted=799 missing=1 failed=0
+[2026-03-21 12:31:19]   [0080 900/5119] extracted=899 missing=1 failed=0
+[2026-03-21 12:32:40]   [0080 1000/5119] extracted=999 missing=1 failed=0
+[2026-03-21 12:34:00]   [0080 1100/5119] extracted=1099 missing=1 failed=0
+[2026-03-21 12:35:17]   [0080 1200/5119] extracted=1199 missing=1 failed=0
+[2026-03-21 12:36:30]   [0080 1300/5119] extracted=1299 missing=1 failed=0
+[2026-03-21 12:37:33]   [0080 1400/5119] extracted=1399 missing=1 failed=0
+[2026-03-21 12:38:35]   [0080 1500/5119] extracted=1499 missing=1 failed=0
+[2026-03-21 12:39:35]   [0080 1600/5119] extracted=1599 missing=1 failed=0
+[2026-03-21 12:40:33]   [0080 1700/5119] extracted=1699 missing=1 failed=0
+[2026-03-21 12:41:32]   [0080 1800/5119] extracted=1799 missing=1 failed=0
+[2026-03-21 12:42:32]   [0080 1900/5119] extracted=1899 missing=1 failed=0
+[2026-03-21 12:43:46]   [0080 2000/5119] extracted=1999 missing=1 failed=0
+[2026-03-21 12:45:06]   [0080 2100/5119] extracted=2099 missing=1 failed=0
+[2026-03-21 12:46:35]   [0080 2200/5119] extracted=2199 missing=1 failed=0
+[2026-03-21 12:48:03]   [0080 2300/5119] extracted=2299 missing=1 failed=0
+[2026-03-21 12:49:36]   [0080 2400/5119] extracted=2399 missing=1 failed=0
+[2026-03-21 12:51:02]   [0080 2500/5119] extracted=2499 missing=1 failed=0
+[2026-03-21 12:52:18]   [0080 2600/5119] extracted=2599 missing=1 failed=0
+[2026-03-21 12:53:51]   [0080 2700/5119] extracted=2699 missing=1 failed=0
+[2026-03-21 12:55:16]   [0080 2800/5119] extracted=2799 missing=1 failed=0
+[2026-03-21 12:56:46]   [0080 2900/5119] extracted=2899 missing=1 failed=0
+[2026-03-21 12:58:03]   [0080 3000/5119] extracted=2999 missing=1 failed=0
+[2026-03-21 12:59:15]   [0080 3100/5119] extracted=3099 missing=1 failed=0
+[2026-03-21 13:00:41]   [0080 3200/5119] extracted=3199 missing=1 failed=0
+[2026-03-21 13:02:00]   [0080 3300/5119] extracted=3299 missing=1 failed=0
+[2026-03-21 13:03:17]   [0080 3400/5119] extracted=3399 missing=1 failed=0
+[2026-03-21 13:04:40]   [0080 3500/5119] extracted=3499 missing=1 failed=0
+[2026-03-21 13:06:10]   [0080 3600/5119] extracted=3599 missing=1 failed=0
+[2026-03-21 13:07:25]   [0080 3700/5119] extracted=3699 missing=1 failed=0
+[2026-03-21 13:08:52]   [0080 3800/5119] extracted=3799 missing=1 failed=0
+[2026-03-21 13:10:03]   [0080 3900/5119] extracted=3899 missing=1 failed=0
+[2026-03-21 13:11:17]   [0080 4000/5119] extracted=3999 missing=1 failed=0
+[2026-03-21 13:12:41]   [0080 4100/5119] extracted=4099 missing=1 failed=0
+[2026-03-21 13:14:20]   [0080 4200/5119] extracted=4199 missing=1 failed=0
+[2026-03-21 13:15:54]   [0080 4300/5119] extracted=4299 missing=1 failed=0
+[2026-03-21 13:17:20]   [0080 4400/5119] extracted=4399 missing=1 failed=0
+[2026-03-21 13:18:47]   [0080 4500/5119] extracted=4499 missing=1 failed=0
+[2026-03-21 13:20:17]   [0080 4600/5119] extracted=4599 missing=1 failed=0
+[2026-03-21 13:21:46]   [0080 4700/5119] extracted=4699 missing=1 failed=0
+[2026-03-21 13:23:17]   [0080 4800/5119] extracted=4799 missing=1 failed=0
+[2026-03-21 13:24:52]   [0080 4900/5119] extracted=4899 missing=1 failed=0
+[2026-03-21 13:26:24]   [0080 5000/5119] extracted=4999 missing=1 failed=0
+[2026-03-21 13:27:58]   [0080 5100/5119] extracted=5099 missing=1 failed=0
+[2026-03-21 13:28:17]   [0080 5119/5119] extracted=5118 missing=1 failed=0
+[2026-03-21 13:48:57] Scene 0080: images=5118 features=11903447 pairs=2339843 size=37.01 GB time=5875.8s missing=1 failed=0
+[2026-03-21 13:50:13] Scene 0042: recon=manhattan/0, 4079 images, 339681 points3D, 611237 kept pairs
+[2026-03-21 13:50:13] 
+[2026-03-21 13:50:13] Total: 1 scenes, 611237 training pairs
+[2026-03-21 13:50:13] Scene 0042: extracting sparse features for 4053 candidate images
+[2026-03-21 13:51:06]   [0042 100/4053] extracted=100 missing=0 failed=0
+[2026-03-21 13:52:02]   [0042 200/4053] extracted=200 missing=0 failed=0
+[2026-03-21 13:52:59]   [0042 300/4053] extracted=300 missing=0 failed=0
+[2026-03-21 13:53:57]   [0042 400/4053] extracted=400 missing=0 failed=0
+[2026-03-21 13:54:55]   [0042 500/4053] extracted=500 missing=0 failed=0
+[2026-03-21 13:55:52]   [0042 600/4053] extracted=600 missing=0 failed=0
+[2026-03-21 13:56:56]   [0042 700/4053] extracted=700 missing=0 failed=0
+[2026-03-21 13:57:52]   [0042 800/4053] extracted=800 missing=0 failed=0
+[2026-03-21 13:58:50]   [0042 900/4053] extracted=900 missing=0 failed=0
+[2026-03-21 13:59:46]   [0042 1000/4053] extracted=1000 missing=0 failed=0
+[2026-03-21 14:00:47]   [0042 1100/4053] extracted=1100 missing=0 failed=0
+[2026-03-21 14:01:45]   [0042 1200/4053] extracted=1200 missing=0 failed=0
+[2026-03-21 14:02:46]   [0042 1300/4053] extracted=1300 missing=0 failed=0
+[2026-03-21 14:03:40]   [0042 1400/4053] extracted=1400 missing=0 failed=0
+[2026-03-21 14:04:35]   [0042 1500/4053] extracted=1500 missing=0 failed=0
+[2026-03-21 14:05:33]   [0042 1600/4053] extracted=1600 missing=0 failed=0
+[2026-03-21 14:06:28]   [0042 1700/4053] extracted=1700 missing=0 failed=0
+[2026-03-21 14:07:21]   [0042 1800/4053] extracted=1800 missing=0 failed=0
+[2026-03-21 14:08:15]   [0042 1900/4053] extracted=1900 missing=0 failed=0
+[2026-03-21 14:09:09]   [0042 2000/4053] extracted=2000 missing=0 failed=0
+[2026-03-21 14:10:04]   [0042 2100/4053] extracted=2100 missing=0 failed=0
+[2026-03-21 14:10:57]   [0042 2200/4053] extracted=2200 missing=0 failed=0
+[2026-03-21 14:11:50]   [0042 2300/4053] extracted=2300 missing=0 failed=0
+[2026-03-21 14:12:46]   [0042 2400/4053] extracted=2400 missing=0 failed=0
+[2026-03-21 14:13:42]   [0042 2500/4053] extracted=2500 missing=0 failed=0
+[2026-03-21 14:14:39]   [0042 2600/4053] extracted=2600 missing=0 failed=0
+[2026-03-21 14:15:38]   [0042 2700/4053] extracted=2700 missing=0 failed=0
+[2026-03-21 14:16:38]   [0042 2800/4053] extracted=2800 missing=0 failed=0
+[2026-03-21 14:17:42]   [0042 2900/4053] extracted=2900 missing=0 failed=0
+[2026-03-21 14:18:46]   [0042 3000/4053] extracted=3000 missing=0 failed=0
+[2026-03-21 14:19:48]   [0042 3100/4053] extracted=3100 missing=0 failed=0
+[2026-03-21 14:20:46]   [0042 3200/4053] extracted=3200 missing=0 failed=0
+[2026-03-21 14:21:44]   [0042 3300/4053] extracted=3300 missing=0 failed=0
+[2026-03-21 14:22:38]   [0042 3400/4053] extracted=3400 missing=0 failed=0
+[2026-03-21 14:23:34]   [0042 3500/4053] extracted=3500 missing=0 failed=0
+[2026-03-21 14:24:26]   [0042 3600/4053] extracted=3600 missing=0 failed=0
+[2026-03-21 14:25:20]   [0042 3700/4053] extracted=3700 missing=0 failed=0
+[2026-03-21 14:26:21]   [0042 3800/4053] extracted=3800 missing=0 failed=0
+[2026-03-21 14:27:37]   [0042 3900/4053] extracted=3900 missing=0 failed=0
+[2026-03-21 14:28:50]   [0042 4000/4053] extracted=4000 missing=0 failed=0
+[2026-03-21 14:29:38]   [0042 4053/4053] extracted=4053 missing=0 failed=0
+[2026-03-21 14:36:37] Scene 0042: images=4053 features=4753772 pairs=611237 size=14.78 GB time=2858.0s missing=0 failed=0
+[2026-03-21 14:37:50] Scene 0380: recon=manhattan/0, 3898 images, 240149 points3D, 718993 kept pairs
+[2026-03-21 14:37:50] 
+[2026-03-21 14:37:50] Total: 1 scenes, 718993 training pairs
+[2026-03-21 14:37:50] Scene 0380: extracting sparse features for 3814 candidate images
+[2026-03-21 14:38:44]   [0380 100/3814] extracted=100 missing=0 failed=0
+[2026-03-21 14:39:39]   [0380 200/3814] extracted=200 missing=0 failed=0
+[2026-03-21 14:40:32]   [0380 300/3814] extracted=300 missing=0 failed=0
+[2026-03-21 14:41:26]   [0380 400/3814] extracted=400 missing=0 failed=0
+[2026-03-21 14:42:26]   [0380 500/3814] extracted=500 missing=0 failed=0
+[2026-03-21 14:43:27]   [0380 600/3814] extracted=600 missing=0 failed=0
+[2026-03-21 14:44:27]   [0380 700/3814] extracted=700 missing=0 failed=0
+[2026-03-21 14:45:30]   [0380 800/3814] extracted=800 missing=0 failed=0
+[2026-03-21 14:46:30]   [0380 900/3814] extracted=900 missing=0 failed=0
+[2026-03-21 14:47:36]   [0380 1000/3814] extracted=1000 missing=0 failed=0
+[2026-03-21 14:48:40]   [0380 1100/3814] extracted=1100 missing=0 failed=0
+[2026-03-21 14:50:04]   [0380 1200/3814] extracted=1200 missing=0 failed=0
+[2026-03-21 14:51:34]   [0380 1300/3814] extracted=1300 missing=0 failed=0
+[2026-03-21 14:52:47]   [0380 1400/3814] extracted=1400 missing=0 failed=0
+[2026-03-21 14:54:03]   [0380 1500/3814] extracted=1500 missing=0 failed=0
+[2026-03-21 14:55:17]   [0380 1600/3814] extracted=1600 missing=0 failed=0
+[2026-03-21 14:56:32]   [0380 1700/3814] extracted=1700 missing=0 failed=0
+[2026-03-21 14:57:43]   [0380 1800/3814] extracted=1800 missing=0 failed=0
+[2026-03-21 14:58:58]   [0380 1900/3814] extracted=1900 missing=0 failed=0
+[2026-03-21 15:00:15]   [0380 2000/3814] extracted=2000 missing=0 failed=0
+[2026-03-21 15:01:42]   [0380 2100/3814] extracted=2100 missing=0 failed=0
+[2026-03-21 15:03:05]   [0380 2200/3814] extracted=2200 missing=0 failed=0
+[2026-03-21 15:04:16]   [0380 2300/3814] extracted=2300 missing=0 failed=0
+[2026-03-21 15:05:09]   [0380 2400/3814] extracted=2400 missing=0 failed=0
+[2026-03-21 15:06:14]   [0380 2500/3814] extracted=2500 missing=0 failed=0
+[2026-03-21 15:07:15]   [0380 2600/3814] extracted=2600 missing=0 failed=0
+[2026-03-21 15:08:24]   [0380 2700/3814] extracted=2700 missing=0 failed=0
+[2026-03-21 15:09:40]   [0380 2800/3814] extracted=2800 missing=0 failed=0
+[2026-03-21 15:10:59]   [0380 2900/3814] extracted=2900 missing=0 failed=0
+[2026-03-21 15:12:07]   [0380 3000/3814] extracted=3000 missing=0 failed=0
+[2026-03-21 15:13:20]   [0380 3100/3814] extracted=3100 missing=0 failed=0
+[2026-03-21 15:14:18]   [0380 3200/3814] extracted=3200 missing=0 failed=0
+[2026-03-21 15:15:21]   [0380 3300/3814] extracted=3300 missing=0 failed=0
+[2026-03-21 15:16:27]   [0380 3400/3814] extracted=3400 missing=0 failed=0
+[2026-03-21 15:17:42]   [0380 3500/3814] extracted=3500 missing=0 failed=0
+[2026-03-21 15:18:54]   [0380 3600/3814] extracted=3600 missing=0 failed=0
+[2026-03-21 15:20:04]   [0380 3700/3814] extracted=3700 missing=0 failed=0
+[2026-03-21 15:21:02]   [0380 3800/3814] extracted=3800 missing=0 failed=0
+[2026-03-21 15:21:11]   [0380 3814/3814] extracted=3814 missing=0 failed=0
+[2026-03-21 15:26:01] Scene 0380: images=3814 features=3525534 pairs=718993 size=10.96 GB time=2963.8s missing=0 failed=0
+[2026-03-21 15:27:21] Scene 0000: recon=manhattan/0, 3803 images, 225128 points3D, 593986 kept pairs
+[2026-03-21 15:27:21] 
+[2026-03-21 15:27:21] Total: 1 scenes, 593986 training pairs
+[2026-03-21 15:27:21] Scene 0000: extracting sparse features for 3746 candidate images
+[2026-03-21 15:28:18]   [0000 100/3746] extracted=100 missing=0 failed=0
+[2026-03-21 15:29:13]   [0000 200/3746] extracted=200 missing=0 failed=0
+[2026-03-21 15:30:17]   [0000 300/3746] extracted=300 missing=0 failed=0
+[2026-03-21 15:31:30]   [0000 400/3746] extracted=400 missing=0 failed=0
+[2026-03-21 15:32:58]   [0000 500/3746] extracted=500 missing=0 failed=0
+[2026-03-21 15:34:17]   [0000 600/3746] extracted=600 missing=0 failed=0
+[2026-03-21 15:35:29]   [0000 700/3746] extracted=700 missing=0 failed=0
+[2026-03-21 15:36:42]   [0000 800/3746] extracted=800 missing=0 failed=0
+[2026-03-21 15:37:46]   [0000 900/3746] extracted=900 missing=0 failed=0
+[2026-03-21 15:38:47]   [0000 1000/3746] extracted=1000 missing=0 failed=0
+[2026-03-21 15:39:51]   [0000 1100/3746] extracted=1100 missing=0 failed=0
+[2026-03-21 15:41:03]   [0000 1200/3746] extracted=1200 missing=0 failed=0
+[2026-03-21 15:42:01]   [0000 1300/3746] extracted=1300 missing=0 failed=0
+[2026-03-21 15:43:04]   [0000 1400/3746] extracted=1400 missing=0 failed=0
+[2026-03-21 15:44:05]   [0000 1500/3746] extracted=1500 missing=0 failed=0
+[2026-03-21 15:45:01]   [0000 1600/3746] extracted=1600 missing=0 failed=0
+[2026-03-21 15:46:07]   [0000 1700/3746] extracted=1700 missing=0 failed=0
+[2026-03-21 15:47:17]   [0000 1800/3746] extracted=1800 missing=0 failed=0
+[2026-03-21 15:48:16]   [0000 1900/3746] extracted=1900 missing=0 failed=0
+[2026-03-21 15:49:21]   [0000 2000/3746] extracted=2000 missing=0 failed=0
+[2026-03-21 15:50:37]   [0000 2100/3746] extracted=2100 missing=0 failed=0
+[2026-03-21 15:51:44]   [0000 2200/3746] extracted=2200 missing=0 failed=0
+[2026-03-21 15:52:47]   [0000 2300/3746] extracted=2300 missing=0 failed=0
+[2026-03-21 15:53:53]   [0000 2400/3746] extracted=2400 missing=0 failed=0
+[2026-03-21 15:54:59]   [0000 2500/3746] extracted=2500 missing=0 failed=0
+[2026-03-21 15:55:53]   [0000 2600/3746] extracted=2600 missing=0 failed=0
+[2026-03-21 15:56:55]   [0000 2700/3746] extracted=2700 missing=0 failed=0
+[2026-03-21 15:58:02]   [0000 2800/3746] extracted=2800 missing=0 failed=0
+[2026-03-21 15:58:54]   [0000 2900/3746] extracted=2900 missing=0 failed=0
+[2026-03-21 15:59:55]   [0000 3000/3746] extracted=3000 missing=0 failed=0
+[2026-03-21 16:01:06]   [0000 3100/3746] extracted=3100 missing=0 failed=0
+[2026-03-21 16:02:06]   [0000 3200/3746] extracted=3200 missing=0 failed=0
+[2026-03-21 16:03:02]   [0000 3300/3746] extracted=3300 missing=0 failed=0
+[2026-03-21 16:03:58]   [0000 3400/3746] extracted=3400 missing=0 failed=0
+[2026-03-21 16:04:54]   [0000 3500/3746] extracted=3500 missing=0 failed=0
+[2026-03-21 16:05:55]   [0000 3600/3746] extracted=3600 missing=0 failed=0
+[2026-03-21 16:06:57]   [0000 3700/3746] extracted=3700 missing=0 failed=0
+[2026-03-21 16:07:24]   [0000 3746/3746] extracted=3746 missing=0 failed=0
+[2026-03-21 16:13:42] Scene 0000: images=3746 features=5201676 pairs=593986 size=16.17 GB time=2860.3s missing=0 failed=0
+[2026-03-21 16:16:44] Scene 0366: recon=manhattan/0, 3735 images, 19035 points3D, 1867366 kept pairs
+[2026-03-21 16:16:44] 
+[2026-03-21 16:16:44] Total: 1 scenes, 1867366 training pairs
+[2026-03-21 16:16:44] Scene 0366: extracting sparse features for 3396 candidate images
+[2026-03-21 16:17:58]   [0366 100/3396] extracted=100 missing=0 failed=0
+[2026-03-21 16:19:05]   [0366 200/3396] extracted=200 missing=0 failed=0
+[2026-03-21 16:20:15]   [0366 300/3396] extracted=300 missing=0 failed=0
+[2026-03-21 16:21:29]   [0366 400/3396] extracted=400 missing=0 failed=0
+[2026-03-21 16:22:42]   [0366 500/3396] extracted=500 missing=0 failed=0
+[2026-03-21 16:23:50]   [0366 600/3396] extracted=600 missing=0 failed=0
+[2026-03-21 16:25:10]   [0366 700/3396] extracted=700 missing=0 failed=0
+[2026-03-21 16:26:21]   [0366 800/3396] extracted=800 missing=0 failed=0
+[2026-03-21 16:27:32]   [0366 900/3396] extracted=900 missing=0 failed=0
+[2026-03-21 16:28:26]   [0366 1000/3396] extracted=1000 missing=0 failed=0
+[2026-03-21 16:29:23]   [0366 1100/3396] extracted=1100 missing=0 failed=0
+[2026-03-21 16:30:33]   [0366 1200/3396] extracted=1200 missing=0 failed=0
+[2026-03-21 16:31:41]   [0366 1300/3396] extracted=1300 missing=0 failed=0
+[2026-03-21 16:32:44]   [0366 1400/3396] extracted=1400 missing=0 failed=0
+[2026-03-21 16:33:44]   [0366 1500/3396] extracted=1500 missing=0 failed=0
+[2026-03-21 16:34:48]   [0366 1600/3396] extracted=1600 missing=0 failed=0
+[2026-03-21 16:35:53]   [0366 1700/3396] extracted=1700 missing=0 failed=0
+[2026-03-21 16:36:58]   [0366 1800/3396] extracted=1800 missing=0 failed=0
+[2026-03-21 16:37:58]   [0366 1900/3396] extracted=1900 missing=0 failed=0
+[2026-03-21 16:39:15]   [0366 2000/3396] extracted=2000 missing=0 failed=0
+[2026-03-21 16:40:38]   [0366 2100/3396] extracted=2100 missing=0 failed=0
+[2026-03-21 16:41:47]   [0366 2200/3396] extracted=2200 missing=0 failed=0
+[2026-03-21 16:42:44]   [0366 2300/3396] extracted=2300 missing=0 failed=0
+[2026-03-21 16:43:48]   [0366 2400/3396] extracted=2400 missing=0 failed=0
+[2026-03-21 16:44:50]   [0366 2500/3396] extracted=2500 missing=0 failed=0
+[2026-03-21 16:46:15]   [0366 2600/3396] extracted=2600 missing=0 failed=0
+[2026-03-21 16:47:29]   [0366 2700/3396] extracted=2700 missing=0 failed=0
+[2026-03-21 16:48:37]   [0366 2800/3396] extracted=2800 missing=0 failed=0
+[2026-03-21 16:49:53]   [0366 2900/3396] extracted=2900 missing=0 failed=0
+[2026-03-21 16:51:01]   [0366 3000/3396] extracted=3000 missing=0 failed=0
+[2026-03-21 16:51:57]   [0366 3100/3396] extracted=3100 missing=0 failed=0
+[2026-03-21 16:53:03]   [0366 3200/3396] extracted=3200 missing=0 failed=0
+[2026-03-21 16:54:20]   [0366 3300/3396] extracted=3300 missing=0 failed=0
+[2026-03-21 16:55:35]   [0366 3396/3396] extracted=3396 missing=0 failed=0
+[2026-03-21 16:58:17] Scene 0366: images=3396 features=2396415 pairs=1867366 size=7.47 GB time=2673.9s missing=0 failed=0
+[2026-03-21 16:58:46] Scene 0001: recon=manhattan/0, 3409 images, 134678 points3D, 262054 kept pairs
+[2026-03-21 16:58:46] 
+[2026-03-21 16:58:46] Total: 1 scenes, 262054 training pairs
+[2026-03-21 16:58:46] Scene 0001: extracting sparse features for 3346 candidate images
+[2026-03-21 17:00:04]   [0001 100/3346] extracted=100 missing=0 failed=0
+[2026-03-21 17:01:09]   [0001 200/3346] extracted=200 missing=0 failed=0
+[2026-03-21 17:02:16]   [0001 300/3346] extracted=300 missing=0 failed=0
+[2026-03-21 17:03:30]   [0001 400/3346] extracted=400 missing=0 failed=0
+[2026-03-21 17:04:48]   [0001 500/3346] extracted=500 missing=0 failed=0
+[2026-03-21 17:06:28]   [0001 600/3346] extracted=600 missing=0 failed=0
+[2026-03-21 17:07:44]   [0001 700/3346] extracted=700 missing=0 failed=0
+[2026-03-21 17:08:57]   [0001 800/3346] extracted=800 missing=0 failed=0
+[2026-03-21 17:10:19]   [0001 900/3346] extracted=900 missing=0 failed=0
+[2026-03-21 17:11:32]   [0001 1000/3346] extracted=1000 missing=0 failed=0
+[2026-03-21 17:12:28]   [0001 1100/3346] extracted=1100 missing=0 failed=0
+[2026-03-21 17:13:37]   [0001 1200/3346] extracted=1200 missing=0 failed=0
+[2026-03-21 17:14:51]   [0001 1300/3346] extracted=1300 missing=0 failed=0
+[2026-03-21 17:16:04]   [0001 1400/3346] extracted=1400 missing=0 failed=0
+[2026-03-21 17:17:18]   [0001 1500/3346] extracted=1500 missing=0 failed=0
+[2026-03-21 17:18:11]   [0001 1600/3346] extracted=1600 missing=0 failed=0
+[2026-03-21 17:19:13]   [0001 1700/3346] extracted=1700 missing=0 failed=0
+[2026-03-21 17:20:20]   [0001 1800/3346] extracted=1800 missing=0 failed=0
+[2026-03-21 17:21:29]   [0001 1900/3346] extracted=1900 missing=0 failed=0
+[2026-03-21 17:22:35]   [0001 2000/3346] extracted=2000 missing=0 failed=0
+[2026-03-21 17:23:42]   [0001 2100/3346] extracted=2100 missing=0 failed=0
+[2026-03-21 17:24:39]   [0001 2200/3346] extracted=2200 missing=0 failed=0
+[2026-03-21 17:25:43]   [0001 2300/3346] extracted=2300 missing=0 failed=0
+[2026-03-21 17:26:42]   [0001 2400/3346] extracted=2400 missing=0 failed=0
+[2026-03-21 17:27:47]   [0001 2500/3346] extracted=2500 missing=0 failed=0
+[2026-03-21 17:28:45]   [0001 2600/3346] extracted=2600 missing=0 failed=0
+[2026-03-21 17:29:46]   [0001 2700/3346] extracted=2700 missing=0 failed=0
+[2026-03-21 17:30:59]   [0001 2800/3346] extracted=2800 missing=0 failed=0
+[2026-03-21 17:32:08]   [0001 2900/3346] extracted=2900 missing=0 failed=0
+[2026-03-21 17:33:21]   [0001 3000/3346] extracted=3000 missing=0 failed=0
+[2026-03-21 17:34:11]   [0001 3100/3346] extracted=3100 missing=0 failed=0
+[2026-03-21 17:35:24]   [0001 3200/3346] extracted=3200 missing=0 failed=0
+[2026-03-21 17:36:40]   [0001 3300/3346] extracted=3300 missing=0 failed=0
+[2026-03-21 17:37:17]   [0001 3346/3346] extracted=3346 missing=0 failed=0
+[2026-03-21 17:39:59] Scene 0001: images=3346 features=2258908 pairs=262054 size=7.02 GB time=2501.2s missing=0 failed=0
+[2026-03-21 17:40:22] Scene 0005: recon=manhattan/0, 3167 images, 162831 points3D, 187378 kept pairs
+[2026-03-21 17:40:22] 
+[2026-03-21 17:40:22] Total: 1 scenes, 187378 training pairs
+[2026-03-21 17:40:22] Scene 0005: extracting sparse features for 3093 candidate images
+[2026-03-21 17:41:31]   [0005 100/3093] extracted=100 missing=0 failed=0
+[2026-03-21 17:42:40]   [0005 200/3093] extracted=200 missing=0 failed=0
+[2026-03-21 17:43:39]   [0005 300/3093] extracted=300 missing=0 failed=0
+[2026-03-21 17:44:48]   [0005 400/3093] extracted=400 missing=0 failed=0
+[2026-03-21 17:45:47]   [0005 500/3093] extracted=500 missing=0 failed=0
+[2026-03-21 17:47:02]   [0005 600/3093] extracted=600 missing=0 failed=0
+[2026-03-21 17:48:02]   [0005 700/3093] extracted=700 missing=0 failed=0
+[2026-03-21 17:49:17]   [0005 800/3093] extracted=800 missing=0 failed=0
+[2026-03-21 17:50:22]   [0005 900/3093] extracted=900 missing=0 failed=0
+[2026-03-21 17:51:27]   [0005 1000/3093] extracted=1000 missing=0 failed=0
+[2026-03-21 17:52:40]   [0005 1100/3093] extracted=1100 missing=0 failed=0
+[2026-03-21 17:53:39]   [0005 1200/3093] extracted=1200 missing=0 failed=0
+[2026-03-21 17:54:49]   [0005 1300/3093] extracted=1300 missing=0 failed=0
+[2026-03-21 17:55:58]   [0005 1400/3093] extracted=1400 missing=0 failed=0
+[2026-03-21 17:56:56]   [0005 1500/3093] extracted=1500 missing=0 failed=0
+[2026-03-21 17:57:53]   [0005 1600/3093] extracted=1600 missing=0 failed=0
+[2026-03-21 17:59:08]   [0005 1700/3093] extracted=1700 missing=0 failed=0
+[2026-03-21 18:00:24]   [0005 1800/3093] extracted=1800 missing=0 failed=0
+[2026-03-21 18:01:36]   [0005 1900/3093] extracted=1900 missing=0 failed=0
+[2026-03-21 18:02:29]   [0005 2000/3093] extracted=2000 missing=0 failed=0
+[2026-03-21 18:03:35]   [0005 2100/3093] extracted=2100 missing=0 failed=0
+[2026-03-21 18:04:41]   [0005 2200/3093] extracted=2200 missing=0 failed=0
+[2026-03-21 18:05:44]   [0005 2300/3093] extracted=2300 missing=0 failed=0
+[2026-03-21 18:06:52]   [0005 2400/3093] extracted=2400 missing=0 failed=0
+[2026-03-21 18:07:59]   [0005 2500/3093] extracted=2500 missing=0 failed=0
+[2026-03-21 18:09:12]   [0005 2600/3093] extracted=2600 missing=0 failed=0
+[2026-03-21 18:10:14]   [0005 2700/3093] extracted=2700 missing=0 failed=0
+[2026-03-21 18:11:28]   [0005 2800/3093] extracted=2800 missing=0 failed=0
+[2026-03-21 18:12:42]   [0005 2900/3093] extracted=2900 missing=0 failed=0
+[2026-03-21 18:13:50]   [0005 3000/3093] extracted=3000 missing=0 failed=0
+[2026-03-21 18:14:48]   [0005 3093/3093] extracted=3093 missing=0 failed=0
+[2026-03-21 18:17:16] Scene 0005: images=3093 features=2339736 pairs=187378 size=7.27 GB time=2237.3s missing=0 failed=0
+[2026-03-21 18:17:59] Scene 0237: recon=manhattan/0, 3054 images, 325918 points3D, 309411 kept pairs
+[2026-03-21 18:17:59] 
+[2026-03-21 18:17:59] Total: 1 scenes, 309411 training pairs
+[2026-03-21 18:17:59] Scene 0237: extracting sparse features for 3025 candidate images
+[2026-03-21 18:19:09]   [0237 100/3025] extracted=100 missing=0 failed=0
+[2026-03-21 18:20:15]   [0237 200/3025] extracted=200 missing=0 failed=0
+[2026-03-21 18:21:28]   [0237 300/3025] extracted=300 missing=0 failed=0
+[2026-03-21 18:22:29]   [0237 400/3025] extracted=400 missing=0 failed=0
+[2026-03-21 18:23:43]   [0237 500/3025] extracted=500 missing=0 failed=0
+[2026-03-21 18:24:46]   [0237 600/3025] extracted=600 missing=0 failed=0
+[2026-03-21 18:25:56]   [0237 700/3025] extracted=700 missing=0 failed=0
+[2026-03-21 18:27:16]   [0237 800/3025] extracted=800 missing=0 failed=0
+[2026-03-21 18:28:33]   [0237 900/3025] extracted=900 missing=0 failed=0
+[2026-03-21 18:29:50]   [0237 1000/3025] extracted=1000 missing=0 failed=0
+[2026-03-21 18:30:57]   [0237 1100/3025] extracted=1100 missing=0 failed=0
+[2026-03-21 18:32:15]   [0237 1200/3025] extracted=1200 missing=0 failed=0
+[2026-03-21 18:33:28]   [0237 1300/3025] extracted=1300 missing=0 failed=0
+[2026-03-21 18:34:40]   [0237 1400/3025] extracted=1400 missing=0 failed=0
+[2026-03-21 18:35:51]   [0237 1500/3025] extracted=1500 missing=0 failed=0
+[2026-03-21 18:37:03]   [0237 1600/3025] extracted=1600 missing=0 failed=0
+[2026-03-21 18:38:05]   [0237 1700/3025] extracted=1700 missing=0 failed=0
+[2026-03-21 18:39:10]   [0237 1800/3025] extracted=1800 missing=0 failed=0
+[2026-03-21 18:40:16]   [0237 1900/3025] extracted=1900 missing=0 failed=0
+[2026-03-21 18:41:28]   [0237 2000/3025] extracted=2000 missing=0 failed=0
+[2026-03-21 18:42:41]   [0237 2100/3025] extracted=2100 missing=0 failed=0
+[2026-03-21 18:43:56]   [0237 2200/3025] extracted=2200 missing=0 failed=0
+[2026-03-21 18:45:10]   [0237 2300/3025] extracted=2300 missing=0 failed=0
+[2026-03-21 18:47:02]   [0237 2400/3025] extracted=2400 missing=0 failed=0
+[2026-03-21 18:48:48]   [0237 2500/3025] extracted=2500 missing=0 failed=0
+[2026-03-21 18:50:45]   [0237 2600/3025] extracted=2600 missing=0 failed=0
+[2026-03-21 18:52:09]   [0237 2700/3025] extracted=2700 missing=0 failed=0
+[2026-03-21 18:53:10]   [0237 2800/3025] extracted=2800 missing=0 failed=0
+[2026-03-21 18:54:13]   [0237 2900/3025] extracted=2900 missing=0 failed=0
+[2026-03-21 18:55:26]   [0237 3000/3025] extracted=3000 missing=0 failed=0
+[2026-03-21 18:55:43]   [0237 3025/3025] extracted=3025 missing=0 failed=0
+[2026-03-21 19:00:21] Scene 0237: images=3025 features=4178128 pairs=309411 size=12.98 GB time=2584.2s missing=0 failed=0
+[2026-03-21 19:02:08] Scene 0011: recon=manhattan/0, 2966 images, 202940 points3D, 514923 kept pairs
+[2026-03-21 19:02:08] 
+[2026-03-21 19:02:08] Total: 1 scenes, 514923 training pairs
+[2026-03-21 19:02:08] Scene 0011: extracting sparse features for 2895 candidate images
+[2026-03-21 19:03:19]   [0011 100/2895] extracted=100 missing=0 failed=0
+[2026-03-21 19:04:29]   [0011 200/2895] extracted=200 missing=0 failed=0
+[2026-03-21 19:05:34]   [0011 300/2895] extracted=300 missing=0 failed=0
+[2026-03-21 19:06:38]   [0011 400/2895] extracted=400 missing=0 failed=0
+[2026-03-21 19:07:48]   [0011 500/2895] extracted=500 missing=0 failed=0
+[2026-03-21 19:08:43]   [0011 600/2895] extracted=600 missing=0 failed=0
+[2026-03-21 19:09:55]   [0011 700/2895] extracted=700 missing=0 failed=0
+[2026-03-21 19:10:59]   [0011 800/2895] extracted=800 missing=0 failed=0
+[2026-03-21 19:12:06]   [0011 900/2895] extracted=900 missing=0 failed=0
+[2026-03-21 19:13:12]   [0011 1000/2895] extracted=1000 missing=0 failed=0
+[2026-03-21 19:14:19]   [0011 1100/2895] extracted=1100 missing=0 failed=0
+[2026-03-21 19:15:25]   [0011 1200/2895] extracted=1200 missing=0 failed=0
+[2026-03-21 19:16:27]   [0011 1300/2895] extracted=1300 missing=0 failed=0
+[2026-03-21 19:17:37]   [0011 1400/2895] extracted=1400 missing=0 failed=0
+[2026-03-21 19:18:51]   [0011 1500/2895] extracted=1500 missing=0 failed=0
+[2026-03-21 19:19:59]   [0011 1600/2895] extracted=1600 missing=0 failed=0
+[2026-03-21 19:21:11]   [0011 1700/2895] extracted=1700 missing=0 failed=0
+[2026-03-21 19:22:20]   [0011 1800/2895] extracted=1800 missing=0 failed=0
+[2026-03-21 19:23:32]   [0011 1900/2895] extracted=1900 missing=0 failed=0
+[2026-03-21 19:24:38]   [0011 2000/2895] extracted=2000 missing=0 failed=0
+[2026-03-21 19:25:41]   [0011 2100/2895] extracted=2100 missing=0 failed=0
+[2026-03-21 19:26:34]   [0011 2200/2895] extracted=2200 missing=0 failed=0
+[2026-03-21 19:27:57]   [0011 2300/2895] extracted=2300 missing=0 failed=0
+[2026-03-21 19:28:55]   [0011 2400/2895] extracted=2400 missing=0 failed=0
+[2026-03-21 19:30:20]   [0011 2500/2895] extracted=2500 missing=0 failed=0
+[2026-03-21 19:31:46]   [0011 2600/2895] extracted=2600 missing=0 failed=0
+[2026-03-21 19:33:16]   [0011 2700/2895] extracted=2700 missing=0 failed=0
+[2026-03-21 19:34:32]   [0011 2800/2895] extracted=2800 missing=0 failed=0
+[2026-03-21 19:35:28]   [0011 2895/2895] extracted=2895 missing=0 failed=0
+[2026-03-21 19:40:52] Scene 0011: images=2895 features=4515896 pairs=514923 size=14.04 GB time=2430.6s missing=0 failed=0
+[2026-03-21 19:42:17] Scene 0148: recon=manhattan/0, 2682 images, 288987 points3D, 690652 kept pairs
+[2026-03-21 19:42:17] 
+[2026-03-21 19:42:17] Total: 1 scenes, 690652 training pairs
+[2026-03-21 19:42:17] Scene 0148: extracting sparse features for 2660 candidate images
+[2026-03-21 19:43:04]   [0148 100/2660] extracted=100 missing=0 failed=0
+[2026-03-21 19:43:48]   [0148 200/2660] extracted=200 missing=0 failed=0
+[2026-03-21 19:44:39]   [0148 300/2660] extracted=300 missing=0 failed=0
+[2026-03-21 19:45:36]   [0148 400/2660] extracted=400 missing=0 failed=0
+[2026-03-21 19:46:30]   [0148 500/2660] extracted=500 missing=0 failed=0
+[2026-03-21 19:47:19]   [0148 600/2660] extracted=600 missing=0 failed=0
+[2026-03-21 19:48:08]   [0148 700/2660] extracted=700 missing=0 failed=0
+[2026-03-21 19:48:56]   [0148 800/2660] extracted=800 missing=0 failed=0
+[2026-03-21 19:49:43]   [0148 900/2660] extracted=900 missing=0 failed=0
+[2026-03-21 19:50:31]   [0148 1000/2660] extracted=1000 missing=0 failed=0
+[2026-03-21 19:51:28]   [0148 1100/2660] extracted=1100 missing=0 failed=0
+[2026-03-21 19:52:23]   [0148 1200/2660] extracted=1200 missing=0 failed=0
+[2026-03-21 19:53:23]   [0148 1300/2660] extracted=1300 missing=0 failed=0
+[2026-03-21 19:54:13]   [0148 1400/2660] extracted=1400 missing=0 failed=0
+[2026-03-21 19:55:00]   [0148 1500/2660] extracted=1500 missing=0 failed=0
+[2026-03-21 19:55:50]   [0148 1600/2660] extracted=1600 missing=0 failed=0
+[2026-03-21 19:56:47]   [0148 1700/2660] extracted=1700 missing=0 failed=0
+[2026-03-21 19:57:41]   [0148 1800/2660] extracted=1800 missing=0 failed=0
+[2026-03-21 19:58:36]   [0148 1900/2660] extracted=1900 missing=0 failed=0
+[2026-03-21 19:59:32]   [0148 2000/2660] extracted=2000 missing=0 failed=0
+[2026-03-21 20:00:28]   [0148 2100/2660] extracted=2100 missing=0 failed=0
+[2026-03-21 20:01:28]   [0148 2200/2660] extracted=2200 missing=0 failed=0
+[2026-03-21 20:02:27]   [0148 2300/2660] extracted=2300 missing=0 failed=0
+[2026-03-21 20:03:30]   [0148 2400/2660] extracted=2400 missing=0 failed=0
+[2026-03-21 20:04:17]   [0148 2500/2660] extracted=2500 missing=0 failed=0
+[2026-03-21 20:05:07]   [0148 2600/2660] extracted=2600 missing=0 failed=0
+[2026-03-21 20:05:41]   [0148 2660/2660] extracted=2660 missing=0 failed=0
+[2026-03-21 20:09:12] Scene 0148: images=2660 features=3737453 pairs=690652 size=11.62 GB time=1699.3s missing=0 failed=0
+[2026-03-21 20:09:12] Done: scenes=10 total_size=139.32 GB total_time=28691.4s
+[2026-03-21 20:09:16] Starting training
+[2026-03-21 20:33:31] Loaded sparse training bundles for 10 scenes, 8095843 pairs, 44810965 feature vectors
+[2026-03-21 20:33:31] Feature sampling sanity check:
+[2026-03-21 20:33:31] {
+[2026-03-21 20:33:31]   "features_1_shape": [
+[2026-03-21 20:33:31]     9309,
+[2026-03-21 20:33:31]     1664
+[2026-03-21 20:33:31]   ],
+[2026-03-21 20:33:31]   "features_2_shape": [
+[2026-03-21 20:33:31]     10746,
+[2026-03-21 20:33:31]     1664
+[2026-03-21 20:33:31]   ],
+[2026-03-21 20:33:31]   "dtype_1": "torch.float16",
+[2026-03-21 20:33:31]   "dtype_2": "torch.float16",
+[2026-03-21 20:33:31]   "num_positives": 512,
+[2026-03-21 20:33:31]   "nan_1": false,
+[2026-03-21 20:33:31]   "nan_2": false,
+[2026-03-21 20:33:31]   "positive_norm_mean_1": 0.7071080803871155,
+[2026-03-21 20:33:31]   "positive_norm_mean_2": 0.707106351852417
+[2026-03-21 20:33:31] }
+[2026-03-21 20:33:40] Model parameters: 983,808
+[2026-03-21 20:33:40] Training pairs available: 8,095,843
+[2026-03-21 20:33:40] Pairs per epoch: 50,000
+[2026-03-21 20:33:40] Validation pairs per epoch: 1,000
+[2026-03-21 20:33:44]   [train 0/50000] loss=6.7757 acc=0.0476 positives=84 bank1=439 bank2=1945 lr=1.00e-03
+[2026-03-21 20:33:50]   [train 500/50000] loss=2.5297 acc=0.3389 positives=90 bank1=812 bank2=639 lr=1.00e-03
+[2026-03-21 20:33:57]   [train 1000/50000] loss=2.6377 acc=0.2349 positives=83 bank1=2033 bank2=617 lr=1.00e-03
+[2026-03-21 20:34:04]   [train 1500/50000] loss=3.1628 acc=0.2109 positives=64 bank1=3585 bank2=1744 lr=1.00e-03
+[2026-03-21 20:34:10]   [train 2000/50000] loss=2.3800 acc=0.3012 positives=254 bank1=2618 bank2=1218 lr=1.00e-03
+[2026-03-21 20:34:17]   [train 2500/50000] loss=4.4797 acc=0.1081 positives=421 bank1=1642 bank2=4715 lr=1.00e-03
+[2026-03-21 20:34:24]   [train 3000/50000] loss=1.8327 acc=0.4385 positives=252 bank1=1618 bank2=1027 lr=1.00e-03
+[2026-03-21 20:34:30]   [train 3500/50000] loss=2.0951 acc=0.2895 positives=76 bank1=690 bank2=1558 lr=1.00e-03
+[2026-03-21 20:34:37]   [train 4000/50000] loss=1.8868 acc=0.3902 positives=82 bank1=695 bank2=928 lr=1.00e-03
+[2026-03-21 20:34:43]   [train 4500/50000] loss=1.2390 acc=0.5463 positives=54 bank1=454 bank2=861 lr=1.00e-03
+[2026-03-21 20:34:49]   [train 5000/50000] loss=1.0527 acc=0.6017 positives=59 bank1=794 bank2=398 lr=1.00e-03
+[2026-03-21 20:34:55]   [train 5500/50000] loss=1.2941 acc=0.5189 positives=53 bank1=1272 bank2=364 lr=1.00e-03
+[2026-03-21 20:35:02]   [train 6000/50000] loss=1.4826 acc=0.4355 positives=62 bank1=318 bank2=471 lr=1.00e-03
+[2026-03-21 20:35:08]   [train 6500/50000] loss=4.1771 acc=0.0976 positives=251 bank1=611 bank2=6287 lr=1.00e-03
+[2026-03-21 20:35:15]   [train 7000/50000] loss=3.3556 acc=0.1645 positives=76 bank1=2637 bank2=699 lr=1.00e-03
+[2026-03-21 20:35:22]   [train 7500/50000] loss=3.5032 acc=0.1489 positives=225 bank1=815 bank2=2076 lr=9.99e-04
+[2026-03-21 20:35:29]   [train 8000/50000] loss=3.9762 acc=0.1653 positives=378 bank1=4848 bank2=2939 lr=9.99e-04
+[2026-03-21 20:35:36]   [train 8500/50000] loss=3.6541 acc=0.1515 positives=373 bank1=1214 bank2=1945 lr=9.99e-04
+[2026-03-21 20:35:43]   [train 9000/50000] loss=3.8197 acc=0.0957 positives=512 bank1=4090 bank2=1963 lr=9.99e-04
+[2026-03-21 20:35:50]   [train 9500/50000] loss=3.4883 acc=0.1543 positives=512 bank1=3491 bank2=4488 lr=9.99e-04
+[2026-03-21 20:35:57]   [train 10000/50000] loss=6.8646 acc=0.0500 positives=50 bank1=4661 bank2=1256 lr=9.99e-04
+[2026-03-21 20:36:03]   [train 10500/50000] loss=3.6125 acc=0.2468 positives=77 bank1=2256 bank2=1095 lr=9.99e-04
+[2026-03-21 20:36:10]   [train 11000/50000] loss=4.8593 acc=0.0726 positives=62 bank1=1595 bank2=4169 lr=9.99e-04
+[2026-03-21 20:36:17]   [train 11500/50000] loss=1.6894 acc=0.4711 positives=190 bank1=1036 bank2=1071 lr=9.99e-04
+[2026-03-21 20:36:23]   [train 12000/50000] loss=2.6336 acc=0.3478 positives=69 bank1=1028 bank2=2055 lr=9.99e-04
+[2026-03-21 20:36:30]   [train 12500/50000] loss=1.6139 acc=0.5063 positives=240 bank1=1763 bank2=834 lr=9.98e-04
+[2026-03-21 20:36:37]   [train 13000/50000] loss=3.6048 acc=0.1722 positives=90 bank1=1018 bank2=3884 lr=9.98e-04
+[2026-03-21 20:36:44]   [train 13500/50000] loss=2.7979 acc=0.2568 positives=512 bank1=4505 bank2=5981 lr=9.98e-04
+[2026-03-21 20:36:52]   [train 14000/50000] loss=2.6251 acc=0.2966 positives=145 bank1=2136 bank2=2987 lr=9.98e-04
+[2026-03-21 20:36:59]   [train 14500/50000] loss=7.1213 acc=0.0022 positives=230 bank1=1830 bank2=5320 lr=9.98e-04
+[2026-03-21 20:37:06]   [train 15000/50000] loss=1.7206 acc=0.4366 positives=142 bank1=3783 bank2=619 lr=9.98e-04
+[2026-03-21 20:37:14]   [train 15500/50000] loss=1.5135 acc=0.5180 positives=222 bank1=3797 bank2=1395 lr=9.98e-04
+[2026-03-21 20:37:21]   [train 16000/50000] loss=2.5895 acc=0.2646 positives=512 bank1=4761 bank2=7032 lr=9.98e-04
+[2026-03-21 20:37:29]   [train 16500/50000] loss=2.1160 acc=0.3438 positives=512 bank1=3437 bank2=7546 lr=9.97e-04
+[2026-03-21 20:37:36]   [train 17000/50000] loss=1.7256 acc=0.3701 positives=77 bank1=4171 bank2=1572 lr=9.97e-04
+[2026-03-21 20:37:43]   [train 17500/50000] loss=4.0683 acc=0.1583 positives=60 bank1=2455 bank2=3197 lr=9.97e-04
+[2026-03-21 20:37:51]   [train 18000/50000] loss=3.5378 acc=0.1774 positives=186 bank1=2221 bank2=2657 lr=9.97e-04
+[2026-03-21 20:37:58]   [train 18500/50000] loss=3.9954 acc=0.1250 positives=512 bank1=3662 bank2=3020 lr=9.97e-04
+[2026-03-21 20:38:05]   [train 19000/50000] loss=1.5344 acc=0.4630 positives=54 bank1=2822 bank2=1726 lr=9.96e-04
+[2026-03-21 20:38:13]   [train 19500/50000] loss=1.0166 acc=0.6502 positives=263 bank1=1917 bank2=1831 lr=9.96e-04
+[2026-03-21 20:38:20]   [train 20000/50000] loss=2.4488 acc=0.2721 positives=68 bank1=2840 bank2=3375 lr=9.96e-04
+[2026-03-21 20:38:27]   [train 20500/50000] loss=1.7386 acc=0.4440 positives=402 bank1=3493 bank2=3306 lr=9.96e-04
+[2026-03-21 20:38:35]   [train 21000/50000] loss=2.1404 acc=0.3057 positives=512 bank1=8034 bank2=6370 lr=9.96e-04
+[2026-03-21 20:38:42]   [train 21500/50000] loss=1.7876 acc=0.3994 positives=512 bank1=3516 bank2=4862 lr=9.95e-04
+[2026-03-21 20:38:49]   [train 22000/50000] loss=1.3016 acc=0.4804 positives=51 bank1=1285 bank2=2204 lr=9.95e-04
+[2026-03-21 20:38:56]   [train 22500/50000] loss=1.3788 acc=0.4795 positives=341 bank1=2097 bank2=1133 lr=9.95e-04
+[2026-03-21 20:39:04]   [train 23000/50000] loss=1.5920 acc=0.4385 positives=512 bank1=2935 bank2=2817 lr=9.95e-04
+[2026-03-21 20:39:11]   [train 23500/50000] loss=1.4211 acc=0.5395 positives=430 bank1=5254 bank2=2626 lr=9.95e-04
+[2026-03-21 20:39:19]   [train 24000/50000] loss=2.5220 acc=0.4038 positives=78 bank1=3373 bank2=1866 lr=9.94e-04
+[2026-03-21 20:39:26]   [train 24500/50000] loss=1.8315 acc=0.3904 positives=470 bank1=4630 bank2=4912 lr=9.94e-04
+[2026-03-21 20:39:33]   [train 25000/50000] loss=1.2983 acc=0.6068 positives=103 bank1=2835 bank2=1262 lr=9.94e-04
+[2026-03-21 20:39:41]   [train 25500/50000] loss=2.3186 acc=0.3937 positives=127 bank1=2335 bank2=3020 lr=9.94e-04
+[2026-03-21 20:39:48]   [train 26000/50000] loss=1.4147 acc=0.4697 positives=512 bank1=4683 bank2=2686 lr=9.93e-04
+[2026-03-21 20:39:55]   [train 26500/50000] loss=2.0758 acc=0.3661 positives=254 bank1=2615 bank2=6412 lr=9.93e-04
+[2026-03-21 20:40:02]   [train 27000/50000] loss=1.3855 acc=0.4897 positives=242 bank1=1975 bank2=3244 lr=9.93e-04
+[2026-03-21 20:40:10]   [train 27500/50000] loss=2.3244 acc=0.2617 positives=512 bank1=6036 bank2=5332 lr=9.93e-04
+[2026-03-21 20:40:17]   [train 28000/50000] loss=2.2013 acc=0.3545 positives=55 bank1=1185 bank2=4604 lr=9.92e-04
+[2026-03-21 20:40:23]   [train 28500/50000] loss=1.6669 acc=0.4815 positives=108 bank1=767 bank2=3758 lr=9.92e-04
+[2026-03-21 20:40:30]   [train 29000/50000] loss=2.8150 acc=0.2432 positives=74 bank1=1705 bank2=2688 lr=9.92e-04
+[2026-03-21 20:40:37]   [train 29500/50000] loss=1.1017 acc=0.6769 positives=65 bank1=1306 bank2=1036 lr=9.92e-04
+[2026-03-21 20:40:44]   [train 30000/50000] loss=1.7672 acc=0.3800 positives=75 bank1=1122 bank2=1850 lr=9.91e-04
+[2026-03-21 20:40:51]   [train 30500/50000] loss=1.7656 acc=0.3651 positives=63 bank1=2641 bank2=670 lr=9.91e-04
+[2026-03-21 20:40:57]   [train 31000/50000] loss=1.2021 acc=0.5333 positives=165 bank1=1585 bank2=727 lr=9.91e-04
+[2026-03-21 20:41:04]   [train 31500/50000] loss=2.2030 acc=0.3520 positives=98 bank1=1893 bank2=3778 lr=9.90e-04
+[2026-03-21 20:41:11]   [train 32000/50000] loss=1.2156 acc=0.5640 positives=367 bank1=1776 bank2=3448 lr=9.90e-04
+[2026-03-21 20:41:18]   [train 32500/50000] loss=6.8244 acc=0.0156 positives=512 bank1=4871 bank2=5631 lr=9.90e-04
+[2026-03-21 20:41:25]   [train 33000/50000] loss=3.2215 acc=0.1859 positives=78 bank1=1746 bank2=2077 lr=9.89e-04
+[2026-03-21 20:41:32]   [train 33500/50000] loss=4.6791 acc=0.0662 positives=204 bank1=4291 bank2=2673 lr=9.89e-04
+[2026-03-21 20:41:39]   [train 34000/50000] loss=2.0172 acc=0.3559 positives=59 bank1=1470 bank2=412 lr=9.89e-04
+[2026-03-21 20:41:45]   [train 34500/50000] loss=2.1241 acc=0.3902 positives=82 bank1=860 bank2=582 lr=9.88e-04
+[2026-03-21 20:41:51]   [train 35000/50000] loss=2.3671 acc=0.3558 positives=52 bank1=882 bank2=888 lr=9.88e-04
+[2026-03-21 20:41:58]   [train 35500/50000] loss=1.0830 acc=0.6575 positives=73 bank1=430 bank2=730 lr=9.88e-04
+[2026-03-21 20:42:04]   [train 36000/50000] loss=2.5510 acc=0.3039 positives=51 bank1=656 bank2=1211 lr=9.87e-04
+[2026-03-21 20:42:10]   [train 36500/50000] loss=1.9137 acc=0.3313 positives=80 bank1=594 bank2=638 lr=9.87e-04
+[2026-03-21 20:42:16]   [train 37000/50000] loss=2.1912 acc=0.3454 positives=291 bank1=1114 bank2=1184 lr=9.87e-04
+[2026-03-21 20:42:22]   [train 37500/50000] loss=2.2112 acc=0.3511 positives=188 bank1=1879 bank2=716 lr=9.86e-04
+[2026-03-21 20:42:28]   [train 38000/50000] loss=1.3583 acc=0.5372 positives=94 bank1=798 bank2=523 lr=9.86e-04
+[2026-03-21 20:42:35]   [train 38500/50000] loss=2.9515 acc=0.2258 positives=62 bank1=809 bank2=529 lr=9.86e-04
+[2026-03-21 20:42:41]   [train 39000/50000] loss=1.7540 acc=0.4097 positives=72 bank1=694 bank2=1051 lr=9.85e-04
+[2026-03-21 20:42:47]   [train 39500/50000] loss=1.8139 acc=0.4308 positives=65 bank1=772 bank2=860 lr=9.85e-04
+[2026-03-21 20:42:53]   [train 40000/50000] loss=1.3101 acc=0.5714 positives=203 bank1=642 bank2=1081 lr=9.84e-04
+[2026-03-21 20:42:59]   [train 40500/50000] loss=1.2886 acc=0.5463 positives=54 bank1=647 bank2=1017 lr=9.84e-04
+[2026-03-21 20:43:06]   [train 41000/50000] loss=1.8516 acc=0.3909 positives=110 bank1=753 bank2=1388 lr=9.84e-04
+[2026-03-21 20:43:12]   [train 41500/50000] loss=1.3921 acc=0.5000 positives=65 bank1=505 bank2=513 lr=9.83e-04
+[2026-03-21 20:43:18]   [train 42000/50000] loss=2.2141 acc=0.3361 positives=61 bank1=1044 bank2=354 lr=9.83e-04
+[2026-03-21 20:43:24]   [train 42500/50000] loss=1.5044 acc=0.5299 positives=67 bank1=623 bank2=1345 lr=9.82e-04
+[2026-03-21 20:43:30]   [train 43000/50000] loss=1.6487 acc=0.4918 positives=61 bank1=1592 bank2=402 lr=9.82e-04
+[2026-03-21 20:43:36]   [train 43500/50000] loss=1.4036 acc=0.5154 positives=292 bank1=822 bank2=966 lr=9.82e-04
+[2026-03-21 20:43:42]   [train 44000/50000] loss=2.8555 acc=0.2186 positives=247 bank1=2056 bank2=922 lr=9.81e-04
+[2026-03-21 20:43:48]   [train 44500/50000] loss=1.5063 acc=0.4883 positives=128 bank1=818 bank2=2097 lr=9.81e-04
+[2026-03-21 20:43:55]   [train 45000/50000] loss=1.2272 acc=0.5410 positives=134 bank1=695 bank2=718 lr=9.80e-04
+[2026-03-21 20:44:01]   [train 45500/50000] loss=1.2356 acc=0.5328 positives=183 bank1=655 bank2=1358 lr=9.80e-04
+[2026-03-21 20:44:07]   [train 46000/50000] loss=2.3212 acc=0.2154 positives=65 bank1=1515 bank2=1107 lr=9.79e-04
+[2026-03-21 20:44:13]   [train 46500/50000] loss=1.5578 acc=0.3246 positives=57 bank1=667 bank2=350 lr=9.79e-04
+[2026-03-21 20:44:20]   [train 47000/50000] loss=1.2517 acc=0.4444 positives=72 bank1=502 bank2=789 lr=9.79e-04
+[2026-03-21 20:44:26]   [train 47500/50000] loss=2.5194 acc=0.2500 positives=96 bank1=5540 bank2=805 lr=9.78e-04
+[2026-03-21 20:44:32]   [train 48000/50000] loss=1.1204 acc=0.4648 positives=71 bank1=427 bank2=681 lr=9.78e-04
+[2026-03-21 20:44:39]   [train 48500/50000] loss=1.2566 acc=0.4359 positives=78 bank1=524 bank2=1096 lr=9.77e-04
+[2026-03-21 20:44:45]   [train 49000/50000] loss=1.4396 acc=0.3988 positives=84 bank1=398 bank2=460 lr=9.77e-04
+[2026-03-21 20:44:51]   [train 49500/50000] loss=1.3636 acc=0.4180 positives=128 bank1=673 bank2=817 lr=9.76e-04
+[2026-03-21 20:44:57]   [val 0/1000] loss=4.4022 acc=0.1605 positives=162 bank1=2212 bank2=3267
+[2026-03-21 20:45:01]   [val 500/1000] loss=2.8576 acc=0.2412 positives=85 bank1=1017 bank2=8978
+[2026-03-21 20:45:05] Epoch 1/10: train_loss=2.2013 train_acc=0.3663 val_loss=2.8503 val_acc=0.3007
+[2026-03-21 20:45:05]   train: time=674.7s pairs/s=74.11 cache_hit_rate=1.000
+[2026-03-21 20:45:05]   val:   time=7.8s pairs/s=128.53 cache_hit_rate=1.000
+[2026-03-21 20:45:05]   RAM maxrss=141.50 GB
+[2026-03-21 20:45:05]   GPU peak: alloc=0.287 GB reserved=0.738 GB
+[2026-03-21 20:45:05]   -> Saved best model (monitor_loss=2.8503)
+[2026-03-21 20:45:06]   [train 0/50000] loss=3.0117 acc=0.2189 positives=201 bank1=2200 bank2=1040 lr=9.76e-04
+[2026-03-21 20:45:12]   [train 500/50000] loss=2.9213 acc=0.2816 positives=87 bank1=1548 bank2=1899 lr=9.75e-04
+[2026-03-21 20:45:19]   [train 1000/50000] loss=3.1653 acc=0.1610 positives=118 bank1=2759 bank2=446 lr=9.75e-04
+[2026-03-21 20:45:26]   [train 1500/50000] loss=1.9880 acc=0.4279 positives=222 bank1=1133 bank2=1732 lr=9.74e-04
+[2026-03-21 20:45:32]   [train 2000/50000] loss=2.7039 acc=0.3056 positives=90 bank1=2392 bank2=1368 lr=9.74e-04
+[2026-03-21 20:45:39]   [train 2500/50000] loss=2.6804 acc=0.3357 positives=70 bank1=1434 bank2=1296 lr=9.73e-04
+[2026-03-21 20:45:46]   [train 3000/50000] loss=3.1452 acc=0.2604 positives=96 bank1=3259 bank2=3320 lr=9.73e-04
+[2026-03-21 20:45:53]   [train 3500/50000] loss=2.4618 acc=0.3250 positives=60 bank1=1131 bank2=1297 lr=9.72e-04
+[2026-03-21 20:45:59]   [train 4000/50000] loss=2.3159 acc=0.3609 positives=115 bank1=1331 bank2=993 lr=9.72e-04
+[2026-03-21 20:46:05]   [train 4500/50000] loss=2.1206 acc=0.2727 positives=55 bank1=619 bank2=944 lr=9.71e-04
+[2026-03-21 20:46:11]   [train 5000/50000] loss=1.8243 acc=0.4118 positives=85 bank1=1505 bank2=1543 lr=9.71e-04
+[2026-03-21 20:46:17]   [train 5500/50000] loss=2.4691 acc=0.3030 positives=66 bank1=2190 bank2=1316 lr=9.70e-04
+[2026-03-21 20:46:24]   [train 6000/50000] loss=2.6581 acc=0.3036 positives=140 bank1=2620 bank2=977 lr=9.70e-04
+[2026-03-21 20:46:30]   [train 6500/50000] loss=4.1411 acc=0.1184 positives=114 bank1=1693 bank2=930 lr=9.69e-04
+[2026-03-21 20:46:37]   [train 7000/50000] loss=3.6025 acc=0.1467 positives=276 bank1=2340 bank2=2717 lr=9.69e-04
+[2026-03-21 20:46:44]   [train 7500/50000] loss=2.7514 acc=0.2435 positives=115 bank1=453 bank2=3735 lr=9.68e-04
+[2026-03-21 20:46:51]   [train 8000/50000] loss=2.5506 acc=0.2835 positives=164 bank1=5185 bank2=1894 lr=9.67e-04
+[2026-03-21 20:46:58]   [train 8500/50000] loss=3.9659 acc=0.1781 positives=247 bank1=7014 bank2=2003 lr=9.67e-04
+[2026-03-21 20:47:05]   [train 9000/50000] loss=3.4837 acc=0.1455 positives=512 bank1=2406 bank2=2918 lr=9.66e-04
+[2026-03-21 20:47:12]   [train 9500/50000] loss=3.4019 acc=0.1826 positives=512 bank1=3907 bank2=4891 lr=9.66e-04
+[2026-03-21 20:47:19]   [train 10000/50000] loss=3.5528 acc=0.1592 positives=201 bank1=1966 bank2=2116 lr=9.65e-04
+[2026-03-21 20:47:25]   [train 10500/50000] loss=1.5269 acc=0.4767 positives=86 bank1=1214 bank2=768 lr=9.65e-04
+[2026-03-21 20:47:32]   [train 11000/50000] loss=2.0020 acc=0.4643 positives=98 bank1=2156 bank2=1179 lr=9.64e-04
+[2026-03-21 20:47:39]   [train 11500/50000] loss=1.7167 acc=0.3817 positives=93 bank1=953 bank2=825 lr=9.64e-04
+[2026-03-21 20:47:46]   [train 12000/50000] loss=2.0421 acc=0.4161 positives=143 bank1=826 bank2=3748 lr=9.63e-04
+[2026-03-21 20:47:52]   [train 12500/50000] loss=2.1419 acc=0.4881 positives=84 bank1=1529 bank2=2159 lr=9.62e-04
+[2026-03-21 20:47:59]   [train 13000/50000] loss=1.7936 acc=0.5200 positives=75 bank1=1010 bank2=1703 lr=9.62e-04
+[2026-03-21 20:48:07]   [train 13500/50000] loss=2.9994 acc=0.2455 positives=393 bank1=4591 bank2=5352 lr=9.61e-04
+[2026-03-21 20:48:14]   [train 14000/50000] loss=1.8571 acc=0.4171 positives=187 bank1=1201 bank2=3552 lr=9.61e-04
+[2026-03-21 20:48:21]   [train 14500/50000] loss=1.5333 acc=0.5000 positives=512 bank1=1683 bank2=6403 lr=9.60e-04
+[2026-03-21 20:48:29]   [train 15000/50000] loss=1.6024 acc=0.4735 positives=113 bank1=1360 bank2=3549 lr=9.59e-04
+[2026-03-21 20:48:36]   [train 15500/50000] loss=1.4521 acc=0.4670 positives=106 bank1=1036 bank2=2452 lr=9.59e-04
+[2026-03-21 20:48:44]   [train 16000/50000] loss=1.9315 acc=0.3969 positives=97 bank1=2478 bank2=1501 lr=9.58e-04
+[2026-03-21 20:48:51]   [train 16500/50000] loss=1.2475 acc=0.5641 positives=117 bank1=2207 bank2=2012 lr=9.57e-04
+[2026-03-21 20:48:59]   [train 17000/50000] loss=2.7718 acc=0.2429 positives=70 bank1=1286 bank2=3797 lr=9.57e-04
+[2026-03-21 20:49:06]   [train 17500/50000] loss=1.9384 acc=0.3027 positives=512 bank1=2955 bank2=4578 lr=9.56e-04
+[2026-03-21 20:49:14]   [train 18000/50000] loss=1.7140 acc=0.3721 positives=512 bank1=1950 bank2=2790 lr=9.56e-04
+[2026-03-21 20:49:21]   [train 18500/50000] loss=2.3211 acc=0.2656 positives=401 bank1=6305 bank2=4774 lr=9.55e-04
+[2026-03-21 20:49:28]   [train 19000/50000] loss=1.6713 acc=0.4254 positives=67 bank1=2398 bank2=2124 lr=9.54e-04
+[2026-03-21 20:49:36]   [train 19500/50000] loss=1.1397 acc=0.5908 positives=292 bank1=2829 bank2=940 lr=9.54e-04
+[2026-03-21 20:49:43]   [train 20000/50000] loss=1.0435 acc=0.6533 positives=75 bank1=2917 bank2=997 lr=9.53e-04
+[2026-03-21 20:49:51]   [train 20500/50000] loss=1.9144 acc=0.3203 positives=64 bank1=1360 bank2=3397 lr=9.52e-04
+[2026-03-21 20:49:58]   [train 21000/50000] loss=1.3267 acc=0.4961 positives=512 bank1=1799 bank2=5267 lr=9.52e-04
+[2026-03-21 20:50:06]   [train 21500/50000] loss=1.7853 acc=0.4077 positives=65 bank1=4837 bank2=1110 lr=9.51e-04
+[2026-03-21 20:50:13]   [train 22000/50000] loss=2.0309 acc=0.4043 positives=141 bank1=4260 bank2=1736 lr=9.50e-04
+[2026-03-21 20:50:20]   [train 22500/50000] loss=2.0702 acc=0.3219 positives=160 bank1=5240 bank2=1830 lr=9.50e-04
+[2026-03-21 20:50:28]   [train 23000/50000] loss=3.0276 acc=0.2266 positives=512 bank1=6756 bank2=2712 lr=9.49e-04
+[2026-03-21 20:50:35]   [train 23500/50000] loss=3.0462 acc=0.3037 positives=512 bank1=5846 bank2=4018 lr=9.48e-04
+[2026-03-21 20:50:43]   [train 24000/50000] loss=1.5657 acc=0.5345 positives=87 bank1=899 bank2=2702 lr=9.47e-04
+[2026-03-21 20:50:50]   [train 24500/50000] loss=2.4101 acc=0.2672 positives=481 bank1=7605 bank2=2336 lr=9.47e-04
+[2026-03-21 20:50:57]   [train 25000/50000] loss=1.2814 acc=0.5026 positives=383 bank1=1667 bank2=5064 lr=9.46e-04
+[2026-03-21 20:51:05]   [train 25500/50000] loss=3.5043 acc=0.1950 positives=100 bank1=2002 bank2=2253 lr=9.45e-04
+[2026-03-21 20:51:12]   [train 26000/50000] loss=1.9893 acc=0.2633 positives=245 bank1=1951 bank2=930 lr=9.45e-04
+[2026-03-21 20:51:20]   [train 26500/50000] loss=1.0393 acc=0.5728 positives=357 bank1=1281 bank2=4070 lr=9.44e-04
+[2026-03-21 20:51:27]   [train 27000/50000] loss=2.1347 acc=0.3566 positives=143 bank1=2376 bank2=5075 lr=9.43e-04
+[2026-03-21 20:51:34]   [train 27500/50000] loss=2.3099 acc=0.2621 positives=145 bank1=6036 bank2=1715 lr=9.42e-04
+[2026-03-21 20:51:42]   [train 28000/50000] loss=2.3579 acc=0.2924 positives=118 bank1=1888 bank2=1075 lr=9.42e-04
+[2026-03-21 20:51:48]   [train 28500/50000] loss=1.8242 acc=0.4683 positives=63 bank1=1298 bank2=2979 lr=9.41e-04
+[2026-03-21 20:51:55]   [train 29000/50000] loss=1.3864 acc=0.5473 positives=74 bank1=532 bank2=5534 lr=9.40e-04
+[2026-03-21 20:52:02]   [train 29500/50000] loss=1.9933 acc=0.3681 positives=163 bank1=4520 bank2=1996 lr=9.40e-04
+[2026-03-21 20:52:09]   [train 30000/50000] loss=2.2269 acc=0.2740 positives=73 bank1=2170 bank2=1770 lr=9.39e-04
+[2026-03-21 20:52:16]   [train 30500/50000] loss=1.3779 acc=0.4962 positives=131 bank1=2302 bank2=960 lr=9.38e-04
+[2026-03-21 20:52:23]   [train 31000/50000] loss=1.7745 acc=0.3655 positives=409 bank1=2323 bank2=2132 lr=9.37e-04
+[2026-03-21 20:52:29]   [train 31500/50000] loss=1.6122 acc=0.4175 positives=194 bank1=4391 bank2=1392 lr=9.37e-04
+[2026-03-21 20:52:36]   [train 32000/50000] loss=2.2461 acc=0.3500 positives=100 bank1=4173 bank2=1507 lr=9.36e-04
+[2026-03-21 20:52:43]   [train 32500/50000] loss=1.9087 acc=0.4394 positives=66 bank1=734 bank2=1237 lr=9.35e-04
+[2026-03-21 20:52:50]   [train 33000/50000] loss=4.5948 acc=0.1209 positives=182 bank1=1560 bank2=8023 lr=9.34e-04
+[2026-03-21 20:52:57]   [train 33500/50000] loss=2.3228 acc=0.3301 positives=153 bank1=1845 bank2=1369 lr=9.33e-04
+[2026-03-21 20:53:04]   [train 34000/50000] loss=3.0780 acc=0.2488 positives=217 bank1=5943 bank2=1610 lr=9.33e-04
+[2026-03-21 20:53:10]   [train 34500/50000] loss=1.7680 acc=0.4435 positives=62 bank1=760 bank2=1291 lr=9.32e-04
+[2026-03-21 20:53:16]   [train 35000/50000] loss=1.7250 acc=0.4180 positives=61 bank1=400 bank2=670 lr=9.31e-04
+[2026-03-21 20:53:22]   [train 35500/50000] loss=1.9306 acc=0.3741 positives=143 bank1=903 bank2=974 lr=9.30e-04
+[2026-03-21 20:53:28]   [train 36000/50000] loss=1.7039 acc=0.4627 positives=67 bank1=587 bank2=683 lr=9.29e-04
+[2026-03-21 20:53:34]   [train 36500/50000] loss=2.0064 acc=0.3981 positives=162 bank1=1535 bank2=1074 lr=9.29e-04
+[2026-03-21 20:53:40]   [train 37000/50000] loss=1.7141 acc=0.4732 positives=112 bank1=2858 bank2=514 lr=9.28e-04
+[2026-03-21 20:53:46]   [train 37500/50000] loss=1.0130 acc=0.6509 positives=106 bank1=886 bank2=473 lr=9.27e-04
+[2026-03-21 20:53:52]   [train 38000/50000] loss=2.1155 acc=0.2596 positives=52 bank1=1188 bank2=480 lr=9.26e-04
+[2026-03-21 20:53:58]   [train 38500/50000] loss=1.8379 acc=0.3278 positives=90 bank1=466 bank2=589 lr=9.25e-04
+[2026-03-21 20:54:05]   [train 39000/50000] loss=1.2687 acc=0.4397 positives=58 bank1=733 bank2=658 lr=9.25e-04
+[2026-03-21 20:54:11]   [train 39500/50000] loss=1.0468 acc=0.6078 positives=51 bank1=1139 bank2=429 lr=9.24e-04
+[2026-03-21 20:54:17]   [train 40000/50000] loss=1.5475 acc=0.4555 positives=337 bank1=901 bank2=1222 lr=9.23e-04
+[2026-03-21 20:54:23]   [train 40500/50000] loss=1.6056 acc=0.4259 positives=108 bank1=983 bank2=655 lr=9.22e-04
+[2026-03-21 20:54:29]   [train 41000/50000] loss=1.4007 acc=0.5040 positives=126 bank1=664 bank2=673 lr=9.21e-04
+[2026-03-21 20:54:35]   [train 41500/50000] loss=1.4128 acc=0.4371 positives=143 bank1=661 bank2=810 lr=9.20e-04
+[2026-03-21 20:54:41]   [train 42000/50000] loss=1.5088 acc=0.4295 positives=78 bank1=778 bank2=515 lr=9.20e-04
+[2026-03-21 20:54:47]   [train 42500/50000] loss=1.6536 acc=0.4114 positives=79 bank1=1772 bank2=485 lr=9.19e-04
+[2026-03-21 20:54:53]   [train 43000/50000] loss=1.8164 acc=0.3982 positives=167 bank1=985 bank2=680 lr=9.18e-04
+[2026-03-21 20:54:59]   [train 43500/50000] loss=1.9721 acc=0.2731 positives=108 bank1=697 bank2=613 lr=9.17e-04
+[2026-03-21 20:55:05]   [train 44000/50000] loss=1.3519 acc=0.4853 positives=68 bank1=523 bank2=509 lr=9.16e-04
+[2026-03-21 20:55:11]   [train 44500/50000] loss=2.1406 acc=0.3213 positives=221 bank1=827 bank2=1986 lr=9.15e-04
+[2026-03-21 20:55:18]   [train 45000/50000] loss=1.4921 acc=0.4391 positives=156 bank1=896 bank2=900 lr=9.14e-04
+[2026-03-21 20:55:24]   [train 45500/50000] loss=1.2467 acc=0.6268 positives=71 bank1=1384 bank2=714 lr=9.14e-04
+[2026-03-21 20:55:30]   [train 46000/50000] loss=1.6245 acc=0.3788 positives=66 bank1=700 bank2=1169 lr=9.13e-04
+[2026-03-21 20:55:36]   [train 46500/50000] loss=1.0438 acc=0.5526 positives=76 bank1=614 bank2=527 lr=9.12e-04
+[2026-03-21 20:55:43]   [train 47000/50000] loss=2.6100 acc=0.2868 positives=68 bank1=881 bank2=6563 lr=9.11e-04
+[2026-03-21 20:55:49]   [train 47500/50000] loss=1.2075 acc=0.4569 positives=58 bank1=801 bank2=612 lr=9.10e-04
+[2026-03-21 20:55:55]   [train 48000/50000] loss=1.3452 acc=0.4500 positives=220 bank1=1002 bank2=1162 lr=9.09e-04
+[2026-03-21 20:56:01]   [train 48500/50000] loss=1.5436 acc=0.4327 positives=52 bank1=789 bank2=789 lr=9.08e-04
+[2026-03-21 20:56:08]   [train 49000/50000] loss=1.0561 acc=0.5471 positives=85 bank1=346 bank2=536 lr=9.07e-04
+[2026-03-21 20:56:14]   [train 49500/50000] loss=1.4334 acc=0.4590 positives=122 bank1=808 bank2=1072 lr=9.06e-04
+[2026-03-21 20:56:20]   [val 0/1000] loss=2.9498 acc=0.2127 positives=134 bank1=2200 bank2=1198
+[2026-03-21 20:56:24]   [val 500/1000] loss=2.5454 acc=0.2959 positives=512 bank1=5320 bank2=4211
+[2026-03-21 20:56:28] Epoch 2/10: train_loss=2.0525 train_acc=0.3869 val_loss=2.6110 val_acc=0.3243
+[2026-03-21 20:56:28]   train: time=674.7s pairs/s=74.11 cache_hit_rate=1.000
+[2026-03-21 20:56:28]   val:   time=7.7s pairs/s=129.62 cache_hit_rate=1.000
+[2026-03-21 20:56:28]   RAM maxrss=141.51 GB
+[2026-03-21 20:56:28]   GPU peak: alloc=0.268 GB reserved=0.465 GB
+[2026-03-21 20:56:28]   -> Saved best model (monitor_loss=2.6110)
+[2026-03-21 20:56:28]   [train 0/50000] loss=3.9871 acc=0.1810 positives=58 bank1=2212 bank2=823 lr=9.05e-04
+[2026-03-21 20:56:35]   [train 500/50000] loss=3.2922 acc=0.1892 positives=74 bank1=631 bank2=1006 lr=9.05e-04
+[2026-03-21 20:56:42]   [train 1000/50000] loss=2.3337 acc=0.3376 positives=117 bank1=2317 bank2=467 lr=9.04e-04
+[2026-03-21 20:56:48]   [train 1500/50000] loss=1.7428 acc=0.5130 positives=115 bank1=463 bank2=2920 lr=9.03e-04
+[2026-03-21 20:56:55]   [train 2000/50000] loss=6.1573 acc=0.0338 positives=458 bank1=5248 bank2=2305 lr=9.02e-04
+[2026-03-21 20:57:02]   [train 2500/50000] loss=3.6466 acc=0.1493 positives=67 bank1=5666 bank2=977 lr=9.01e-04
+[2026-03-21 20:57:09]   [train 3000/50000] loss=2.8992 acc=0.2714 positives=70 bank1=2667 bank2=694 lr=9.00e-04
+[2026-03-21 20:57:15]   [train 3500/50000] loss=3.9161 acc=0.1797 positives=512 bank1=4519 bank2=4413 lr=8.99e-04
+[2026-03-21 20:57:22]   [train 4000/50000] loss=2.0030 acc=0.3722 positives=309 bank1=1761 bank2=1316 lr=8.98e-04
+[2026-03-21 20:57:28]   [train 4500/50000] loss=1.6100 acc=0.5481 positives=52 bank1=1479 bank2=464 lr=8.97e-04
+[2026-03-21 20:57:34]   [train 5000/50000] loss=1.4088 acc=0.5000 positives=50 bank1=923 bank2=480 lr=8.96e-04
+[2026-03-21 20:57:40]   [train 5500/50000] loss=2.0950 acc=0.3378 positives=111 bank1=770 bank2=1743 lr=8.95e-04
+[2026-03-21 20:57:46]   [train 6000/50000] loss=1.8237 acc=0.4304 positives=115 bank1=1293 bank2=1028 lr=8.94e-04
+[2026-03-21 20:57:53]   [train 6500/50000] loss=3.8313 acc=0.1383 positives=141 bank1=773 bank2=3066 lr=8.93e-04
+[2026-03-21 20:58:00]   [train 7000/50000] loss=1.8726 acc=0.4692 positives=65 bank1=603 bank2=5381 lr=8.92e-04
+[2026-03-21 20:58:07]   [train 7500/50000] loss=3.5625 acc=0.1475 positives=512 bank1=4589 bank2=4634 lr=8.91e-04

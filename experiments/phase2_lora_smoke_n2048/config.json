@@ -1,0 +1,37 @@
+{
+  "megadepth_root": "/mnt/datasets/MegaDepth/MegaDepth_v1_SfM",
+  "sparse_dir": "data/sparse_train",
+  "scenes": [
+    "0148"
+  ],
+  "lora_rank": 4,
+  "lora_alpha": 8.0,
+  "lora_dropout": 0.0,
+  "dinov3_only": true,
+  "freeze_backbone": true,
+  "lora_checkpoint": "experiments/phase2_lora_smoke_dinov3only/best.pt",
+  "projection_checkpoint": null,
+  "hidden_dims": [
+    512
+  ],
+  "epochs": 1,
+  "pairs_per_epoch": 50,
+  "num_correspondences": 2048,
+  "min_correspondences": 50,
+  "temperature": 0.07,
+  "lr_lora": 5e-05,
+  "lr_proj": 0.001,
+  "weight_decay": 0.0001,
+  "grad_clip": 1.0,
+  "seed": 42,
+  "amp": true,
+  "output_dir": "experiments/phase2_lora_smoke_n2048",
+  "device": "cuda:0",
+  "log_interval": 25,
+  "timestamp": "2026-03-24T16:45:55.305025",
+  "n_valid_pairs": 690652,
+  "pairs_per_epoch_effective": 50,
+  "input_dim": 1024,
+  "output_dim": 256,
+  "feat_level": -8
+}

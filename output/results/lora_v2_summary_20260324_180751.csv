@@ -1,0 +1,9 @@
+experiment,sacre_mAA10,reichstag_mAA10,st_peters_mAA10,avg_mAA10
+phase2_lora_eval_raw_dinov3,64.8,67.8,54.4,62.3
+phase2_lora_eval_fusion_noproj,67.2,75.3,59.2,67.2
+phase2_lora_proj_dinov3only,65.3,66.4,54.7,62.1
+phase2_lora_proj_fusion,67.7,71.9,59.3,66.3
+---baselines---,,,,
+baseline_dinov3_raw,67.4,50.8,62.6,60.3
+baseline_fusion_raw,79.8,59.3,72.0,70.4
+baseline_proj_wide,82.5,74.1,73.3,76.7

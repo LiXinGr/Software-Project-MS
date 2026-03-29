@@ -1,0 +1,28 @@
+[
+  {
+    "epoch": 0,
+    "train_loss": 1.290591858178377,
+    "train_accuracy": 0.596253467053175,
+    "time_sec": 94.51951265148818,
+    "pairs_per_second": 2.1159652053797493,
+    "skipped": 0,
+    "ram_maxrss_gb": 15.059383392333984,
+    "lr_0": 2.5249999999999997e-05,
+    "lr_1": 0.0005002500000000004,
+    "gpu_peak_allocated_gb": 6.387631893157959,
+    "gpu_peak_reserved_gb": 7.771484375
+  },
+  {
+    "epoch": 1,
+    "train_loss": 0.9762893378734588,
+    "train_accuracy": 0.6676882322644815,
+    "time_sec": 92.92598242685199,
+    "pairs_per_second": 2.152250584570713,
+    "skipped": 0,
+    "ram_maxrss_gb": 15.059383392333984,
+    "lr_0": 5.000000000000001e-07,
+    "lr_1": 5.000000000000001e-07,
+    "gpu_peak_allocated_gb": 6.30380392074585,
+    "gpu_peak_reserved_gb": 7.771484375
+  }
+]

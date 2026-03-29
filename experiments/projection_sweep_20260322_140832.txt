@@ -1,0 +1,82 @@
+Using Anaconda3/2020.07
+[2026-03-22 14:08:33] Starting projection sweep
+[2026-03-22 14:08:33] Project root: /home.stud/gorbuden/datagrid/Software-Project-MS
+[2026-03-22 14:08:33] Host: lie
+[2026-03-22 14:08:33] Device: cuda:0
+[2026-03-22 14:08:33] GPU gate: index=0 max_used=4000MiB max_util=20% poll=300s
+[2026-03-22 14:08:33] Sparse scene cache size: 10
+[2026-03-22 14:08:33] Summary TSV: /home.stud/gorbuden/datagrid/Software-Project-MS/experiments/projection_sweep_summary_20260322_140832.tsv
+[2026-03-22 14:08:33] === Variant: temp003 ===
+[2026-03-22 14:08:33] Output dir: /home.stud/gorbuden/datagrid/Software-Project-MS/experiments/phase2_projection_temp003
+[2026-03-22 14:08:33] Resuming temp003 from /home.stud/gorbuden/datagrid/Software-Project-MS/experiments/phase2_projection_temp003/latest.pt
+[2026-03-22 14:08:34] GPU 0 current state: used=23106MiB util=87%
+[2026-03-22 14:08:34] Starting training for temp003 without GPU gate
+[2026-03-22 14:08:36] [temp003 train] [sparse meta 1/10] 0080: reading pair metadata from data/sparse_train/0080.pt (37.01 GB bundle)
+[2026-03-22 14:12:37] [temp003 train] [sparse meta 1/10] 0080: pairs=2,339,843
+[2026-03-22 14:12:37] [temp003 train] [sparse meta 2/10] 0042: reading pair metadata from data/sparse_train/0042.pt (14.78 GB bundle)
+[2026-03-22 14:14:57] [temp003 train] [sparse meta 2/10] 0042: pairs=611,237
+[2026-03-22 14:14:57] [temp003 train] [sparse meta 3/10] 0380: reading pair metadata from data/sparse_train/0380.pt (10.96 GB bundle)
+[2026-03-22 14:16:40] [temp003 train] [sparse meta 3/10] 0380: pairs=718,993
+[2026-03-22 14:16:40] [temp003 train] [sparse meta 4/10] 0000: reading pair metadata from data/sparse_train/0000.pt (16.17 GB bundle)
+[2026-03-22 14:19:20] [temp003 train] [sparse meta 4/10] 0000: pairs=593,986
+[2026-03-22 14:19:20] [temp003 train] [sparse meta 5/10] 0366: reading pair metadata from data/sparse_train/0366.pt (7.47 GB bundle)
+[2026-03-22 14:20:35] [temp003 train] [sparse meta 5/10] 0366: pairs=1,867,366
+[2026-03-22 14:20:35] [temp003 train] [sparse meta 6/10] 0001: reading pair metadata from data/sparse_train/0001.pt (7.02 GB bundle)
+[2026-03-22 14:21:41] [temp003 train] [sparse meta 6/10] 0001: pairs=262,054
+[2026-03-22 14:21:41] [temp003 train] [sparse meta 7/10] 0005: reading pair metadata from data/sparse_train/0005.pt (7.27 GB bundle)
+[2026-03-22 14:22:53] [temp003 train] [sparse meta 7/10] 0005: pairs=187,378
+[2026-03-22 14:22:54] [temp003 train] [sparse meta 8/10] 0237: reading pair metadata from data/sparse_train/0237.pt (12.98 GB bundle)
+[2026-03-22 14:25:02] [temp003 train] [sparse meta 8/10] 0237: pairs=309,411
+[2026-03-22 14:25:02] [temp003 train] [sparse meta 9/10] 0011: reading pair metadata from data/sparse_train/0011.pt (14.04 GB bundle)
+[2026-03-22 14:27:22] [temp003 train] [sparse meta 9/10] 0011: pairs=514,923
+[2026-03-22 14:27:22] [temp003 train] [sparse meta 10/10] 0148: reading pair metadata from data/sparse_train/0148.pt (11.62 GB bundle)
+[2026-03-22 14:29:18] [temp003 train] [sparse meta 10/10] 0148: pairs=690,652
+[2026-03-22 14:29:19] [temp003 train] Loaded sparse training metadata for 10 scenes, 8095843 pairs (139.32 GB across bundles, cache_size=10)
+[2026-03-22 14:29:19] [temp003 train] Preloading all sparse scene bundles into RAM (10 scenes, cache_size=10)
+[2026-03-22 14:29:19] [temp003 train] [sparse cache miss] 0080: loading full bundle (37.01 GB)
+[2026-03-22 14:33:33] [temp003 train] [sparse cache miss] 0042: loading full bundle (14.78 GB)
+[2026-03-22 14:35:53] [temp003 train] [sparse cache miss] 0380: loading full bundle (10.96 GB)
+[2026-03-22 14:37:35] [temp003 train] [sparse cache miss] 0000: loading full bundle (16.17 GB)
+[2026-03-22 14:40:14] [temp003 train] [sparse cache miss] 0366: loading full bundle (7.47 GB)
+[2026-03-22 14:41:26] [temp003 train] [sparse cache miss] 0001: loading full bundle (7.02 GB)
+[2026-03-22 14:42:35] [temp003 train] [sparse cache miss] 0005: loading full bundle (7.27 GB)
+[2026-03-22 14:43:47] [temp003 train] [sparse cache miss] 0237: loading full bundle (12.98 GB)
+[2026-03-22 14:45:55] [temp003 train] [sparse cache miss] 0011: loading full bundle (14.04 GB)
+[2026-03-22 14:48:15] [temp003 train] [sparse cache miss] 0148: loading full bundle (11.62 GB)
+[2026-03-22 14:50:06] [temp003 train] Finished preloading sparse scene bundles
+[2026-03-22 14:50:06] [temp003 train] Feature sampling sanity check:
+[2026-03-22 14:50:06] [temp003 train] {
+[2026-03-22 14:50:06] [temp003 train]   "features_1_shape": [
+[2026-03-22 14:50:06] [temp003 train]     9309,
+[2026-03-22 14:50:06] [temp003 train]     1664
+[2026-03-22 14:50:06] [temp003 train]   ],
+[2026-03-22 14:50:06] [temp003 train]   "features_2_shape": [
+[2026-03-22 14:50:06] [temp003 train]     10746,
+[2026-03-22 14:50:06] [temp003 train]     1664
+[2026-03-22 14:50:06] [temp003 train]   ],
+[2026-03-22 14:50:06] [temp003 train]   "dtype_1": "torch.float16",
+[2026-03-22 14:50:06] [temp003 train]   "dtype_2": "torch.float16",
+[2026-03-22 14:50:06] [temp003 train]   "num_positives": 512,
+[2026-03-22 14:50:06] [temp003 train]   "nan_1": false,
+[2026-03-22 14:50:06] [temp003 train]   "nan_2": false,
+[2026-03-22 14:50:06] [temp003 train]   "positive_norm_mean_1": 0.7071080803871155,
+[2026-03-22 14:50:06] [temp003 train]   "positive_norm_mean_2": 0.707106351852417
+[2026-03-22 14:50:06] [temp003 train] }
+[2026-03-22 14:50:12] [temp003 train] Model parameters: 983,808
+[2026-03-22 14:50:12] [temp003 train] Training pairs available: 8,095,843
+[2026-03-22 14:50:12] [temp003 train] Pairs per epoch: 50,000
+[2026-03-22 14:50:12] [temp003 train] Validation pairs per epoch: 1,000
+[2026-03-22 14:50:15] [temp003 train] Traceback (most recent call last):
+[2026-03-22 14:50:15] [temp003 train]   File "/mnt/datagrid/personal/gorbuden/Software-Project-MS/scripts/train_projection_head.py", line 1081, in <module>
+[2026-03-22 14:50:15] [temp003 train]     train(parse_args())
+[2026-03-22 14:50:15] [temp003 train]   File "/mnt/datagrid/personal/gorbuden/Software-Project-MS/scripts/train_projection_head.py", line 909, in train
+[2026-03-22 14:50:16] [temp003 train]     torch.cuda.set_rng_state_all(
+[2026-03-22 14:50:16] [temp003 train]   File "/home.stud/gorbuden/.conda/envs/train/lib/python3.10/site-packages/torch/cuda/random.py", line 85, in set_rng_state_all
+[2026-03-22 14:50:16] [temp003 train]     set_rng_state(state, i)
+[2026-03-22 14:50:16] [temp003 train]   File "/home.stud/gorbuden/.conda/envs/train/lib/python3.10/site-packages/torch/cuda/random.py", line 75, in set_rng_state
+[2026-03-22 14:50:16] [temp003 train]     _lazy_call(cb)
+[2026-03-22 14:50:16] [temp003 train]   File "/home.stud/gorbuden/.conda/envs/train/lib/python3.10/site-packages/torch/cuda/__init__.py", line 249, in _lazy_call
+[2026-03-22 14:50:16] [temp003 train]     callable()
+[2026-03-22 14:50:16] [temp003 train]   File "/home.stud/gorbuden/.conda/envs/train/lib/python3.10/site-packages/torch/cuda/random.py", line 72, in cb
+[2026-03-22 14:50:16] [temp003 train]     default_generator = torch.cuda.default_generators[idx]
+[2026-03-22 14:50:16] [temp003 train] IndexError: tuple index out of range

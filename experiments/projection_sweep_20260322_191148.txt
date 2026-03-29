@@ -1,0 +1,42 @@
+Using Anaconda3/2020.07
+[2026-03-22 19:11:50] Starting projection sweep
+[2026-03-22 19:11:50] Project root: /home.stud/gorbuden/datagrid/Software-Project-MS
+[2026-03-22 19:11:50] Host: lie
+[2026-03-22 19:11:50] Device: cuda:0
+[2026-03-22 19:11:50] GPU gate: index=0 max_used=4000MiB max_util=20% poll=300s
+[2026-03-22 19:11:50] Sparse scene cache size: 10
+[2026-03-22 19:11:50] Wait for GPU before eval: 0
+[2026-03-22 19:11:50] Summary TSV: /home.stud/gorbuden/datagrid/Software-Project-MS/experiments/projection_sweep_summary_20260322_191148.tsv
+[2026-03-22 19:11:50] === Variant: temp003 ===
+[2026-03-22 19:11:50] Output dir: /home.stud/gorbuden/datagrid/Software-Project-MS/experiments/phase2_projection_temp003
+[2026-03-22 19:11:50] Resuming temp003 from /home.stud/gorbuden/datagrid/Software-Project-MS/experiments/phase2_projection_temp003/latest.pt
+[2026-03-22 19:11:50] Training already complete for temp003; skipping retraining
+[2026-03-22 19:11:50] Evaluating temp003 on sacre_coeur
+[2026-03-22 19:11:50] Skipping GPU wait before eval
+[2026-03-22 19:11:50] GPU 0 current state: used=2442MiB util=59%
+[2026-03-22 19:11:50] [temp003 eval] [2026-03-22 19:11:50] ============================================
+[2026-03-22 19:11:50] [temp003 eval] [2026-03-22 19:11:50] Thesis Benchmark Pipeline
+[2026-03-22 19:11:50] [temp003 eval] [2026-03-22 19:11:50] ============================================
+[2026-03-22 19:11:50] [temp003 eval] [2026-03-22 19:11:50] Matcher:  projection
+[2026-03-22 19:11:50] [temp003 eval] [2026-03-22 19:11:50] Run ID:   phase2_sweep_temp003
+[2026-03-22 19:11:50] [temp003 eval] [2026-03-22 19:11:50] Scene:    sacre_coeur
+[2026-03-22 19:11:50] [temp003 eval] [2026-03-22 19:11:50] Device:   cuda:0
+[2026-03-22 19:11:50] [temp003 eval] [2026-03-22 19:11:50] Dry-run:  false
+[2026-03-22 19:11:50] [temp003 eval] [2026-03-22 19:11:50] Limit: 15000 pairs (default)
+[2026-03-22 19:11:50] [temp003 eval] [2026-03-22 19:11:50] ============================================
+[2026-03-22 19:11:50] [temp003 eval] [2026-03-22 19:11:50] Config key: projection_temp003_sp_mnn_mp2000
+[2026-03-22 19:11:50] [temp003 eval] [2026-03-22 19:11:50] Step 0: Using existing pairs file: /home.stud/gorbuden/datagrid/Software-Project-MS/output/pairs_sacre_coeur.txt
+[2026-03-22 19:11:50] [temp003 eval] [2026-03-22 19:11:50] Step 1.5: Preprocessed images already exist at /home.stud/gorbuden/datagrid/Software-Project-MS/datasets/phototourism/sacre_coeur/images_preprocessed, skipping...
+[2026-03-22 19:11:50] [temp003 eval] [2026-03-22 19:11:50] Step 1: Skipping depth generation (--skip-depth)
+[2026-03-22 19:11:50] [temp003 eval] [2026-03-22 19:11:50] Step 2: Generating matches with projection...
+[2026-03-22 19:11:50] [temp003 eval] [2026-03-22 19:11:50] Activating environment: lightglue
+[2026-03-22 19:11:51] [temp003 eval] [2026-03-22 19:11:51]   Feature cache: /home.stud/gorbuden/datagrid/Software-Project-MS/cache/features/projection_temp003_sp_mnn_mp2000/sacre_coeur
+[2026-03-22 19:11:51] [temp003 eval] [2026-03-22 19:11:51]   Using projected fused descriptors
+[2026-03-22 19:11:51] [temp003 eval] [2026-03-22 19:11:51]   checkpoint: /home.stud/gorbuden/datagrid/Software-Project-MS/experiments/phase2_projection_temp003/best.pt
+[2026-03-22 19:11:51] [temp003 eval] [2026-03-22 19:11:51]   projection tag: projection_temp003
+[2026-03-22 19:11:51] [temp003 eval] [2026-03-22 19:11:51]   max_points: 2000
+[2026-03-22 19:11:51] [temp003 eval] [2026-03-22 19:11:51]   projection source img_size: 768x768
+[2026-03-22 19:11:51] [temp003 eval] [2026-03-22 19:11:51]   projection source feat_level: -8
+[2026-03-22 19:11:51] [temp003 eval] [2026-03-22 19:11:51]   projection source up_ft_index: 2, t: 0, ensemble_size: 8
+[2026-03-22 19:11:51] [temp003 eval] [2026-03-22 19:11:51]   projection alpha: 0.5
+[2026-03-22 19:11:51] [temp003 eval] [2026-03-22 19:11:51]   Limiting to 15000 pairs

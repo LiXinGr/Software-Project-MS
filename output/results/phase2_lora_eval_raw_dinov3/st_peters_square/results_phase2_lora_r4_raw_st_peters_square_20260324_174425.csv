@@ -1,0 +1,10 @@
+Matches,Depth,Solver,Exp.Type,Opt.,εr(°),εt(°),mAA@10,mAA_f@10,τ(ms),Inliers,Num_Pairs,max_points,img_size,feat_level,up_ft_index,dift_t,ratio_thresh
+phase2_lora_r4_raw,UniDepth,3p_ours_shift_scale+12,calibrated,S,0.50,3.74,54.4,N/A,21.6,59.7,200,2000,768,-8,2,0,
+phase2_lora_r4_raw,UniDepth,3p_ours_shift_scale_hybrid_reproj+12,calibrated,H,1.23,8.64,24.9,N/A,11.2,84.8,200,2000,768,-8,2,0,
+phase2_lora_r4_raw,UniDepth,3p_ours_shift_scale_reproj+12,calibrated,S,1.23,8.64,24.9,N/A,11.3,84.8,200,2000,768,-8,2,0,
+phase2_lora_r4_raw,UniDepth,4p_ours_scale_shift+12,shared_f,S,0.92,8.25,35.8,22.4,35.7,60.1,200,2000,768,-8,2,0,
+phase2_lora_r4_raw,UniDepth,4p_ours_scale_shift+12,varying_f,S,1.92,16.22,14.1,10.3,25.9,59.0,200,2000,768,-8,2,0,
+phase2_lora_r4_raw,UniDepth,4p_ours_scale_shift_reproj+12,shared_f,S,1.33,8.85,24.2,19.2,32.4,84.7,200,2000,768,-8,2,0,
+phase2_lora_r4_raw,UniDepth,4p_ours_scale_shift_reproj+12,varying_f,S,1.11,21.60,15.8,13.7,19.4,85.6,200,2000,768,-8,2,0,
+phase2_lora_r4_raw,UniDepth,4p_ours_scale_shift_reproj-s+12,shared_f,S,1.19,9.13,27.5,18.6,37.6,85.5,200,2000,768,-8,2,0,
+phase2_lora_r4_raw,UniDepth,4p_ours_scale_shift_reproj-s+12,varying_f,S,1.41,36.87,8.3,11.8,25.0,85.8,200,2000,768,-8,2,0,
