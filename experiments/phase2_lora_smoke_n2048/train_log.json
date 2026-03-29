@@ -1,0 +1,14 @@
+[
+  {
+    "epoch": 0,
+    "train_loss": 1.7779344761371612,
+    "train_accuracy": 0.5231250379979611,
+    "time_sec": 12.274650692939758,
+    "pairs_per_second": 4.073435672492044,
+    "skipped": 0,
+    "ram_maxrss_gb": 15.053836822509766,
+    "lr_0": 1e-05,
+    "gpu_peak_allocated_gb": 1.0164403915405273,
+    "gpu_peak_reserved_gb": 1.173828125
+  }
+]

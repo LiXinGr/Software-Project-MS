@@ -163,11 +163,6 @@ def get_superpoint_keypoints(img_path, device='cuda', max_keypoints=2048, cache_
     Returns:
         kpts: [N, 2] tensor of keypoint coordinates (x, y) in pixel space
     """
-    try:
-        from lightglue import SuperPoint
-    except ImportError:
-        raise ImportError("LightGlue not installed. Run: pip install git+https://github.com/cvg/LightGlue.git")
-    
     img_path = Path(img_path)
     
     # Check cache
@@ -175,6 +170,11 @@ def get_superpoint_keypoints(img_path, device='cuda', max_keypoints=2048, cache_
         cache_path = Path(cache_dir) / f"{img_path.stem}_sp_kpts_k{max_keypoints}.pt"
         if cache_path.exists():
             return torch.load(cache_path, map_location=device)
+
+    try:
+        from lightglue import SuperPoint
+    except ImportError:
+        raise ImportError("LightGlue not installed. Run: pip install git+https://github.com/cvg/LightGlue.git")
     
     # Load image
     img = Image.open(img_path).convert('RGB')

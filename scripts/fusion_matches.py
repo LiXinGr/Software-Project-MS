@@ -82,11 +82,11 @@ def get_config_key(args):
 
 
 def infer_scene_name(args):
-    if args.scene:
+    if getattr(args, "scene", None):
         return args.scene
-    if args.images_dir:
+    if getattr(args, "images_dir", None):
         return Path(args.images_dir).resolve().parent.name
-    if args.img1:
+    if getattr(args, "img1", None):
         p = Path(args.img1).resolve()
         for parent in p.parents:
             if parent.name in {"sacre_coeur", "reichstag", "st_peters_square"}:
