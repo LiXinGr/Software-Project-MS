@@ -1,0 +1,53 @@
+{
+  "megadepth_root": "/mnt/datasets/MegaDepth/MegaDepth_v1_SfM",
+  "sparse_dir": "/home.stud/gorbuden/datagrid/Software-Project-MS/data/sparse_train",
+  "scenes": [
+    "0080",
+    "0042",
+    "0380",
+    "0000",
+    "0366",
+    "0001",
+    "0005",
+    "0237",
+    "0011",
+    "0148"
+  ],
+  "lora_rank": 4,
+  "lora_alpha": 8.0,
+  "lora_dropout": 0.0,
+  "dinov3_only": false,
+  "freeze_backbone": false,
+  "fast_sparse": false,
+  "lora_checkpoint": "/home.stud/gorbuden/datagrid/Software-Project-MS/experiments/phase2_lora_dinov3only/best.pt",
+  "projection_checkpoint": "/home.stud/gorbuden/datagrid/Software-Project-MS/experiments/phase2_projection_wide/best.pt",
+  "hidden_dims": [
+    1024
+  ],
+  "epochs": 10,
+  "pairs_per_epoch": 10000,
+  "num_correspondences": 512,
+  "min_correspondences": 50,
+  "temperature": 0.07,
+  "fusion_alpha": 0.5,
+  "lr_lora": 5e-05,
+  "lr_proj": 0.0001,
+  "weight_decay": 0.0001,
+  "grad_clip": 1.0,
+  "seed": 42,
+  "amp": true,
+  "output_dir": "/home.stud/gorbuden/datagrid/Software-Project-MS/experiments/phase2_lora_joint_fusion_projwarm_jointwarm10k_20260328_184458",
+  "device": "cuda:0",
+  "log_interval": 100,
+  "timestamp": "2026-03-28T19:27:37.624078",
+  "n_valid_pairs": 8095843,
+  "pairs_per_epoch_effective": 10000,
+  "input_dim": 1664,
+  "output_dim": 256,
+  "feat_level": -8,
+  "feat_split_verified": {
+    "dift_dims": "[:, 0:640]",
+    "dinov3_dims": "[:, 640:1664]",
+    "source": "fusion_matches.py + extract_sparse_training_data.py"
+  }
+}
