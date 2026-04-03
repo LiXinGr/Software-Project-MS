@@ -1,0 +1,4 @@
+Matches,Depth,Solver,Exp.Type,Opt.,εr(°),εt(°),mAA@10,mAA_f@10,τ(ms),Inliers,Num_Pairs,max_points,img_size,feat_level,up_ft_index,dift_t,ratio_thresh
+phase4_lg_finetuned_v1_ft015,UniDepth,3p_ours_shift_scale+12,calibrated,S,0.57,1.29,83.7,N/A,20.2,70.7,2577,2048,768,-8,2,0,0.15
+phase4_lg_finetuned_v1_ft015,UniDepth,3p_ours_shift_scale_hybrid_reproj+12,calibrated,H,1.81,4.49,53.5,N/A,8.3,92.9,2577,2048,768,-8,2,0,0.15
+phase4_lg_finetuned_v1_ft015,UniDepth,3p_ours_shift_scale_reproj+12,calibrated,S,1.81,4.49,53.5,N/A,8.3,92.9,2577,2048,768,-8,2,0,0.15

@@ -349,6 +349,22 @@ def build_matcher(args: argparse.Namespace, device: torch.device) -> LightGlue:
         flash=args.flash,
         mp=args.mp,
     ).eval().to(device)
+    if args.lightglue_checkpoint:
+        checkpoint = torch.load(args.lightglue_checkpoint, map_location="cpu", weights_only=False)
+        state = checkpoint.get("model", checkpoint)
+        matcher_state = {
+            key.removeprefix("matcher."): value
+            for key, value in state.items()
+            if key.startswith("matcher.")
+        }
+        if not matcher_state:
+            matcher_state = state
+        load_result = matcher.load_state_dict(matcher_state, strict=False)
+        print(
+            f"{log_prefix(args)} Loaded fine-tuned LightGlue checkpoint: {args.lightglue_checkpoint} "
+            f"(missing={len(load_result.missing_keys)}, unexpected={len(load_result.unexpected_keys)})",
+            flush=True,
+        )
     return matcher
 
 
@@ -362,6 +378,8 @@ def main() -> None:
     parser.add_argument("--scene", type=str, default=None, choices=PHASE4_DEFAULT_SCENES, help="Scene name for benchmark convenience mode")
     parser.add_argument("--config_key", type=str, default=PHASE4_DEFAULT_CONFIG_KEY)
     parser.add_argument("--checkpoint", type=str, default=str(PHASE4_DEFAULT_CHECKPOINT))
+    parser.add_argument("--lightglue_checkpoint", type=str, default=None,
+                        help="Optional Glue Factory LightGlue checkpoint (.tar) used to override pretrained matcher weights")
     parser.add_argument("--max_points", type=int, default=2048)
     parser.add_argument("--source_cache_max_points", type=int, default=None,
                         help="Which cached DINOv3/DIFT source namespace to reuse; defaults to max_points with a fallback to 2000")
