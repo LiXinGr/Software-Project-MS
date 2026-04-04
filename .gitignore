@@ -9,6 +9,13 @@ __pycache__/
 # Large data files
 datasets/phototourism
 data/sparse_train/
+data/sparse_train_lora/
+data/sparse_train_lora_v3clean/
+data/gf_cache/
+data/gf_cache_*/
+data/lightglue_training/
+data/revisitop1m_stage1/
+data/smoke_0046_image_names.txt
 *.tar.gz
 *.npy
 *.h5
