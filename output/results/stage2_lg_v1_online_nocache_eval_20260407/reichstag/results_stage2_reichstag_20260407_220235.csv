@@ -1,0 +1,10 @@
+Solver,Exp.Type,Opt.,eps_r_deg,eps_t_deg,mAA@10,mAA_f@10,runtime_ms,inliers,num_pairs
+3p_ours_shift_scale+12,calibrated,S,0.57,1.30,82.9,nan,17.4,62.3,2577
+3p_ours_shift_scale_hybrid_reproj+12,calibrated,H,1.96,4.90,49.7,nan,7.9,90.6,2577
+3p_ours_shift_scale_reproj+12,calibrated,S,1.96,4.90,49.7,nan,7.9,90.6,2577
+4p_ours_scale_shift+12,shared_f,S,0.94,2.03,71.0,35.7,32.4,61.1,2577
+4p_ours_scale_shift+12,varying_f,S,2.42,5.81,39.7,12.7,22.5,58.6,2577
+4p_ours_scale_shift_reproj+12,shared_f,S,2.32,5.11,45.7,20.7,27.9,89.7,2577
+4p_ours_scale_shift_reproj+12,varying_f,S,1.89,8.17,31.4,17.6,15.7,92.4,2577
+4p_ours_scale_shift_reproj-s+12,shared_f,S,1.63,3.84,54.6,21.5,30.8,91.5,2577
+4p_ours_scale_shift_reproj-s+12,varying_f,S,2.30,9.25,27.6,13.7,19.1,92.9,2577

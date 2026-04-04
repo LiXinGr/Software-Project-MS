@@ -31,6 +31,7 @@ from PIL import Image
 SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = SCRIPT_DIR.parent
 LIGHTGLUE_ROOT = PROJECT_ROOT / "external" / "LightGlue"
+GF_ROOT = PROJECT_ROOT / "external" / "glue-factory"
 
 os.environ.setdefault("MPLCONFIGDIR", "/tmp/mpl_phase4")
 
@@ -176,6 +177,67 @@ def get_or_build_projected_bundle(
     return bundle
 
 
+def load_image_tensor(img_path: Path, device: torch.device) -> tuple[torch.Tensor, tuple[int, int]]:
+    with Image.open(img_path) as img:
+        img_np = np.array(img.convert("RGB"), dtype=np.float32) / 255.0
+    image = torch.from_numpy(img_np).permute(2, 0, 1).to(device=device, dtype=torch.float32)
+    return image, (img_np.shape[0], img_np.shape[1])
+
+
+def build_online_extractor(args: argparse.Namespace, device: torch.device):
+    os.environ.setdefault("HF_HUB_OFFLINE", "1")
+    os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+    os.environ.setdefault("DIFFUSERS_OFFLINE", "1")
+
+    if str(GF_ROOT) not in sys.path:
+        sys.path.insert(0, str(GF_ROOT))
+
+    from gluefactory.models.extractors.dinov3_dift_projection import DINOv3DIFTProjection
+
+    extractor_conf = {
+        "name": "extractors.dinov3_dift_projection",
+        "trainable": False,
+        "max_num_keypoints": int(args.max_points),
+        "force_num_keypoints": False,
+        "feat_level": int(args.feat_level),
+        "dift_t": int(args.t),
+        "dift_up_ft_index": int(args.up_ft_index),
+        "dift_ensemble_size": int(args.ensemble_size),
+        "dift_input_size": list(args.img_size),
+        "projection_checkpoint": str(Path(args.checkpoint)),
+        "alpha_dift": float(args.alpha),
+        "alpha_dinov3": float(1.0 - args.alpha),
+        "sampling_mode": "bilinear",
+        "cache_mode": "online",
+        "write_cache": False,
+        "include_depth_keypoints": False,
+        "cache_mem_size": 0,
+        "cache_warp_by_homography": False,
+    }
+    extractor = DINOv3DIFTProjection(extractor_conf).eval().to(device)
+    return extractor
+
+
+def extract_online_bundle(
+    img_path: Path,
+    extractor,
+    device: torch.device,
+) -> dict[str, torch.Tensor]:
+    image, (height, width) = load_image_tensor(img_path, device)
+    with torch.no_grad():
+        pred = extractor(
+            {
+                "image": image.unsqueeze(0),
+                "image_size": torch.tensor([[width, height]], device=device, dtype=torch.float32),
+                "scales": torch.tensor([[1.0, 1.0]], device=device, dtype=torch.float32),
+            }
+        )
+    return {
+        "kpts": pred["keypoints"][0].detach().cpu().to(dtype=torch.float32),
+        "desc": pred["descriptors"][0].detach().cpu().to(dtype=torch.float32),
+    }
+
+
 @lru_cache(maxsize=4096)
 def load_image_size(path_str: str) -> tuple[int, int]:
     with Image.open(path_str) as img:
@@ -256,7 +318,11 @@ def save_match_archive(
         raise
 
 
-def print_hyperparameter_verification(args: argparse.Namespace, matcher, source_cache_max_points: int) -> None:
+def print_hyperparameter_verification(
+    args: argparse.Namespace,
+    matcher,
+    source_cache_max_points: int | None,
+) -> None:
     prefix = log_prefix(args)
     print(f"{prefix} === Hyperparameter Verification ===", flush=True)
     print(f"{prefix} descriptor_dim:    {matcher.conf.descriptor_dim}", flush=True)
@@ -270,7 +336,11 @@ def print_hyperparameter_verification(args: argparse.Namespace, matcher, source_
     print(f"{prefix} max_keypoints:     {args.max_points}", flush=True)
     print(f"{prefix} coord_format:      pixel + image_size[W,H] (LightGlue normalizes internally)", flush=True)
     print(f"{prefix} weights:           {matcher.conf.weights}", flush=True)
-    print(f"{prefix} source_cache_mp:   {source_cache_max_points}", flush=True)
+    if args.online_extraction:
+        print(f"{prefix} extraction_mode:   online (no feature cache reuse)", flush=True)
+        print(f"{prefix} projection_head:   {args.checkpoint}", flush=True)
+    else:
+        print(f"{prefix} source_cache_mp:   {source_cache_max_points}", flush=True)
     if prefix == "[PHASE4-NOADAPT]":
         print(f"{prefix} All other params identical to phase4_lg_zeroshot_proj256", flush=True)
     else:
@@ -288,27 +358,32 @@ def process_pair(
     sp_cache_dir: Path,
     projection_model,
     matcher,
+    online_extractor=None,
 ):
-    bundle0 = get_or_build_projected_bundle(
-        img0_path,
-        args,
-        device,
-        feature_cache_dir,
-        dino_cache_dir,
-        dift_cache_dir,
-        sp_cache_dir,
-        projection_model,
-    )
-    bundle1 = get_or_build_projected_bundle(
-        img1_path,
-        args,
-        device,
-        feature_cache_dir,
-        dino_cache_dir,
-        dift_cache_dir,
-        sp_cache_dir,
-        projection_model,
-    )
+    if args.online_extraction:
+        bundle0 = extract_online_bundle(img0_path, online_extractor, device)
+        bundle1 = extract_online_bundle(img1_path, online_extractor, device)
+    else:
+        bundle0 = get_or_build_projected_bundle(
+            img0_path,
+            args,
+            device,
+            feature_cache_dir,
+            dino_cache_dir,
+            dift_cache_dir,
+            sp_cache_dir,
+            projection_model,
+        )
+        bundle1 = get_or_build_projected_bundle(
+            img1_path,
+            args,
+            device,
+            feature_cache_dir,
+            dino_cache_dir,
+            dift_cache_dir,
+            sp_cache_dir,
+            projection_model,
+        )
 
     return match_with_lightglue(bundle0, bundle1, img0_path, img1_path, matcher, device)
 
@@ -393,6 +468,8 @@ def main() -> None:
     parser.add_argument("--device", type=str, default="cuda")
     parser.add_argument("--feature_cache", type=str, default=None, help="Directory for projected descriptor cache")
     parser.add_argument("--cache_root", type=str, default=str(PROJECT_ROOT / "cache" / "features"), help="Root directory containing cached matcher features")
+    parser.add_argument("--online_extraction", action="store_true",
+                        help="Run DINOv3+DIFT+projection online from images instead of loading cached descriptors")
     parser.add_argument("--limit", type=int, default=None, help="Limit number of pairs to process")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--visualize", action="store_true")
@@ -422,23 +499,68 @@ def main() -> None:
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
     scene_name = infer_scene_name(args)
 
-    if args.feature_cache is None:
-        args.feature_cache = PROJECT_ROOT / "cache" / "features" / f"{args.config_key}_mp{args.max_points}" / scene_name
-    feature_cache_dir = Path(args.feature_cache)
-    feature_cache_dir.mkdir(parents=True, exist_ok=True)
-
-    dino_cache_dir, dift_cache_dir, source_cache_max_points = resolve_source_cache_dirs(args, scene_name)
-
     checkpoint_path = Path(args.checkpoint)
     if not checkpoint_path.exists():
         raise FileNotFoundError(f"Projection checkpoint not found: {checkpoint_path}")
 
-    sp_cache_dir = Path(args.cache_root) / "superpoint_kpts" / scene_name
-    sp_cache_dir.mkdir(parents=True, exist_ok=True)
-    projection_model = load_projection_model(checkpoint_path, device)
+    feature_cache_dir = None
+    dino_cache_dir = None
+    dift_cache_dir = None
+    sp_cache_dir = None
+    source_cache_max_points = None
+    projection_model = None
+    online_extractor = None
+
+    if args.online_extraction:
+        online_extractor = build_online_extractor(args, device)
+    else:
+        if args.feature_cache is None:
+            args.feature_cache = PROJECT_ROOT / "cache" / "features" / f"{args.config_key}_mp{args.max_points}" / scene_name
+        feature_cache_dir = Path(args.feature_cache)
+        feature_cache_dir.mkdir(parents=True, exist_ok=True)
+        dino_cache_dir, dift_cache_dir, source_cache_max_points = resolve_source_cache_dirs(args, scene_name)
+        sp_cache_dir = Path(args.cache_root) / "superpoint_kpts" / scene_name
+        sp_cache_dir.mkdir(parents=True, exist_ok=True)
+        projection_model = load_projection_model(checkpoint_path, device)
+
     matcher = build_matcher(args, device)
     print_hyperparameter_verification(args, matcher, source_cache_max_points)
     prefix = log_prefix(args)
+
+    if args.img1 and args.img2:
+        img0_path = Path(args.img1)
+        img1_path = Path(args.img2)
+        mkpts0, mkpts1, match_scores, stop_layer = process_pair(
+            img0_path,
+            img1_path,
+            args,
+            device,
+            feature_cache_dir,
+            dino_cache_dir,
+            dift_cache_dir,
+            sp_cache_dir,
+            projection_model,
+            matcher,
+            online_extractor=online_extractor,
+        )
+        mean_conf = float(match_scores.mean()) if match_scores.size else 0.0
+        print(
+            f"{prefix} Found {len(mkpts0)} matches "
+            f"(mean_conf={mean_conf:.3f}, stop={stop_layer})",
+            flush=True,
+        )
+
+        if args.output_dir:
+            output_dir = Path(args.output_dir)
+            output_dir.mkdir(parents=True, exist_ok=True)
+            output_path = output_dir / f"{img0_path.stem}__{img1_path.stem}.npz"
+            save_match_archive(output_path, mkpts0, mkpts1, args, match_scores=match_scores, stop_layer=stop_layer)
+
+        if args.visualize and len(mkpts0) > 0:
+            out_dir = Path(args.output_dir) if args.output_dir else PROJECT_ROOT / "datasets"
+            out_dir.mkdir(parents=True, exist_ok=True)
+            maybe_visualize(img0_path, img1_path, mkpts0, mkpts1, out_dir, args.max_lines, prefix)
+        return
 
     if args.pairs_file or args.scene:
         if scene_name == "single_pair":
@@ -487,6 +609,7 @@ def main() -> None:
                 sp_cache_dir,
                 projection_model,
                 matcher,
+                online_extractor=online_extractor,
             )
 
             save_match_archive(output_path, mkpts0, mkpts1, args, match_scores=match_scores, stop_layer=stop_layer)
@@ -515,40 +638,6 @@ def main() -> None:
             f"zero_match_pairs={zero_match_pairs}, skipped_existing={skipped_existing}",
             flush=True,
         )
-        return
-
-    if args.img1 and args.img2:
-        img0_path = Path(args.img1)
-        img1_path = Path(args.img2)
-        mkpts0, mkpts1, match_scores, stop_layer = process_pair(
-            img0_path,
-            img1_path,
-            args,
-            device,
-            feature_cache_dir,
-            dino_cache_dir,
-            dift_cache_dir,
-            sp_cache_dir,
-            projection_model,
-            matcher,
-        )
-        mean_conf = float(match_scores.mean()) if match_scores.size else 0.0
-        print(
-            f"{prefix} Found {len(mkpts0)} matches "
-            f"(mean_conf={mean_conf:.3f}, stop={stop_layer})",
-            flush=True,
-        )
-
-        if args.output_dir:
-            output_dir = Path(args.output_dir)
-            output_dir.mkdir(parents=True, exist_ok=True)
-            output_path = output_dir / f"{img0_path.stem}__{img1_path.stem}.npz"
-            save_match_archive(output_path, mkpts0, mkpts1, args, match_scores=match_scores, stop_layer=stop_layer)
-
-        if args.visualize and len(mkpts0) > 0:
-            out_dir = Path(args.output_dir) if args.output_dir else PROJECT_ROOT / "datasets"
-            out_dir.mkdir(parents=True, exist_ok=True)
-            maybe_visualize(img0_path, img1_path, mkpts0, mkpts1, out_dir, args.max_lines, prefix)
         return
 
     parser.error("Provide either --img1/--img2 or batch inputs via --scene or --pairs_file/--output_dir.")
