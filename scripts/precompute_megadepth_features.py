@@ -185,7 +185,13 @@ def iter_scene_images(root: Path, scenes: List[str]) -> Iterable[Tuple[str, str,
             print(f"Scene {scene_name}: SKIPPED - no valid reconstruction found")
             continue
 
-        recon_dir = scene_dir / "sparse" / reconstruction
+        resolved = MegaDepthPairSampler._resolve_reconstruction_dir(
+            scene_dir, reconstruction
+        )
+        if resolved is None:
+            print(f"Scene {scene_name}: SKIPPED - reconstruction path could not be resolved")
+            continue
+        recon_dir, reconstruction = resolved
         images = MegaDepthScene._parse_images(recon_dir / "images.txt")
         image_paths: List[Path] = []
         missing_count = 0

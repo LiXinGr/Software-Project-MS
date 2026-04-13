@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import logging
 import random
 from collections import Counter
 from dataclasses import dataclass
@@ -11,6 +12,9 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
+
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -54,17 +58,23 @@ class MegaDepthScene:
         """
         Args:
             scene_dir: e.g. /mnt/datasets/MegaDepth/MegaDepth_v1_SfM/0015
-            reconstruction: sub-path under sparse/, e.g. "manhattan/0"
+            reconstruction: sub-path under sparse/ or sparse-txt/,
+                e.g. "manhattan/0"
             min_covis: minimum shared 3D points required for a valid pair
         """
         self.scene_dir = Path(scene_dir)
         self.image_dir = self.scene_dir / "images"
-        self.reconstruction = reconstruction
         self.min_covis = min_covis
 
-        recon_dir = self.scene_dir / "sparse" / reconstruction
-        if not recon_dir.exists():
-            raise FileNotFoundError(f"Reconstruction not found: {recon_dir}")
+        resolved = MegaDepthPairSampler._resolve_reconstruction_dir(
+            self.scene_dir, reconstruction
+        )
+        if resolved is None:
+            raise FileNotFoundError(
+                f"Reconstruction not found for {self.scene_dir} using {reconstruction}"
+            )
+        recon_dir, resolved_reconstruction = resolved
+        self.reconstruction = resolved_reconstruction
 
         self.cameras = self._parse_cameras(recon_dir / "cameras.txt")
         self.images = self._parse_images(recon_dir / "images.txt")
@@ -336,23 +346,77 @@ class MegaDepthPairSampler:
 
     @staticmethod
     def _find_reconstruction(scene_dir: Path) -> Optional[str]:
-        sparse_dir = scene_dir / "sparse"
-        if not sparse_dir.is_dir():
+        resolved = MegaDepthPairSampler._resolve_reconstruction_dir(scene_dir)
+        if resolved is None:
+            return None
+        _, reconstruction = resolved
+        return reconstruction
+
+    @staticmethod
+    def _reconstruction_roots(scene_dir: Path) -> list[tuple[str, Path]]:
+        return [
+            ("sparse", scene_dir / "sparse"),
+            ("sparse-txt", scene_dir / "sparse-txt"),
+        ]
+
+    @staticmethod
+    def _resolve_reconstruction_dir(
+        scene_dir: Path, reconstruction: Optional[str] = None
+    ) -> Optional[tuple[Path, str]]:
+        roots = MegaDepthPairSampler._reconstruction_roots(scene_dir)
+
+        if reconstruction is not None:
+            recon_path = Path(reconstruction)
+            root_names = {name for name, _ in roots}
+            if recon_path.parts and recon_path.parts[0] in root_names:
+                root_name = recon_path.parts[0]
+                relative_path = Path(*recon_path.parts[1:])
+                candidate = scene_dir / recon_path
+                if MegaDepthPairSampler._is_valid_reconstruction_dir(candidate):
+                    return candidate, relative_path.as_posix()
+                return None
+
+            for root_name, root_dir in roots:
+                candidate = root_dir / recon_path
+                if MegaDepthPairSampler._is_valid_reconstruction_dir(candidate):
+                    return candidate, recon_path.as_posix()
             return None
 
-        preferred = sparse_dir / "manhattan" / "0"
-        if MegaDepthPairSampler._is_valid_reconstruction_dir(preferred):
-            return str(preferred.relative_to(sparse_dir))
+        for root_name, root_dir in roots:
+            if not root_dir.is_dir():
+                continue
 
-        candidates = sorted(
-            path.parent
-            for path in sparse_dir.rglob("cameras.txt")
-            if MegaDepthPairSampler._is_valid_reconstruction_dir(path.parent)
+            preferred = root_dir / "manhattan" / "0"
+            if MegaDepthPairSampler._is_valid_reconstruction_dir(preferred):
+                relative_path = preferred.relative_to(root_dir).as_posix()
+                logger.info(
+                    "Scene %s: using reconstruction from %s/%s",
+                    scene_dir.name,
+                    root_name,
+                    relative_path,
+                )
+                return preferred, relative_path
+
+            candidates = sorted(
+                path.parent
+                for path in root_dir.rglob("cameras.txt")
+                if MegaDepthPairSampler._is_valid_reconstruction_dir(path.parent)
+            )
+            if candidates:
+                relative_path = candidates[0].relative_to(root_dir).as_posix()
+                logger.info(
+                    "Scene %s: using reconstruction from %s/%s",
+                    scene_dir.name,
+                    root_name,
+                    relative_path,
+                )
+                return candidates[0], relative_path
+
+        logger.warning(
+            "Scene %s: no valid reconstruction found under sparse/ or sparse-txt/",
+            scene_dir.name,
         )
-        if not candidates:
-            return None
-
-        return str(candidates[0].relative_to(sparse_dir))
+        return None
 
     @staticmethod
     def _is_valid_reconstruction_dir(path: Path) -> bool:
