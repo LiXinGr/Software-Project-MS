@@ -34,6 +34,7 @@ from fusion_matches import (
     parse_pairs_file,
     source_cache_dirs,
 )
+from projection_checkpoint_utils import build_projection_model
 from train_projection_head import ProjectionHead
 from util import save_matches, visualize_matches
 
@@ -54,18 +55,7 @@ def final_cache_path(img_path: Path, feature_cache_dir: Path) -> Path:
 
 
 def load_projection_model(checkpoint_path: Path, device: torch.device) -> ProjectionHead:
-    checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
-    config = checkpoint.get("config", {})
-    hidden_dims = config.get("hidden_dims")
-    if hidden_dims is None:
-        hidden_dims = [int(config.get("hidden_dim", 512))]
-    model = ProjectionHead(
-        input_dim=int(config.get("input_dim", 1664)),
-        hidden_dims=hidden_dims,
-        output_dim=int(config.get("output_dim", 256)),
-    )
-    model.load_state_dict(checkpoint["model_state_dict"])
-    model.eval().to(device)
+    model, _ = build_projection_model(checkpoint_path, device=device, eval_mode=True)
     return model
 
 

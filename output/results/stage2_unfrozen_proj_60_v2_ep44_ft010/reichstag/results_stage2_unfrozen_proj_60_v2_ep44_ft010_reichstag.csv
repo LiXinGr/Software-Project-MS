@@ -1,0 +1,4 @@
+Matches,Depth,Solver,Exp.Type,Opt.,εr(°),εt(°),mAA@10,mAA_f@10,τ(ms),Inliers,Num_Pairs,max_points,img_size,feat_level,up_ft_index,dift_t,ratio_thresh
+stage2_unfrozen_proj_60_v2_ep44_ft010,UniDepth,3p_ours_shift_scale+12,calibrated,S,0.80,1.86,71.1,N/A,10.7,55.4,2577,2048,768,-8,2,0,
+stage2_unfrozen_proj_60_v2_ep44_ft010,UniDepth,3p_ours_shift_scale_hybrid_reproj+12,calibrated,H,2.10,5.36,46.2,N/A,5.5,88.3,2577,2048,768,-8,2,0,
+stage2_unfrozen_proj_60_v2_ep44_ft010,UniDepth,3p_ours_shift_scale_reproj+12,calibrated,S,2.10,5.36,46.2,N/A,5.5,88.3,2577,2048,768,-8,2,0,

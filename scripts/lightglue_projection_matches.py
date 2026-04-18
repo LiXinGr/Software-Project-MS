@@ -238,6 +238,25 @@ def extract_online_bundle(
     }
 
 
+def get_or_build_online_bundle(
+    img_path: Path,
+    extractor,
+    device: torch.device,
+    bundle_cache: dict[str, dict[str, torch.Tensor]] | None,
+) -> dict[str, torch.Tensor]:
+    if bundle_cache is None:
+        return extract_online_bundle(img_path, extractor, device)
+
+    cache_key = str(img_path)
+    cached = bundle_cache.get(cache_key)
+    if cached is not None:
+        return cached
+
+    cached = extract_online_bundle(img_path, extractor, device)
+    bundle_cache[cache_key] = cached
+    return cached
+
+
 @lru_cache(maxsize=4096)
 def load_image_size(path_str: str) -> tuple[int, int]:
     with Image.open(path_str) as img:
@@ -337,7 +356,7 @@ def print_hyperparameter_verification(
     print(f"{prefix} coord_format:      pixel + image_size[W,H] (LightGlue normalizes internally)", flush=True)
     print(f"{prefix} weights:           {matcher.conf.weights}", flush=True)
     if args.online_extraction:
-        print(f"{prefix} extraction_mode:   online (no feature cache reuse)", flush=True)
+        print(f"{prefix} extraction_mode:   online (RAM memoization per image, no disk cache)", flush=True)
         print(f"{prefix} projection_head:   {args.checkpoint}", flush=True)
     else:
         print(f"{prefix} source_cache_mp:   {source_cache_max_points}", flush=True)
@@ -359,10 +378,11 @@ def process_pair(
     projection_model,
     matcher,
     online_extractor=None,
+    online_bundle_cache=None,
 ):
     if args.online_extraction:
-        bundle0 = extract_online_bundle(img0_path, online_extractor, device)
-        bundle1 = extract_online_bundle(img1_path, online_extractor, device)
+        bundle0 = get_or_build_online_bundle(img0_path, online_extractor, device, online_bundle_cache)
+        bundle1 = get_or_build_online_bundle(img1_path, online_extractor, device, online_bundle_cache)
     else:
         bundle0 = get_or_build_projected_bundle(
             img0_path,
@@ -510,9 +530,11 @@ def main() -> None:
     source_cache_max_points = None
     projection_model = None
     online_extractor = None
+    online_bundle_cache = None
 
     if args.online_extraction:
         online_extractor = build_online_extractor(args, device)
+        online_bundle_cache = {}
     else:
         if args.feature_cache is None:
             args.feature_cache = PROJECT_ROOT / "cache" / "features" / f"{args.config_key}_mp{args.max_points}" / scene_name
@@ -542,6 +564,7 @@ def main() -> None:
             projection_model,
             matcher,
             online_extractor=online_extractor,
+            online_bundle_cache=online_bundle_cache,
         )
         mean_conf = float(match_scores.mean()) if match_scores.size else 0.0
         print(
@@ -610,6 +633,7 @@ def main() -> None:
                 projection_model,
                 matcher,
                 online_extractor=online_extractor,
+                online_bundle_cache=online_bundle_cache,
             )
 
             save_match_archive(output_path, mkpts0, mkpts1, args, match_scores=match_scores, stop_layer=stop_layer)
@@ -623,9 +647,11 @@ def main() -> None:
                 zero_match_pairs += 1
 
             if pair_index == total_pairs or pair_index % 100 == 0:
+                cache_entries = len(online_bundle_cache) if online_bundle_cache is not None else 0
                 print(
                     f"{prefix} {scene_name} pair {pair_index}/{total_pairs}: "
-                    f"matches={num_matches}, conf={mean_conf:.3f}, stop={stop_layer}",
+                    f"matches={num_matches}, conf={mean_conf:.3f}, stop={stop_layer}, "
+                    f"online_cache_entries={cache_entries}",
                     flush=True,
                 )
 
@@ -635,7 +661,8 @@ def main() -> None:
         print(
             f"{prefix} {scene_name} DONE: {evaluated_pairs} pairs, "
             f"avg_matches={avg_matches:.1f}, avg_conf={avg_conf:.3f}, "
-            f"zero_match_pairs={zero_match_pairs}, skipped_existing={skipped_existing}",
+            f"zero_match_pairs={zero_match_pairs}, skipped_existing={skipped_existing}, "
+            f"online_cache_entries={len(online_bundle_cache) if online_bundle_cache is not None else 0}",
             flush=True,
         )
         return
