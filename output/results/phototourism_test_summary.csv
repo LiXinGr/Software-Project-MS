@@ -1,0 +1,7 @@
+method_key,method_label,validation_avg_3scenes,test_avg_10scenes,delta_vs_validation,completed_scenes,total_scenes,total_runtime_seconds,avg_runtime_seconds,total_match_seconds,avg_match_seconds,total_pack_seconds,avg_pack_seconds,total_eval_seconds,avg_eval_seconds,total_csv_seconds,avg_csv_seconds,failed_scenes,british_museum,florence_cathedral_side,lincoln_memorial_statue,milan_cathedral,mount_rushmore,piazza_san_marco,sagrada_familia,st_pauls_cathedral,taj_mahal,temple_nara_japan
+test_dinov3_mnn,DINOv3 MNN,63.6,45.00999999999999,-18.59000000000001,10,10,8110.0,811.0,5589.0,558.9,539.0,53.9,1958.0,195.8,10.0,1.0,,45.8,46.8,59.6,39.6,17.0,24.1,57.4,71.4,51.4,37.0
+test_dift_mnn,DIFT MNN,66.5,49.290000000000006,-17.209999999999994,10,10,15018.0,1501.8,12559.0,1255.9,632.0,63.2,1802.0,180.2,10.0,1.0,,61.0,44.7,72.2,36.2,23.1,22.6,61.3,73.0,52.3,46.5
+test_ours_151sc_ft010,Ours (frozen 151sc),81.4,72.0,-9.400000000000006,10,10,14091.0,1409.1,11250.0,1125.0,690.0,69.0,2124.0,212.4,14.0,1.4,,79.7,83.9,82.7,75.9,41.7,76.6,71.8,78.4,73.1,56.2
+test_splg,SP+LG,81.7,72.75,-8.950000000000003,10,10,7426.0,742.6,3980.0,398.0,933.0,93.3,2489.0,248.9,12.0,1.2,,80.3,83.8,84.4,75.8,45.1,78.2,72.0,77.9,73.1,56.9
+test_roma,RoMa,87.1,81.55999999999999,-5.540000000000006,10,10,70424.0,7042.4,66513.0,6651.3,811.0,81.1,3078.0,307.8,10.0,1.0,,84.0,90.0,88.5,85.6,72.2,89.1,74.8,82.0,82.6,66.8
+test_romav2,RoMaV2,86.4,81.49,-4.910000000000011,10,10,80442.0,8044.2,76189.0,7618.9,778.0,77.8,3450.0,345.0,11.0,1.1,,84.0,90.5,88.8,85.2,71.6,89.5,75.0,82.1,82.3,65.9

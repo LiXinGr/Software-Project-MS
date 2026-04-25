@@ -1,0 +1,4 @@
+Matches,Depth,Solver,Exp.Type,Opt.,εr(°),εt(°),mAA@10,mAA_f@10,τ(ms),Inliers,Num_Pairs,max_points,img_size,feat_level,up_ft_index,dift_t,ratio_thresh
+test_splg,UniDepth,3p_ours_shift_scale+12,calibrated,S,0.21,0.75,84.4,N/A,26.9,72.4,15000,2048,768,'','','',
+test_splg,UniDepth,3p_ours_shift_scale_hybrid_reproj+12,calibrated,H,2.19,8.77,32.4,N/A,11.1,83.4,15000,2048,768,'','','',
+test_splg,UniDepth,3p_ours_shift_scale_reproj+12,calibrated,S,2.19,8.77,32.4,N/A,11.2,83.4,15000,2048,768,'','','',

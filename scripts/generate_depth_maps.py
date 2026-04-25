@@ -19,12 +19,14 @@ import sys
 try:
     from unidepth.models import UniDepthV2
     UNIDEPTH_VERSION = 2
-except ImportError:
+except ImportError as exc_v2:
     try:
         from unidepth.models import UniDepthV1
         UNIDEPTH_VERSION = 1
-    except ImportError:
+    except ImportError as exc_v1:
         print("Error: UniDepth not found. Make sure you're in the unidepth conda environment.")
+        print(f"  UniDepthV2 import error: {exc_v2}", file=sys.stderr)
+        print(f"  UniDepthV1 import error: {exc_v1}", file=sys.stderr)
         sys.exit(1)
 
 
@@ -42,16 +44,18 @@ def load_unidepth_model(backbone="vitl14", device="cuda"):
     return model
 
 
-def process_image(img_path, model, device, max_size=None):
+def process_image(img_path, model, device, max_size=None, _allow_full_res_retry=True):
     """Process a single image and return depth map and intrinsics."""
     img = Image.open(img_path).convert("RGB")
     orig_size = (img.height, img.width)
+    resized_for_inference = False
     
     # Resize if image is too large (to save GPU memory)
     if max_size and max(img.size) > max_size:
         ratio = max_size / max(img.size)
         new_size = (int(img.width * ratio), int(img.height * ratio))
         img = img.resize(new_size, Image.BILINEAR)
+        resized_for_inference = True
     
     img_np = np.array(img)
     img_tensor = torch.from_numpy(img_np).permute(2, 0, 1).unsqueeze(0).float() / 255.0
@@ -60,11 +64,32 @@ def process_image(img_path, model, device, max_size=None):
     with torch.no_grad():
         predictions = model.infer(img_tensor)
     
-    depth = predictions["depth"].squeeze().cpu().numpy()
+    depth_raw = predictions["depth"].detach().cpu().numpy()
+    depth = np.squeeze(depth_raw)
     K = predictions["intrinsics"].squeeze().cpu().numpy()
+
+    # UniDepth occasionally returns a collapsed width dimension after the optional
+    # max_size resize (e.g. shape (1, 1, H, 1)), which breaks the resize-back step.
+    # Retrying once at the original preprocessed resolution avoids dropping the image.
+    if depth.ndim != 2:
+        if resized_for_inference and _allow_full_res_retry:
+            print(
+                f"[UniDepth] Warning: unexpected depth shape {depth_raw.shape} for {img_path.name}; "
+                "retrying without max_size resize..."
+            )
+            return process_image(
+                img_path,
+                model,
+                device,
+                max_size=None,
+                _allow_full_res_retry=False,
+            )
+        raise ValueError(
+            f"Unexpected depth shape {depth_raw.shape} (after squeeze: {depth.shape}) for {img_path.name}"
+        )
     
     # If resized, scale depth back to original resolution
-    if max_size and max(orig_size) > max_size:
+    if resized_for_inference:
         from scipy.ndimage import zoom
         scale_h = orig_size[0] / depth.shape[0]
         scale_w = orig_size[1] / depth.shape[1]

@@ -1,0 +1,10 @@
+british_museum | img=660 | prep=660 | depth=0 | pairs=212522 | info=Y | ready=NO
+florence_cathedral_side | img=108 | prep=108 | depth=0 | pairs=4803 | info=Y | ready=NO
+lincoln_memorial_statue | img=850 | prep=850 | depth=0 | pairs=336478 | info=Y | ready=NO
+milan_cathedral | img=124 | prep=124 | depth=0 | pairs=7251 | info=Y | ready=NO
+mount_rushmore | img=138 | prep=138 | depth=0 | pairs=9038 | info=Y | ready=NO
+piazza_san_marco | img=249 | prep=249 | depth=0 | pairs=21174 | info=Y | ready=NO
+sagrada_familia | img=401 | prep=401 | depth=0 | pairs=79080 | info=Y | ready=NO
+st_pauls_cathedral | img=615 | prep=615 | depth=0 | pairs=182318 | info=Y | ready=NO
+taj_mahal | img=1312 | prep=1312 | depth=0 | pairs=810660 | info=Y | ready=NO
+temple_nara_japan | img=904 | prep=904 | depth=0 | pairs=399262 | info=Y | ready=NO
