@@ -17,6 +17,7 @@ from tqdm import tqdm
 from utils.data import depth_indices, R_err_fun, t_err_fun
 from utils.eval_utils import print_results_focal, NoDaemonProcessPool, get_exception_result_dict
 from utils.madpose import madpose_opt_from_dict
+from utils.result_summary import write_summary_json
 
 
 # from utils.vis import draw_results_pose_auc_10
@@ -25,7 +26,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--first', type=int, default=None)
     parser.add_argument('-i', '--force_inliers', type=float, default=None)
-    parser.add_argument('-t', '--threshold', type=float, default=1.0)
+    parser.add_argument('-t', '--threshold', '--max_epipolar_error', type=float, default=2.0)
     parser.add_argument('-r', '--reproj_threshold', type=float, default=16.0)
     parser.add_argument('-nw', '--num_workers', type=int, default=1)
     parser.add_argument('-l', '--load', action='store_true', default=False)
@@ -436,6 +437,14 @@ def eval(args):
             json.dump(results, f)
 
         print("Done")
+
+    write_summary_json(
+        results,
+        args.output_dir,
+        json_string.replace(".json", "_summary.json"),
+        "shared_focal",
+        dataset_path,
+    )
 
     print_results_focal(experiments, results)
     # draw_cumplots(experiments, results)

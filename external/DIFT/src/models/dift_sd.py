@@ -250,7 +250,8 @@ class SDFeaturizer:
             ensemble_size: the number of repeated images used in the batch to extract features
         unet_ft: a torch tensor in the shape of [1, c, h, w]
         '''
-        img_tensor = img_tensor.repeat(ensemble_size, 1, 1, 1).to(self.device) # ensem, c, h, w
+        chunk_size = max(1, int(os.environ.get("DIFT_ENSEMBLE_CHUNK_SIZE", "2")))
+        img_tensor = img_tensor.to(self.device)
         if prompt == self.null_prompt:
             prompt_embeds = self.null_prompt_embeds
         else:
@@ -260,15 +261,37 @@ class SDFeaturizer:
                 device=self.device,
                 num_images_per_prompt=1,
             ) # [1, 77, dim]
-        prompt_embeds = prompt_embeds.repeat(ensemble_size, 1, 1)
-        unet_ft_all = self.pipe(
-            img_tensor=img_tensor,
-            t=t,
-            up_ft_indices=[up_ft_index],
-            prompt_embeds=prompt_embeds)
-        unet_ft = unet_ft_all['up_ft'][up_ft_index] # ensem, c, h, w
-        unet_ft = unet_ft.mean(0, keepdim=True) # 1,c,h,w
-        return unet_ft
+
+        if ensemble_size <= chunk_size:
+            img_batch = img_tensor.repeat(ensemble_size, 1, 1, 1)
+            prompt_batch = prompt_embeds.repeat(ensemble_size, 1, 1)
+            unet_ft_all = self.pipe(
+                img_tensor=img_batch,
+                t=t,
+                up_ft_indices=[up_ft_index],
+                prompt_embeds=prompt_batch)
+            unet_ft = unet_ft_all['up_ft'][up_ft_index] # ensem, c, h, w
+            return unet_ft.mean(0, keepdim=True) # 1,c,h,w
+
+        unet_ft_sum = None
+        remaining = ensemble_size
+        while remaining > 0:
+            current = min(chunk_size, remaining)
+            img_batch = img_tensor.repeat(current, 1, 1, 1)
+            prompt_batch = prompt_embeds.repeat(current, 1, 1)
+            unet_ft_all = self.pipe(
+                img_tensor=img_batch,
+                t=t,
+                up_ft_indices=[up_ft_index],
+                prompt_embeds=prompt_batch)
+            unet_ft = unet_ft_all['up_ft'][up_ft_index].sum(0, keepdim=True)
+            unet_ft_sum = unet_ft if unet_ft_sum is None else unet_ft_sum + unet_ft
+            remaining -= current
+            del img_batch, prompt_batch, unet_ft_all, unet_ft
+            if torch.cuda.is_available() and str(self.device).startswith("cuda"):
+                torch.cuda.empty_cache()
+
+        return unet_ft_sum / float(ensemble_size)
 
 
 class SDFeaturizer4Eval(SDFeaturizer):

@@ -19,6 +19,7 @@ containing mkpts0 and mkpts1 in preprocessed-image pixel coordinates.
 
 import argparse
 import sys
+import time
 from pathlib import Path
 
 import numpy as np
@@ -33,7 +34,15 @@ PROJECT_ROOT = SCRIPT_DIR.parent
 
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from util import get_superpoint_keypoints, save_matches, visualize_matches
+from util import (
+    get_superpoint_keypoints,
+    save_matches,
+    visualize_matches,
+    reset_peak_memory,
+    current_peak_memory_mb,
+    preprocess_image,
+    save_timing_json,
+)
 
 
 DINOV3_NUM_BLOCKS = 24
@@ -158,6 +167,10 @@ def load_dinov3_feature(img_path, args, source_cache_dir):
     w, h = img.size
     cache_path = source_cache_dir / f"{img_path.stem}_dinov3_{w}x{h}_l{args.feat_level}.pt"
     if not cache_path.exists():
+        candidates = sorted(source_cache_dir.glob(f"{img_path.stem}_dinov3_raw{w}x{h}_prep*_l{args.feat_level}.pt"))
+        if candidates:
+            cache_path = candidates[-1]
+    if not cache_path.exists():
         raise FileNotFoundError(f"Missing DINOv3 cache for {img_path.name}: {cache_path}")
     return torch.load(cache_path, map_location="cpu"), (h, w)
 
@@ -211,7 +224,17 @@ def get_or_build_raw_bundle(img_path, args, device, feature_cache_dir, dino_cach
     dino_ft = dino_ft.to(device)
     dift_ft = dift_ft.to(device)
 
-    dino_desc = sample_feature_map(dino_ft, kpts, orig_size, device)
+    with Image.open(img_path) as img:
+        _, dino_info = preprocess_image(
+            img.convert("RGB"),
+            target_long_edge=1120,
+            divisibility=16,
+            return_info=True,
+        )
+    kpts_dino = kpts.clone()
+    kpts_dino[:, 0] = kpts_dino[:, 0] * dino_info.scale + dino_info.pad_left
+    kpts_dino[:, 1] = kpts_dino[:, 1] * dino_info.scale + dino_info.pad_top
+    dino_desc = sample_feature_map(dino_ft, kpts_dino, dino_info.final_size, device)
 
     dift_h, dift_w = canonical_img_size(args.img_size)
     kpts_dift = kpts.clone()
@@ -441,10 +464,14 @@ def main():
     parser.add_argument("--pca_seed", type=int, default=0, help="Random seed for PCA sampling")
     parser.add_argument("--device", type=str, default="cuda")
     parser.add_argument("--feature_cache", type=str, default=None, help="Directory for fused descriptor cache")
+    parser.add_argument("--sp_cache_dir", type=str, default=None,
+                        help="Directory containing/raw-writing SuperPoint keypoint cache")
     parser.add_argument("--cache_root", type=str, default=str(PROJECT_ROOT / "cache" / "features"), help="Root directory containing cached matcher features")
     parser.add_argument("--limit", type=int, default=None, help="Limit number of pairs to process")
     parser.add_argument("--visualize", action="store_true")
     parser.add_argument("--print_config_key", action="store_true", help="Print the config key for this configuration and exit")
+    parser.add_argument("--timing_output", type=str, default=None,
+                        help="Path to write per-pair timing JSON")
     args = parser.parse_args()
 
     if not (0.0 <= args.alpha <= 1.0):
@@ -470,9 +497,10 @@ def main():
     if not dift_cache_dir.exists():
         raise FileNotFoundError(f"Missing DIFT source cache directory: {dift_cache_dir}")
 
-    sp_cache_dir = Path(args.cache_root) / "superpoint_kpts" / scene_name
+    sp_cache_dir = Path(args.sp_cache_dir) if args.sp_cache_dir else Path(args.cache_root) / "superpoint_kpts" / scene_name
     sp_cache_dir.mkdir(parents=True, exist_ok=True)
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
+    reset_peak_memory(device)
 
     if args.pairs_file and args.output_dir:
         images_dir = Path(args.images_dir) if args.images_dir else Path(".")
@@ -493,18 +521,24 @@ def main():
             sp_cache_dir,
         )
 
+        pair_timings = []
+        skipped_existing = 0
+        skipped_missing = 0
         for img1_name, img2_name in tqdm(pairs, desc="Matching"):
             img1_path = images_dir / img1_name
             img2_path = images_dir / img2_name
             if not img1_path.exists() or not img2_path.exists():
                 print(f"[FUSION] Skipping missing pair: {img1_name}, {img2_name}")
+                skipped_missing += 1
                 continue
 
             pair_name = f"{Path(img1_name).stem}__{Path(img2_name).stem}"
             output_path = output_dir / f"{pair_name}.npz"
             if output_path.exists():
+                skipped_existing += 1
                 continue
 
+            t_start = time.time()
             mkpts0, mkpts1 = process_pair(
                 img1_path,
                 img2_path,
@@ -517,8 +551,29 @@ def main():
                 pca_model,
             )
             save_matches(output_path, mkpts0, mkpts1)
+            pair_timings.append(
+                {
+                    "img0": img1_name,
+                    "img1": img2_name,
+                    "time_ms": (time.time() - t_start) * 1000.0,
+                    "num_matches": int(len(mkpts0)),
+                }
+            )
 
         print(f"[FUSION] Saved matches to {output_dir}")
+        save_timing_json(
+            getattr(args, "timing_output", None),
+            config_key=get_config_key(args),
+            scene=scene_name,
+            pair_timings=pair_timings,
+            feature_timings=[],
+            peak_mem_mb=current_peak_memory_mb(device),
+            extra={
+                "skipped_existing": skipped_existing,
+                "skipped_missing": skipped_missing,
+                "coordinate_frame": "raw",
+            },
+        )
         return
 
     if args.img1 and args.img2:

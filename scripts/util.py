@@ -4,8 +4,10 @@ import matplotlib.pyplot as plt
 from PIL import Image
 from pathlib import Path
 from dataclasses import dataclass
+import json
 import os
 import tempfile
+import time
 
 
 @dataclass
@@ -521,6 +523,97 @@ def save_matches(output_path, mkpts0, mkpts1):
     os.close(fd)
     try:
         np.savez(tmp_path, mkpts0=mkpts0, mkpts1=mkpts1)
+        os.replace(tmp_path, output_path)
+    except Exception:
+        if os.path.exists(tmp_path):
+            os.unlink(tmp_path)
+        raise
+
+
+def current_peak_memory_mb(device=None):
+    """Return CUDA peak allocation in MiB, or 0.0 when CUDA is unavailable."""
+    if not torch.cuda.is_available():
+        return 0.0
+    if device is not None:
+        try:
+            torch.cuda.synchronize(device)
+        except Exception:
+            pass
+    return float(torch.cuda.max_memory_allocated(device=device) / 1024**2)
+
+
+def reset_peak_memory(device=None):
+    """Reset CUDA peak allocation stats when CUDA is available."""
+    if torch.cuda.is_available():
+        torch.cuda.reset_peak_memory_stats(device=device)
+
+
+def timed_feature_load(
+    image_key,
+    feature_timings,
+    seen_images,
+    loader,
+):
+    """
+    Run a per-image loader once for timing purposes and record cache hits.
+
+    The loader must return either the loaded value or ``(value, cache_hit)``.
+    """
+    start = time.time()
+    loaded = loader()
+    elapsed_ms = (time.time() - start) * 1000.0
+    cache_hit = False
+    value = loaded
+    if isinstance(loaded, tuple) and len(loaded) == 2 and isinstance(loaded[1], bool):
+        value, cache_hit = loaded
+
+    if feature_timings is not None and seen_images is not None and image_key not in seen_images:
+        feature_timings.append(
+            {
+                "image": str(image_key),
+                "extract_ms": elapsed_ms,
+                "cache_hit": bool(cache_hit),
+            }
+        )
+        seen_images.add(image_key)
+    return value
+
+
+def save_timing_json(
+    output_path,
+    *,
+    config_key,
+    scene,
+    pair_timings,
+    feature_timings,
+    peak_mem_mb,
+    extra=None,
+):
+    """Write a standardized matcher timing JSON."""
+    if output_path is None:
+        return
+    payload = {
+        "config_key": config_key,
+        "scene": scene,
+        "created_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        "pair_timings": pair_timings,
+        "feature_timings": feature_timings,
+        "peak_gpu_memory_mb": float(peak_mem_mb),
+    }
+    if extra:
+        payload.update(extra)
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp_path = tempfile.mkstemp(
+        prefix=f"{output_path.stem}_",
+        suffix=output_path.suffix,
+        dir=output_path.parent,
+    )
+    os.close(fd)
+    try:
+        with open(tmp_path, "w", encoding="utf-8") as handle:
+            json.dump(payload, handle, indent=2)
+            handle.write("\n")
         os.replace(tmp_path, output_path)
     except Exception:
         if os.path.exists(tmp_path):

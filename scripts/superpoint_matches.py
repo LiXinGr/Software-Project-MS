@@ -15,10 +15,19 @@ import argparse
 from pathlib import Path
 from PIL import Image
 from tqdm import tqdm
+import time
 
 from lightglue import LightGlue, SuperPoint
 from lightglue.utils import load_image
-from util import compute_matches, visualize_matches, save_matches
+from util import (
+    compute_matches,
+    visualize_matches,
+    save_matches,
+    reset_peak_memory,
+    current_peak_memory_mb,
+    timed_feature_load,
+    save_timing_json,
+)
 
 
 def get_config_key(args):
@@ -32,7 +41,7 @@ def extract_features(img_path, extractor, device, cache_dir=None):
     if cache_dir:
         cache_path = Path(cache_dir) / f"{Path(img_path).stem}_superpoint.pt"
         if cache_path.exists():
-            return torch.load(cache_path)
+            return torch.load(cache_path, map_location=device), True
     
     image_tensor = load_image(img_path).to(device)
     
@@ -44,7 +53,7 @@ def extract_features(img_path, extractor, device, cache_dir=None):
         cache_path.parent.mkdir(parents=True, exist_ok=True)
         torch.save(feats, cache_path)
     
-    return feats
+    return feats, False
 
 
 def match_lightglue(feats0, feats1, matcher):
@@ -96,10 +105,30 @@ def match_nn(feats0, feats1, max_points, use_mutual, ratio_thresh):
     return mkpts0, mkpts1
 
 
-def process_pair(img1_path, img2_path, extractor, matcher, args, device, cache_dir=None):
+def process_pair(
+    img1_path,
+    img2_path,
+    extractor,
+    matcher,
+    args,
+    device,
+    cache_dir=None,
+    feature_timings=None,
+    seen_images=None,
+):
     """Process a single pair."""
-    feats0 = extract_features(img1_path, extractor, device, cache_dir)
-    feats1 = extract_features(img2_path, extractor, device, cache_dir)
+    feats0 = timed_feature_load(
+        str(img1_path),
+        feature_timings,
+        seen_images,
+        lambda: extract_features(img1_path, extractor, device, cache_dir),
+    )
+    feats1 = timed_feature_load(
+        str(img2_path),
+        feature_timings,
+        seen_images,
+        lambda: extract_features(img2_path, extractor, device, cache_dir),
+    )
     
     if args.matcher == 'lightglue':
         mkpts0, mkpts1 = match_lightglue(feats0, feats1, matcher)
@@ -129,8 +158,9 @@ def main():
     
     # Batch mode
     parser.add_argument("--pairs_file", type=str, help="Path to pairs.txt")
-    parser.add_argument("--images_dir", type=str, help="Base directory for images")
+    parser.add_argument("--images_dir", "--image_dir", dest="images_dir", type=str, help="Base directory for images")
     parser.add_argument("--output_dir", type=str, help="Output directory for matches")
+    parser.add_argument("--scene", type=str, default=None, help="Scene name for timing metadata")
     
     # Matching options
     parser.add_argument("--matcher", type=str, choices=["nn", "lightglue"], default="lightglue")
@@ -146,6 +176,10 @@ def main():
     parser.add_argument("--visualize", action="store_true")
     parser.add_argument("--print_config_key", action="store_true",
                         help="Print the config key for this configuration and exit")
+    parser.add_argument("--raw_images", action="store_true",
+                        help="Compatibility flag: input images are raw and LightGlue handles resizing")
+    parser.add_argument("--timing_output", type=str, default=None,
+                        help="Path to write per-pair and per-image timing JSON")
 
     args = parser.parse_args()
 
@@ -155,6 +189,7 @@ def main():
 
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
     print(f"[SuperPoint] Using device: {device}")
+    reset_peak_memory(device)
 
     # Initialize models
     extractor = SuperPoint(max_num_keypoints=args.max_points).eval().to(device)
@@ -179,6 +214,11 @@ def main():
             pairs = pairs[:args.limit]
         
         print(f"[SuperPoint] Processing {len(pairs)} pairs with {args.matcher}...")
+        pair_timings = []
+        feature_timings = []
+        seen_images = set()
+        skipped_existing = 0
+        skipped_missing = 0
         
         for img1_name, img2_name in tqdm(pairs, desc="Matching"):
             img1_path = images_dir / img1_name
@@ -189,35 +229,72 @@ def main():
             output_path = output_dir / f"{pair_name}.npz"
             
             if output_path.exists():
+                skipped_existing += 1
                 continue
             
             if not img1_path.exists() or not img2_path.exists():
                 print(f"[SuperPoint] Skipping: {img1_name}, {img2_name}")
+                skipped_missing += 1
                 continue
             
             try:
+                t_start = time.time()
                 mkpts0, mkpts1, _, _ = process_pair(
                     img1_path, img2_path, 
                     extractor, matcher, args, device,
-                    cache_dir=args.feature_cache
+                    cache_dir=args.feature_cache,
+                    feature_timings=feature_timings,
+                    seen_images=seen_images,
                 )
                 
                 save_matches(output_path, mkpts0, mkpts1)
+                pair_timings.append(
+                    {
+                        "img0": img1_name,
+                        "img1": img2_name,
+                        "time_ms": (time.time() - t_start) * 1000.0,
+                        "num_matches": int(len(mkpts0)),
+                    }
+                )
             except Exception as e:
                 print(f"[SuperPoint] Error: {e}")
         
         print(f"[SuperPoint] Saved matches to {output_dir}")
+        save_timing_json(
+            args.timing_output,
+            config_key=get_config_key(args),
+            scene=args.scene or output_dir.name,
+            pair_timings=pair_timings,
+            feature_timings=feature_timings,
+            peak_mem_mb=current_peak_memory_mb(device),
+            extra={
+                "skipped_existing": skipped_existing,
+                "skipped_missing": skipped_missing,
+                "coordinate_frame": "raw",
+            },
+        )
         
     elif args.img1 and args.img2:
         # Single-pair mode
         img1_path = Path(args.img1)
         img2_path = Path(args.img2)
         
+        feature_timings = []
+        seen_images = set()
+        t_start = time.time()
         mkpts0, mkpts1, size1, size2 = process_pair(
             img1_path, img2_path,
             extractor, matcher, args, device,
-            cache_dir=args.feature_cache
+            cache_dir=args.feature_cache,
+            feature_timings=feature_timings,
+            seen_images=seen_images,
         )
+        pair_timings = [{
+            "img0": img1_path.name,
+            "img1": img2_path.name,
+            "time_ms": (time.time() - t_start) * 1000.0,
+            "num_matches": int(len(mkpts0)),
+        }]
         
         print(f"[SuperPoint] Found {len(mkpts0)} matches")
         
@@ -226,6 +303,15 @@ def main():
             output_dir.mkdir(parents=True, exist_ok=True)
             pair_name = f"{img1_path.stem}__{img2_path.stem}"
             save_matches(output_dir / f"{pair_name}.npz", mkpts0, mkpts1)
+        save_timing_json(
+            args.timing_output,
+            config_key=get_config_key(args),
+            scene=args.scene or "single_pair",
+            pair_timings=pair_timings,
+            feature_timings=feature_timings,
+            peak_mem_mb=current_peak_memory_mb(device),
+            extra={"coordinate_frame": "raw"},
+        )
         
         if args.visualize or not args.output_dir:
             img1_np = np.array(Image.open(img1_path).convert("RGB"))
