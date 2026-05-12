@@ -1,57 +1,30 @@
 # Software-Project-MS
-The content of my software project as preparation for Master's thesis
 
-## DINOv3 Layer Study (Reproducible Runbook)
+This repository contains the implementation and experiment orchestration for a master's thesis on visual correspondence and camera-pose evaluation. The code compares training-free feature matchers, supervised projection heads, and LightGlue-based learned matching on PhotoTourism/MegaDepth-style data.
 
-### What this is for
-Use this when you want to compare DINOv3 transformer blocks (`4 8 12 16 20 23`) on a scene and generate a summary table with calibrated solver metrics for each block.
+## Pipeline Overview
 
-The wrapper script:
-- runs `run_thesis_benchmark.sh` for each block
-- logs experiment JSONs in `experiments/layer_study_b*.json`
-- writes a summary table to `experiments/layer_study_summary_<scene>_<timestamp>.txt`
+The final pipeline uses raw input images and preserves original image coordinates through matching and evaluation:
 
-### One-time setup
-```bash
-chmod +x scripts/run_layer_study.sh
-```
+1. Detect SuperPoint keypoints.
+2. Extract DINOv3 ViT-L/16 and DIFT Stable Diffusion descriptors.
+3. Fuse and project descriptors into the selected 256-dimensional descriptor space.
+4. Match descriptors with either mutual nearest-neighbor matching or LightGlue.
+5. Pack matches, depth, and sparse reconstruction metadata into RePoseD benchmark files.
+6. Run calibrated, shared-focal, or varying-focal pose evaluation.
+7. Aggregate CSV/report artifacts and generate thesis figures.
 
-### Full run (recompute as needed)
-```bash
-./scripts/run_layer_study.sh --scene sacre_coeur --device cuda:0 --layers "4 8 12 16 20 23"
-```
+## Repository Layout
 
-### Summary-only rerun (no new matching/packing/depth)
-Use this if experiments were already run and you only want to regenerate the table from existing outputs/JSON logs.
-```bash
-./scripts/run_layer_study.sh --scene sacre_coeur --device cuda:0 --layers "4 8 12 16 20 23" --skip-matches --skip-pack --skip-depth
-```
+- `scripts/`: matchers, training/evaluation runners, aggregation scripts, runtime benchmarks, and figure generation.
+- `configs/`: small reproducibility configuration files.
+- `docs/`: final artifact manifest and curated thesis documentation.
+- `envs/`: environment files used by model-specific Python environments.
+- `external/`: local checkouts or patched copies of external dependencies used by the thesis pipeline.
+- `data/`, `datasets/`, `output/`, `output_v2/`, `cache/`, and `experiments/`: local data, generated artifacts, caches, and checkpoints. These are not stored in Git.
 
-### Read the newest summary table
-```bash
-cat "$(ls -t experiments/layer_study_summary_sacre_coeur_*.txt | head -1)"
-```
+## Data And Artifacts
 
-### Quick dry-run sanity check (single block)
-Use this to confirm argument wiring and config key generation before long runs.
-```bash
-./scripts/run_layer_study.sh --scene sacre_coeur --device cuda:0 --layers "12" --dry-run
-```
+Large datasets, feature caches, benchmark HDF5 files, match files, checkpoints, logs, and generated outputs are intentionally excluded from version control. Reproduce or restore those artifacts from the documented dataset and checkpoint locations before running final evaluations.
 
-### Optional: all-scenes run (slow)
-```bash
-./scripts/run_layer_study.sh --all-scenes --device cuda:0 --layers "4 8 12 16 20 23"
-```
-
-### Notes
-- Block-to-feature mapping in this project is `feat_level = block - 24`:
-  - block `23 -> feat_level -1`
-  - block `20 -> feat_level -4`
-  - block `16 -> feat_level -8`
-  - block `12 -> feat_level -12`
-  - block `8  -> feat_level -16`
-  - block `4  -> feat_level -20`
-- Calibrated results now store aggregate metrics and per-solver metrics in experiment JSONs:
-  - `scenes.<scene>.calibrated.mAA10` (aggregate)
-  - `scenes.<scene>.calibrated.solvers.<solver_name>` (per solver)
-  - `scenes.<scene>.calibrated.primary_solver` (selected thesis solver)
+See [REPRODUCIBILITY.md](REPRODUCIBILITY.md) for the expected environments, datasets, checkpoints, final selected configuration, and main thesis commands. The selected pipeline configuration is recorded in [configs/final_selected_pipeline.json](configs/final_selected_pipeline.json).

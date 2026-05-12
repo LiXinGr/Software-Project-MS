@@ -1,13 +1,47 @@
 .venv/
 .envrc
+.codex
+.codex/
 
-# Python bytecode
+# Python caches
 __pycache__/
 *.py[cod]
 *$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
 
-# Large data files
-datasets/phototourism
+# Temporary and editor files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.nfs*
+res_*
+
+# Generated run outputs
+output/
+output_*/
+output_v2/
+cache/
+cache_*/
+logs/
+*.log
+benchmark*.log
+Pictures/
+backup_before_*/
+thesis_dirty_*
+figures/
+
+# Keep only final curated documentation visible by default.
+docs/*
+!docs/.gitkeep
+!docs/final_artifacts.md
+
+# Large data and model artifacts
+datasets/phototourism/
 data/sparse_train/
 data/sparse_train_lora/
 data/sparse_train_lora_v3clean/
@@ -16,37 +50,21 @@ data/gf_cache_*/
 data/lightglue_training/
 data/revisitop1m_stage1/
 data/smoke_0046_image_names.txt
-*.tar.gz
-*.npy
-*.h5
+experiments/
 *.pt
+*.pth
+*.ckpt
+*.tar
+*.tar.gz
+*.h5
+*.npz
+*.npy
 
-# Ignore everything under output
-output/**
-output_1
-
-# Re-include results and its subfolders
-!output/results/
-!output/results/**/
-!output/results/**/*.csv
-!output/results/**/*.txt
-
-# Explicit large/generated files still ignored
-output/pairs_reichstag.txt
-output/pairs_sacre_coeur.txt
-output/pairs_st_peters_square.txt
-
-cache*
-*.log
-
-# External dependencies
-external/
-
-benchmark*
-.nfs*
-
-docs
-figures
-
-res_*
-output/results/**/*.json
+# External dependencies are mostly local checkouts. Keep the small local
+# RePoseD summary helper visible so it can be tracked with the evaluation patch.
+external/*
+!external/RePoseD/
+external/RePoseD/*
+!external/RePoseD/utils/
+external/RePoseD/utils/*
+!external/RePoseD/utils/result_summary.py
