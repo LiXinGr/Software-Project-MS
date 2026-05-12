@@ -2,10 +2,6 @@
 .venv/
 .envrc
 
-# Local assistant/session state
-.codex/
-.codex
-
 # Python caches
 __pycache__/
 *.py[cod]
@@ -83,3 +79,17 @@ external/RePoseD/*
 !external/RePoseD/utils/
 external/RePoseD/utils/*
 !external/RePoseD/utils/result_summary.py
+
+
+chapter4_*_evidence_report.md
+rerun_config.json
+run_full_rerun.sh
+plots/
+scripts/ch4_missing_common.sh
+scripts/chapter5_finalize_screen.sh
+scripts/run_ch4_missing_*.sh
+scripts/run_ch5_ch6_eval_repair.sh
+scripts/wait_ch5_early_results.sh
+scripts/cache_gluefactory_features.py
+scripts/cache_revisitop1m_features.py
+scripts/cache_superpoint_raw.py
