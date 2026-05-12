@@ -10,7 +10,7 @@ source:
 - Phase 4: projected DINOv3 + DIFT descriptors -> LightGlue
 
 Matches are saved in the standard benchmark format:
-    .npz files containing mkpts0 and mkpts1 in preprocessed-image pixel space.
+    .npz files containing mkpts0 and mkpts1 in raw-image pixel space.
 """
 
 from __future__ import annotations
@@ -20,11 +20,13 @@ import os
 import random
 import sys
 import tempfile
+import time
 from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
 import torch
+import torch.nn.functional as F
 from PIL import Image
 
 
@@ -52,7 +54,13 @@ from projection_matches import (
     get_or_build_raw_bundle,
     load_projection_model,
 )
-from util import visualize_matches
+from util import (
+    visualize_matches,
+    reset_peak_memory,
+    current_peak_memory_mb,
+    timed_feature_load,
+    save_timing_json,
+)
 
 
 PHASE4_DEFAULT_CONFIG_KEY = "phase4_lg_zeroshot_proj256"
@@ -177,10 +185,21 @@ def get_or_build_projected_bundle(
     return bundle
 
 
+def pad_image_to_multiple(image: torch.Tensor, multiple: int = 16) -> torch.Tensor:
+    """Pad CHW image tensor on bottom/right so ViT patch embedding is valid."""
+    height, width = image.shape[-2:]
+    pad_h = (multiple - height % multiple) % multiple
+    pad_w = (multiple - width % multiple) % multiple
+    if pad_h == 0 and pad_w == 0:
+        return image
+    return F.pad(image, (0, pad_w, 0, pad_h), mode="constant", value=0.0)
+
+
 def load_image_tensor(img_path: Path, device: torch.device) -> tuple[torch.Tensor, tuple[int, int]]:
     with Image.open(img_path) as img:
         img_np = np.array(img.convert("RGB"), dtype=np.float32) / 255.0
     image = torch.from_numpy(img_np).permute(2, 0, 1).to(device=device, dtype=torch.float32)
+    image = pad_image_to_multiple(image, multiple=16)
     return image, (img_np.shape[0], img_np.shape[1])
 
 
@@ -379,13 +398,17 @@ def process_pair(
     matcher,
     online_extractor=None,
     online_bundle_cache=None,
+    feature_timings=None,
+    seen_images=None,
 ):
-    if args.online_extraction:
-        bundle0 = get_or_build_online_bundle(img0_path, online_extractor, device, online_bundle_cache)
-        bundle1 = get_or_build_online_bundle(img1_path, online_extractor, device, online_bundle_cache)
-    else:
-        bundle0 = get_or_build_projected_bundle(
-            img0_path,
+    def load_bundle(path: Path):
+        if args.online_extraction:
+            cache_hit = online_bundle_cache is not None and str(path) in online_bundle_cache
+            return get_or_build_online_bundle(path, online_extractor, device, online_bundle_cache), cache_hit
+
+        cache_hit = projected_cache_path(path, feature_cache_dir).exists()
+        return get_or_build_projected_bundle(
+            path,
             args,
             device,
             feature_cache_dir,
@@ -393,17 +416,20 @@ def process_pair(
             dift_cache_dir,
             sp_cache_dir,
             projection_model,
-        )
-        bundle1 = get_or_build_projected_bundle(
-            img1_path,
-            args,
-            device,
-            feature_cache_dir,
-            dino_cache_dir,
-            dift_cache_dir,
-            sp_cache_dir,
-            projection_model,
-        )
+        ), cache_hit
+
+    bundle0 = timed_feature_load(
+        str(img0_path),
+        feature_timings,
+        seen_images,
+        lambda: load_bundle(img0_path),
+    )
+    bundle1 = timed_feature_load(
+        str(img1_path),
+        feature_timings,
+        seen_images,
+        lambda: load_bundle(img1_path),
+    )
 
     return match_with_lightglue(bundle0, bundle1, img0_path, img1_path, matcher, device)
 
@@ -468,9 +494,9 @@ def main() -> None:
     parser.add_argument("--img1", type=str, help="Path to first image (single-pair mode)")
     parser.add_argument("--img2", type=str, help="Path to second image (single-pair mode)")
     parser.add_argument("--pairs_file", type=str, help="Path to pairs.txt (batch mode)")
-    parser.add_argument("--images_dir", type=str, help="Base directory for images (batch mode)")
+    parser.add_argument("--images_dir", "--image_dir", dest="images_dir", type=str, help="Base directory for images (batch mode)")
     parser.add_argument("--output_dir", type=str, help="Output directory for matches")
-    parser.add_argument("--scene", type=str, default=None, choices=PHASE4_DEFAULT_SCENES, help="Scene name for benchmark convenience mode")
+    parser.add_argument("--scene", type=str, default=None, help="Scene name for benchmark convenience mode")
     parser.add_argument("--config_key", type=str, default=PHASE4_DEFAULT_CONFIG_KEY)
     parser.add_argument("--checkpoint", type=str, default=str(PHASE4_DEFAULT_CHECKPOINT))
     parser.add_argument("--lightglue_checkpoint", type=str, default=None,
@@ -487,6 +513,8 @@ def main() -> None:
     parser.add_argument("--alpha", type=float, default=DEFAULT_ALPHA, help="Weight applied to DIFT before concatenation")
     parser.add_argument("--device", type=str, default="cuda")
     parser.add_argument("--feature_cache", type=str, default=None, help="Directory for projected descriptor cache")
+    parser.add_argument("--sp_cache_dir", type=str, default=None,
+                        help="Directory containing/raw-writing SuperPoint keypoint cache")
     parser.add_argument("--cache_root", type=str, default=str(PROJECT_ROOT / "cache" / "features"), help="Root directory containing cached matcher features")
     parser.add_argument("--online_extraction", action="store_true",
                         help="Run DINOv3+DIFT+projection online from images instead of loading cached descriptors")
@@ -504,6 +532,10 @@ def main() -> None:
     parser.add_argument("--save_scores", action="store_true", default=True,
                         help="Save LightGlue scores and metadata alongside mkpts arrays")
     parser.add_argument("--no_save_scores", dest="save_scores", action="store_false")
+    parser.add_argument("--raw_images", action="store_true",
+                        help="Compatibility flag: input images are raw and descriptors are sampled in raw coordinates")
+    parser.add_argument("--timing_output", type=str, default=None,
+                        help="Path to write per-pair and per-image timing JSON")
     args = parser.parse_args()
 
     if not (0.0 <= args.alpha <= 1.0):
@@ -517,6 +549,7 @@ def main() -> None:
 
     seed_everything(args.seed)
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
+    reset_peak_memory(device)
     scene_name = infer_scene_name(args)
 
     checkpoint_path = Path(args.checkpoint)
@@ -541,7 +574,7 @@ def main() -> None:
         feature_cache_dir = Path(args.feature_cache)
         feature_cache_dir.mkdir(parents=True, exist_ok=True)
         dino_cache_dir, dift_cache_dir, source_cache_max_points = resolve_source_cache_dirs(args, scene_name)
-        sp_cache_dir = Path(args.cache_root) / "superpoint_kpts" / scene_name
+        sp_cache_dir = Path(args.sp_cache_dir) if args.sp_cache_dir else Path(args.cache_root) / "superpoint_kpts" / scene_name
         sp_cache_dir.mkdir(parents=True, exist_ok=True)
         projection_model = load_projection_model(checkpoint_path, device)
 
@@ -552,6 +585,9 @@ def main() -> None:
     if args.img1 and args.img2:
         img0_path = Path(args.img1)
         img1_path = Path(args.img2)
+        feature_timings = []
+        seen_images = set()
+        t_start = time.time()
         mkpts0, mkpts1, match_scores, stop_layer = process_pair(
             img0_path,
             img1_path,
@@ -565,7 +601,15 @@ def main() -> None:
             matcher,
             online_extractor=online_extractor,
             online_bundle_cache=online_bundle_cache,
+            feature_timings=feature_timings,
+            seen_images=seen_images,
         )
+        pair_timings = [{
+            "img0": img0_path.name,
+            "img1": img1_path.name,
+            "time_ms": (time.time() - t_start) * 1000.0,
+            "num_matches": int(len(mkpts0)),
+        }]
         mean_conf = float(match_scores.mean()) if match_scores.size else 0.0
         print(
             f"{prefix} Found {len(mkpts0)} matches "
@@ -578,6 +622,15 @@ def main() -> None:
             output_dir.mkdir(parents=True, exist_ok=True)
             output_path = output_dir / f"{img0_path.stem}__{img1_path.stem}.npz"
             save_match_archive(output_path, mkpts0, mkpts1, args, match_scores=match_scores, stop_layer=stop_layer)
+        save_timing_json(
+            args.timing_output,
+            config_key=get_config_key(args),
+            scene=args.scene or "single_pair",
+            pair_timings=pair_timings,
+            feature_timings=feature_timings,
+            peak_mem_mb=current_peak_memory_mb(device),
+            extra={"coordinate_frame": "raw"},
+        )
 
         if args.visualize and len(mkpts0) > 0:
             out_dir = Path(args.output_dir) if args.output_dir else PROJECT_ROOT / "datasets"
@@ -608,12 +661,17 @@ def main() -> None:
         zero_match_pairs = 0
         written = 0
         skipped_existing = 0
+        skipped_missing = 0
+        pair_timings = []
+        feature_timings = []
+        seen_images = set()
 
         for pair_index, (img0_name, img1_name) in enumerate(pairs, start=1):
             img0_path = images_dir / img0_name
             img1_path = images_dir / img1_name
             if not img0_path.exists() or not img1_path.exists():
                 print(f"{prefix} Skipping missing pair: {img0_name}, {img1_name}", flush=True)
+                skipped_missing += 1
                 continue
 
             output_path = output_dir / f"{Path(img0_name).stem}__{Path(img1_name).stem}.npz"
@@ -621,6 +679,7 @@ def main() -> None:
                 skipped_existing += 1
                 continue
 
+            t_start = time.time()
             mkpts0, mkpts1, match_scores, stop_layer = process_pair(
                 img0_path,
                 img1_path,
@@ -634,10 +693,20 @@ def main() -> None:
                 matcher,
                 online_extractor=online_extractor,
                 online_bundle_cache=online_bundle_cache,
+                feature_timings=feature_timings,
+                seen_images=seen_images,
             )
 
             save_match_archive(output_path, mkpts0, mkpts1, args, match_scores=match_scores, stop_layer=stop_layer)
             written += 1
+            pair_timings.append(
+                {
+                    "img0": img0_name,
+                    "img1": img1_name,
+                    "time_ms": (time.time() - t_start) * 1000.0,
+                    "num_matches": int(len(mkpts0)),
+                }
+            )
 
             num_matches = int(len(mkpts0))
             mean_conf = float(match_scores.mean()) if match_scores.size else 0.0
@@ -664,6 +733,20 @@ def main() -> None:
             f"zero_match_pairs={zero_match_pairs}, skipped_existing={skipped_existing}, "
             f"online_cache_entries={len(online_bundle_cache) if online_bundle_cache is not None else 0}",
             flush=True,
+        )
+        save_timing_json(
+            args.timing_output,
+            config_key=get_config_key(args),
+            scene=scene_name,
+            pair_timings=pair_timings,
+            feature_timings=feature_timings,
+            peak_mem_mb=current_peak_memory_mb(device),
+            extra={
+                "skipped_existing": skipped_existing,
+                "skipped_missing": skipped_missing,
+                "coordinate_frame": "raw",
+                "online_extraction": bool(args.online_extraction),
+            },
         )
         return
 

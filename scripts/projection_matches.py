@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+import time
 from pathlib import Path
 
 import numpy as np
@@ -36,7 +37,7 @@ from fusion_matches import (
 )
 from projection_checkpoint_utils import build_projection_model
 from train_projection_head import ProjectionHead
-from util import save_matches, visualize_matches
+from util import save_matches, visualize_matches, reset_peak_memory, current_peak_memory_mb, save_timing_json
 
 
 DEFAULT_CHECKPOINT = PROJECT_ROOT / "experiments" / "phase2_projection_v1" / "best.pt"
@@ -213,10 +214,14 @@ def main():
     parser.add_argument("--alpha", type=float, default=DEFAULT_ALPHA, help="Weight applied to DIFT before concatenation")
     parser.add_argument("--device", type=str, default="cuda")
     parser.add_argument("--feature_cache", type=str, default=None, help="Directory for projected descriptor cache")
+    parser.add_argument("--sp_cache_dir", type=str, default=None,
+                        help="Directory containing/raw-writing SuperPoint keypoint cache")
     parser.add_argument("--cache_root", type=str, default=str(PROJECT_ROOT / "cache" / "features"), help="Root directory containing cached matcher features")
     parser.add_argument("--limit", type=int, default=None, help="Limit number of pairs to process")
     parser.add_argument("--visualize", action="store_true")
     parser.add_argument("--print_config_key", action="store_true", help="Print the config key for this configuration and exit")
+    parser.add_argument("--timing_output", type=str, default=None,
+                        help="Path to write per-pair timing JSON")
     args = parser.parse_args()
 
     if not (0.0 <= args.alpha <= 1.0):
@@ -244,9 +249,10 @@ def main():
     if not checkpoint_path.exists():
         raise FileNotFoundError(f"Projection checkpoint not found: {checkpoint_path}")
 
-    sp_cache_dir = Path(args.cache_root) / "superpoint_kpts" / scene_name
+    sp_cache_dir = Path(args.sp_cache_dir) if args.sp_cache_dir else Path(args.cache_root) / "superpoint_kpts" / scene_name
     sp_cache_dir.mkdir(parents=True, exist_ok=True)
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
+    reset_peak_memory(device)
     projection_model = load_projection_model(checkpoint_path, device)
 
     if args.pairs_file and args.output_dir:
@@ -274,6 +280,7 @@ def main():
         written = 0
         skipped_existing = 0
         skipped_missing = 0
+        pair_timings = []
         for pair_index, (img1_name, img2_name) in enumerate(pairs, start=1):
             img1_path = images_dir / img1_name
             img2_path = images_dir / img2_name
@@ -291,9 +298,10 @@ def main():
                         f"[PROJECTION] Match progress {pair_index}/{total_pairs} pairs "
                         f"(written={written}, reused={skipped_existing}, missing={skipped_missing})",
                         flush=True,
-                    )
+                )
                 continue
 
+            t_start = time.time()
             mkpts0, mkpts1 = process_pair(
                 img1_path,
                 img2_path,
@@ -307,6 +315,14 @@ def main():
             )
             save_matches(output_path, mkpts0, mkpts1)
             written += 1
+            pair_timings.append(
+                {
+                    "img0": img1_name,
+                    "img1": img2_name,
+                    "time_ms": (time.time() - t_start) * 1000.0,
+                    "num_matches": int(len(mkpts0)),
+                }
+            )
             if pair_index == total_pairs or pair_index % 250 == 0:
                 print(
                     f"[PROJECTION] Match progress {pair_index}/{total_pairs} pairs "
@@ -318,6 +334,19 @@ def main():
             f"[PROJECTION] Saved matches to {output_dir} "
             f"(written={written}, reused={skipped_existing}, missing={skipped_missing})",
             flush=True,
+        )
+        save_timing_json(
+            args.timing_output,
+            config_key=get_config_key(args),
+            scene=scene_name,
+            pair_timings=pair_timings,
+            feature_timings=[],
+            peak_mem_mb=current_peak_memory_mb(device),
+            extra={
+                "skipped_existing": skipped_existing,
+                "skipped_missing": skipped_missing,
+                "coordinate_frame": "raw",
+            },
         )
         return
 

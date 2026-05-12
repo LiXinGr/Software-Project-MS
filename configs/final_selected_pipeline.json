@@ -1,0 +1,48 @@
+{
+  "name": "final_selected_expanded151_lg_proj_dinov3_dift_ft002_mp2048",
+  "coordinate_protocol": {
+    "input_images": "raw",
+    "output_coordinates": "raw_image_pixels",
+    "shared_preprocessing": false
+  },
+  "keypoints": {
+    "detector": "SuperPoint",
+    "max_keypoints": 2048
+  },
+  "dinov3": {
+    "model": "ViT-L/16",
+    "block": 16,
+    "feat_level": -8,
+    "target_long_edge": 1120,
+    "patch_size": 16
+  },
+  "dift": {
+    "model": "Stable Diffusion v1.5",
+    "model_id": "stable-diffusion-v1-5/stable-diffusion-v1-5",
+    "t": 0,
+    "up_ft_index": 2,
+    "ensemble_size": 2,
+    "input_size": [768, 768]
+  },
+  "fusion": {
+    "dinov3_weight": 0.5,
+    "dift_weight": 0.5,
+    "branch_normalization": "independent_l2",
+    "input_dim": 1664
+  },
+  "projection": {
+    "architecture": "1664 -> 1024 -> 256",
+    "hidden_dims": [1024],
+    "output_dim": 256,
+    "output_normalization": "l2"
+  },
+  "matcher": {
+    "type": "LightGlue",
+    "checkpoint": "external/glue-factory/outputs/training/stage2_dinov3_lg_151scenes_v1/checkpoint_best.tar",
+    "filter_threshold": 0.02
+  },
+  "matching": {
+    "correspondence_cap": 2048,
+    "match_coordinate_frame": "raw_image_pixels"
+  }
+}

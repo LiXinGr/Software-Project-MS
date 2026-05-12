@@ -44,6 +44,37 @@ def load_unidepth_model(backbone="vitl14", device="cuda"):
     return model
 
 
+def unidepth_safe_padding(width, height, ratio_bounds=(0.5, 2.0)):
+    """Return right/bottom padding that avoids UniDepth negative internal pads."""
+    pad_right = 0
+    pad_bottom = 0
+    for _ in range(64):
+        w = width + pad_right
+        h = height + pad_bottom
+        aspect = w / h
+        target = min(ratio_bounds[1], max(ratio_bounds[0], aspect))
+        if aspect > target:
+            padded_h = int(w / target)
+            if padded_h >= h:
+                return pad_right, pad_bottom
+            pad_bottom += h - padded_h
+        else:
+            padded_w = int(h * target)
+            if padded_w >= w:
+                return pad_right, pad_bottom
+            pad_right += w - padded_w
+    return pad_right, pad_bottom
+
+
+def pad_for_unidepth(img):
+    pad_right, pad_bottom = unidepth_safe_padding(img.width, img.height)
+    if pad_right == 0 and pad_bottom == 0:
+        return img, (0, 0)
+    padded = Image.new("RGB", (img.width + pad_right, img.height + pad_bottom))
+    padded.paste(img, (0, 0))
+    return padded, (pad_right, pad_bottom)
+
+
 def process_image(img_path, model, device, max_size=None, _allow_full_res_retry=True):
     """Process a single image and return depth map and intrinsics."""
     img = Image.open(img_path).convert("RGB")
@@ -56,9 +87,13 @@ def process_image(img_path, model, device, max_size=None, _allow_full_res_retry=
         new_size = (int(img.width * ratio), int(img.height * ratio))
         img = img.resize(new_size, Image.BILINEAR)
         resized_for_inference = True
+
+    inference_size = (img.height, img.width)
+    img, safe_pad = pad_for_unidepth(img)
     
     img_np = np.array(img)
-    img_tensor = torch.from_numpy(img_np).permute(2, 0, 1).unsqueeze(0).float() / 255.0
+    # UniDepth's infer(normalize=True) expects 0-255 RGB and performs /255 itself.
+    img_tensor = torch.from_numpy(img_np).permute(2, 0, 1).unsqueeze(0).float()
     img_tensor = img_tensor.to(device)
     
     with torch.no_grad():
@@ -87,6 +122,9 @@ def process_image(img_path, model, device, max_size=None, _allow_full_res_retry=
         raise ValueError(
             f"Unexpected depth shape {depth_raw.shape} (after squeeze: {depth.shape}) for {img_path.name}"
         )
+
+    if safe_pad != (0, 0):
+        depth = depth[: inference_size[0], : inference_size[1]]
     
     # If resized, scale depth back to original resolution
     if resized_for_inference:
@@ -126,7 +164,7 @@ def get_images_from_pairs(pairs_file, images_dir):
 def main():
     parser = argparse.ArgumentParser(description="Generate depth maps using UniDepth")
     
-    parser.add_argument("--images_dir", type=str, required=True,
+    parser.add_argument("--images_dir", "--image_dir", dest="images_dir", type=str, required=True,
                         help="Directory containing input images")
     parser.add_argument("--output_dir", type=str, required=True,
                         help="Directory to save depth maps")
@@ -140,6 +178,10 @@ def main():
                         help="Max image dimension to reduce GPU memory (e.g., 1024)")
     parser.add_argument("--skip_existing", action="store_true",
                         help="Skip images that already have depth maps")
+    parser.add_argument("--overwrite", action="store_true",
+                        help="Regenerate depth maps even when outputs already exist")
+    parser.add_argument("--limit_images", type=int, default=None,
+                        help="Limit number of images to process (for smoke tests)")
     
     args = parser.parse_args()
     
@@ -163,6 +205,10 @@ def main():
     else:
         image_files = sorted(images_dir.glob("*.jpg")) + sorted(images_dir.glob("*.png"))
         print(f"[UniDepth] Processing all {len(image_files)} images in directory")
+
+    if args.limit_images is not None:
+        image_files = image_files[: args.limit_images]
+        print(f"[UniDepth] Limited to {len(image_files)} images")
     
     # Process images
     processed = 0
@@ -174,7 +220,7 @@ def main():
         depth_path = output_dir / f"{stem}_depth.npy"
         K_path = output_dir / f"{stem}_K.npy"
         
-        if args.skip_existing and depth_path.exists() and K_path.exists():
+        if args.skip_existing and not args.overwrite and depth_path.exists() and K_path.exists():
             skipped += 1
             continue
         
@@ -191,6 +237,8 @@ def main():
                 print("\n[UniDepth] Suppressing further error messages...")
     
     print(f"\n[UniDepth] Done. Processed: {processed}, Skipped: {skipped}, Errors: {errors}")
+    if errors:
+        sys.exit(1)
 
 
 if __name__ == "__main__":

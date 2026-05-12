@@ -16,13 +16,14 @@ import torch
 import numpy as np
 from PIL import Image
 from tqdm import tqdm
+import time
 
 # Add scripts to path
 SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = SCRIPT_DIR.parent
 sys.path.insert(0, str(SCRIPT_DIR))
 
-from util import visualize_matches, save_matches
+from util import visualize_matches, save_matches, reset_peak_memory, current_peak_memory_mb, save_timing_json
 
 try:
     from romav2 import RoMaV2
@@ -86,11 +87,12 @@ def main():
     
     # Batch mode
     parser.add_argument("--pairs_file", type=str, help="Path to pairs.txt")
-    parser.add_argument("--images_dir", type=str, help="Base directory for images")
+    parser.add_argument("--images_dir", "--image_dir", dest="images_dir", type=str, help="Base directory for images")
     parser.add_argument("--output_dir", type=str, help="Output directory for matches")
+    parser.add_argument("--scene", type=str, default=None, help="Scene name for timing metadata")
     
     # RoMaV2 options
-    parser.add_argument("--max_points", type=int, default=2000)
+    parser.add_argument("--max_points", type=int, default=2048)
     parser.add_argument("--max_lines", type=int, default=200)
     parser.add_argument("--device", type=str, default="cuda")
     parser.add_argument("--setting", type=str, default="precise", 
@@ -100,6 +102,10 @@ def main():
     parser.add_argument("--visualize", action="store_true")
     parser.add_argument("--print_config_key", action="store_true",
                         help="Print the config key for this configuration and exit")
+    parser.add_argument("--raw_images", action="store_true",
+                        help="Compatibility flag: input images are raw and RoMaV2 handles resizing")
+    parser.add_argument("--timing_output", type=str, default=None,
+                        help="Path to write per-pair timing JSON")
 
     args = parser.parse_args()
 
@@ -109,6 +115,7 @@ def main():
 
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
     print(f"[RoMaV2] Using device: {device}")
+    reset_peak_memory(device)
 
     # Initialize RoMaV2 model
     print(f"[RoMaV2] Loading model with setting: {args.setting}")
@@ -133,6 +140,9 @@ def main():
             pairs = pairs[:args.limit]
         
         print(f"[RoMaV2] Processing {len(pairs)} pairs...")
+        pair_timings = []
+        skipped_existing = 0
+        skipped_missing = 0
         
         for img1_name, img2_name in tqdm(pairs, desc="Matching"):
             img1_path = images_dir / img1_name
@@ -143,22 +153,46 @@ def main():
             output_path = output_dir / f"{pair_name}.npz"
             
             if output_path.exists():
+                skipped_existing += 1
                 continue
             
             if not img1_path.exists() or not img2_path.exists():
                 print(f"[RoMaV2] Skipping pair: {img1_name}, {img2_name}")
+                skipped_missing += 1
                 continue
             
             try:
+                t_start = time.time()
                 mkpts0, mkpts1, _, _ = process_pair(
                     img1_path, img2_path, model, args, device
                 )
                 
                 save_matches(output_path, mkpts0, mkpts1)
+                pair_timings.append(
+                    {
+                        "img0": img1_name,
+                        "img1": img2_name,
+                        "time_ms": (time.time() - t_start) * 1000.0,
+                        "num_matches": int(len(mkpts0)),
+                    }
+                )
             except Exception as e:
                 print(f"[RoMaV2] Error processing {img1_name}, {img2_name}: {e}")
         
         print(f"[RoMaV2] Saved matches to {output_dir}")
+        save_timing_json(
+            args.timing_output,
+            config_key=get_config_key(args),
+            scene=args.scene or output_dir.name,
+            pair_timings=pair_timings,
+            feature_timings=[],
+            peak_mem_mb=current_peak_memory_mb(device),
+            extra={
+                "skipped_existing": skipped_existing,
+                "skipped_missing": skipped_missing,
+                "coordinate_frame": "raw",
+            },
+        )
         
     elif args.img1 and args.img2:
         # Single-pair mode
@@ -169,9 +203,16 @@ def main():
             print(f"Error: Image not found")
             sys.exit(1)
 
+        t_start = time.time()
         mkpts0, mkpts1, size1, size2 = process_pair(
             img1_path, img2_path, model, args, device
         )
+        pair_timings = [{
+            "img0": img1_path.name,
+            "img1": img2_path.name,
+            "time_ms": (time.time() - t_start) * 1000.0,
+            "num_matches": int(len(mkpts0)),
+        }]
         
         print(f"[RoMaV2] Found {len(mkpts0)} matches")
         
@@ -180,6 +221,15 @@ def main():
             output_dir.mkdir(parents=True, exist_ok=True)
             pair_name = f"{img1_path.stem}__{img2_path.stem}"
             save_matches(output_dir / f"{pair_name}.npz", mkpts0, mkpts1)
+        save_timing_json(
+            args.timing_output,
+            config_key=get_config_key(args),
+            scene=args.scene or "single_pair",
+            pair_timings=pair_timings,
+            feature_timings=[],
+            peak_mem_mb=current_peak_memory_mb(device),
+            extra={"coordinate_frame": "raw"},
+        )
         
         if args.visualize or not args.output_dir:
             datasets_dir = PROJECT_ROOT / "datasets"

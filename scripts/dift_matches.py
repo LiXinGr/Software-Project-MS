@@ -12,6 +12,7 @@ import argparse
 from pathlib import Path
 import sys
 import warnings
+import time
 
 # Suppress diffusers safety checker warnings
 warnings.filterwarnings("ignore", message=".*safety checker.*")
@@ -29,7 +30,18 @@ DIFT_ROOT = PROJECT_ROOT / "external" / "DIFT"
 sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(DIFT_ROOT))
 
-from util import compute_matches, visualize_matches, match_dense_features, save_matches, match_at_keypoints, get_superpoint_keypoints
+from util import (
+    compute_matches,
+    visualize_matches,
+    match_dense_features,
+    save_matches,
+    match_at_keypoints,
+    get_superpoint_keypoints,
+    reset_peak_memory,
+    current_peak_memory_mb,
+    timed_feature_load,
+    save_timing_json,
+)
 from torchvision.transforms import PILToTensor
 
 # Import DIFT's SDFeaturizer for efficient single-load feature extraction
@@ -46,6 +58,8 @@ def get_config_key(args):
     parts = ["dift", f"t{args.t}", f"up{args.up_ft_index}", f"ens{args.ensemble_size}"]
     parts.append("sp" if args.use_sp_keypoints else "dense")
     parts.append("mnn" if args.use_mutual else "nn")
+    if getattr(args, "enable_ratio_test", False) and args.ratio_thresh is not None:
+        parts.append(f"rt{args.ratio_thresh}")
     parts.append(f"mp{args.max_points}")
     return "_".join(parts)
 
@@ -76,7 +90,7 @@ def run_dift_extractor(img_path, dift_model, feature_cache_dir, shared_args):
     ft_path = Path(feature_cache_dir) / cache_key
     
     if ft_path.exists():
-        return torch.load(ft_path), orig_size
+        return (torch.load(ft_path), orig_size), True
 
     # Resize image to target size
     img_size = shared_args.img_size
@@ -104,13 +118,31 @@ def run_dift_extractor(img_path, dift_model, feature_cache_dir, shared_args):
     ft_path.parent.mkdir(parents=True, exist_ok=True)
     torch.save(ft.cpu(), ft_path)
     
-    return ft, orig_size
+    return (ft, orig_size), False
 
 
-def process_pair(img1_path, img2_path, dift_model, feature_cache_dir, args):
+def process_pair(
+    img1_path,
+    img2_path,
+    dift_model,
+    feature_cache_dir,
+    args,
+    feature_timings=None,
+    seen_images=None,
+):
     """Process a single pair and return mkpts0, mkpts1."""
-    ft1, orig_size1 = run_dift_extractor(img1_path, dift_model, feature_cache_dir, args)
-    ft2, orig_size2 = run_dift_extractor(img2_path, dift_model, feature_cache_dir, args)
+    ft1, orig_size1 = timed_feature_load(
+        str(img1_path),
+        feature_timings,
+        seen_images,
+        lambda: run_dift_extractor(img1_path, dift_model, feature_cache_dir, args),
+    )
+    ft2, orig_size2 = timed_feature_load(
+        str(img2_path),
+        feature_timings,
+        seen_images,
+        lambda: run_dift_extractor(img2_path, dift_model, feature_cache_dir, args),
+    )
     
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
     ft1 = ft1.to(device)
@@ -118,7 +150,7 @@ def process_pair(img1_path, img2_path, dift_model, feature_cache_dir, args):
     
     if args.use_sp_keypoints:
         # Use SuperPoint-detected keypoints for fair comparison
-        sp_cache = Path(feature_cache_dir).parent / 'superpoint_kpts' if feature_cache_dir else None
+        sp_cache = Path(args.sp_cache_dir) if args.sp_cache_dir else (Path(feature_cache_dir).parent / 'superpoint_kpts' if feature_cache_dir else None)
         kpts1 = get_superpoint_keypoints(img1_path, device=device, max_keypoints=args.max_points, cache_dir=sp_cache)
         kpts2 = get_superpoint_keypoints(img2_path, device=device, max_keypoints=args.max_points, cache_dir=sp_cache)
         
@@ -143,16 +175,14 @@ def process_pair(img1_path, img2_path, dift_model, feature_cache_dir, args):
         kpts2_scaled[:, 0] *= dift_w / preproc_w2  # x
         kpts2_scaled[:, 1] *= dift_h / preproc_h2  # y
         
-        # Note: Ratio test is disabled for DIFT keypoint matching because the
-        # similarity-based ratio test doesn't work well with dense diffusion features.
-        # Mutual matching alone provides sufficient filtering.
+        ratio_thresh = args.ratio_thresh if args.enable_ratio_test else None
         mkpts0_scaled, mkpts1_scaled = match_at_keypoints(
             ft1, ft2,
             kpts1_scaled, kpts2_scaled,
             img_size1=(dift_h, dift_w),  # DIFT's input size
             img_size2=(dift_h, dift_w),
             use_mutual=args.use_mutual,
-            ratio_thresh=None,  # Disabled for DIFT - ratio test incompatible with dense features
+            ratio_thresh=ratio_thresh,
         )
         
         # Scale matched keypoints back to preprocessed image coords
@@ -191,21 +221,24 @@ def main():
     
     # Batch mode
     parser.add_argument("--pairs_file", type=str, help="Path to pairs.txt (batch mode)")
-    parser.add_argument("--images_dir", type=str, help="Base directory for images (batch mode)")
+    parser.add_argument("--images_dir", "--image_dir", dest="images_dir", type=str, help="Base directory for images (batch mode)")
     parser.add_argument("--output_dir", type=str, help="Output directory for matches (batch mode)")
+    parser.add_argument("--scene", type=str, default=None, help="Scene name for timing metadata")
     
     # Matching options
-    parser.add_argument("--max_points", type=int, default=2000)
+    parser.add_argument("--max_points", type=int, default=2048)
     parser.add_argument("--max_lines", type=int, default=200)
     parser.add_argument("--use_mutual", action="store_true", default=True)
     parser.add_argument("--no_mutual", dest="use_mutual", action="store_false")
     parser.add_argument("--ratio_thresh", type=float, default=0.8)
+    parser.add_argument("--enable_ratio_test", action="store_true",
+                        help="Apply ratio_thresh in SuperPoint-keypoint mode. Default keeps historical MNN-only behavior.")
     
     # DIFT parameters
     parser.add_argument("--model_id", type=str, 
                         default="stable-diffusion-v1-5/stable-diffusion-v1-5")
-    parser.add_argument("--img_size", nargs="+", type=int, default=[1120, 1120],
-                        help="Image size for DIFT extraction (default: 1120x1120 to match preprocessing)")
+    parser.add_argument("--img_size", nargs="+", type=int, default=[768, 768],
+                        help="Image size for DIFT extraction (default: 768x768)")
     parser.add_argument("--t", type=int, default=261)
     parser.add_argument("--up_ft_index", type=int, choices=[0, 1, 2, 3], default=1)
     parser.add_argument("--prompt", type=str, default="")
@@ -213,6 +246,8 @@ def main():
     parser.add_argument("--device", type=str, default="cuda")
     parser.add_argument("--feature_cache", type=str, default=None,
                         help="Directory to cache extracted features")
+    parser.add_argument("--sp_cache_dir", type=str, default=None,
+                        help="Directory containing/raw-writing SuperPoint keypoint cache")
     parser.add_argument("--limit", type=int, default=None,
                         help="Limit number of pairs to process")
     parser.add_argument("--visualize", action="store_true")
@@ -220,6 +255,10 @@ def main():
                         help="Use SuperPoint-detected keypoints for fair comparison")
     parser.add_argument("--print_config_key", action="store_true",
                         help="Print the config key for this configuration and exit")
+    parser.add_argument("--raw_images", action="store_true",
+                        help="Compatibility flag: input images are raw and DIFT resizes internally")
+    parser.add_argument("--timing_output", type=str, default=None,
+                        help="Path to write per-pair and per-image timing JSON")
 
     args = parser.parse_args()
 
@@ -232,6 +271,8 @@ def main():
         args.feature_cache = PROJECT_ROOT / "datasets" / "dift_features"
     feature_cache_dir = Path(args.feature_cache)
     feature_cache_dir.mkdir(parents=True, exist_ok=True)
+    device = torch.device(args.device if torch.cuda.is_available() else "cpu")
+    reset_peak_memory(device)
 
     if args.pairs_file and args.output_dir:
         # Batch mode
@@ -255,6 +296,11 @@ def main():
         print(f"[DIFT] Loading Stable Diffusion model: {args.model_id}")
         dift_model = SDFeaturizer(sd_id=args.model_id, device=args.device)
         print(f"[DIFT] Model loaded successfully")
+        pair_timings = []
+        feature_timings = []
+        seen_images = set()
+        skipped_existing = 0
+        skipped_missing = 0
         
         for img1_name, img2_name in tqdm(pairs, desc="Matching"):
             img1_path = images_dir / img1_name
@@ -265,19 +311,49 @@ def main():
             output_path = output_dir / f"{pair_name}.npz"
             
             if output_path.exists():
+                skipped_existing += 1
                 continue
             
             if not img1_path.exists() or not img2_path.exists():
                 print(f"[DIFT] Skipping pair: {img1_name}, {img2_name}")
+                skipped_missing += 1
                 continue
             
+            t_start = time.time()
             mkpts0, mkpts1, _, _ = process_pair(
-                img1_path, img2_path, dift_model, feature_cache_dir, args
+                img1_path,
+                img2_path,
+                dift_model,
+                feature_cache_dir,
+                args,
+                feature_timings=feature_timings,
+                seen_images=seen_images,
             )
             
             save_matches(output_path, mkpts0, mkpts1)
+            pair_timings.append(
+                {
+                    "img0": img1_name,
+                    "img1": img2_name,
+                    "time_ms": (time.time() - t_start) * 1000.0,
+                    "num_matches": int(len(mkpts0)),
+                }
+            )
         
         print(f"[DIFT] Saved matches to {output_dir}")
+        save_timing_json(
+            args.timing_output,
+            config_key=get_config_key(args),
+            scene=args.scene or output_dir.name,
+            pair_timings=pair_timings,
+            feature_timings=feature_timings,
+            peak_mem_mb=current_peak_memory_mb(device),
+            extra={
+                "skipped_existing": skipped_existing,
+                "skipped_missing": skipped_missing,
+                "coordinate_frame": "raw",
+            },
+        )
         
     elif args.img1 and args.img2:
         # Single-pair mode
@@ -288,9 +364,24 @@ def main():
         print(f"[DIFT] Loading Stable Diffusion model: {args.model_id}")
         dift_model = SDFeaturizer(sd_id=args.model_id, device=args.device)
         
+        feature_timings = []
+        seen_images = set()
+        t_start = time.time()
         mkpts0, mkpts1, orig_size1, orig_size2 = process_pair(
-            img1_path, img2_path, dift_model, feature_cache_dir, args
+            img1_path,
+            img2_path,
+            dift_model,
+            feature_cache_dir,
+            args,
+            feature_timings=feature_timings,
+            seen_images=seen_images,
         )
+        pair_timings = [{
+            "img0": img1_path.name,
+            "img1": img2_path.name,
+            "time_ms": (time.time() - t_start) * 1000.0,
+            "num_matches": int(len(mkpts0)),
+        }]
         
         print(f"[DIFT] Found {len(mkpts0)} matches")
         
@@ -299,6 +390,15 @@ def main():
             output_dir.mkdir(parents=True, exist_ok=True)
             pair_name = f"{img1_path.stem}__{img2_path.stem}"
             save_matches(output_dir / f"{pair_name}.npz", mkpts0, mkpts1)
+        save_timing_json(
+            args.timing_output,
+            config_key=get_config_key(args),
+            scene=args.scene or "single_pair",
+            pair_timings=pair_timings,
+            feature_timings=feature_timings,
+            peak_mem_mb=current_peak_memory_mb(device),
+            extra={"coordinate_frame": "raw"},
+        )
         
         if args.visualize or not args.output_dir:
             img1_np = np.array(Image.open(img1_path).convert("RGB").resize(tuple(args.img_size)))

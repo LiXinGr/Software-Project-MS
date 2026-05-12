@@ -14,14 +14,48 @@ import torch
 from PIL import Image
 import torchvision.transforms as T
 import timm
-from util import compute_matches, visualize_matches, match_dense_features, save_matches, match_at_keypoints, get_superpoint_keypoints
 import argparse
 from pathlib import Path
 import numpy as np
 from tqdm import tqdm
+import time
+
+from util import (
+    compute_matches,
+    visualize_matches,
+    match_dense_features,
+    save_matches,
+    match_at_keypoints,
+    get_superpoint_keypoints,
+    preprocess_image,
+    map_points_to_original,
+    reset_peak_memory,
+    current_peak_memory_mb,
+    timed_feature_load,
+    save_timing_json,
+)
 
 
 PATCH_SIZE = 16  # DINOv3 ViT-Large uses patch size 16
+
+
+def _map_keypoints_to_preprocessed(kpts, info, device):
+    if kpts.numel() == 0:
+        return kpts.to(device)
+    out = kpts.clone().float().to(device)
+    out[:, 0] = out[:, 0] * info.scale + info.pad_left
+    out[:, 1] = out[:, 1] * info.scale + info.pad_top
+    return out
+
+
+def _map_points_to_original_np(points, info):
+    if len(points) == 0:
+        return points
+    mapped = map_points_to_original(points, info).astype(np.float32, copy=False)
+    h, w = info.orig_size
+    mapped[:, 0] = np.clip(mapped[:, 0], 0, w - 1)
+    mapped[:, 1] = np.clip(mapped[:, 1], 0, h - 1)
+    return mapped
 
 
 def get_config_key(args):
@@ -29,6 +63,7 @@ def get_config_key(args):
     parts = ["dinov3", f"l{args.feat_level}"]
     if args.snap_to_grid:
         parts.append("gridalign")
+        parts.append(f"out{args.snap_output_coords}")
     elif args.dense_grid:
         parts.append("dense16")
     elif args.use_sp_keypoints:
@@ -116,6 +151,7 @@ def _match_at_grid_indices(
     out_py1=None,
     out_px2=None,
     out_py2=None,
+    max_matches=None,
 ):
     """
     Match DINOv3 features at exact grid indices (no bilinear interpolation).
@@ -162,6 +198,7 @@ def _match_at_grid_indices(
         mutual_mask = rev_best_i[best_j] == rows_all
         rows = rows_all[mutual_mask]
         best_j = best_j[mutual_mask]
+        best_sim = best_sim[mutual_mask]
         if rows.numel() == 0:
             return np.zeros((0, 2)), np.zeros((0, 2))
 
@@ -172,8 +209,14 @@ def _match_at_grid_indices(
         good = ratio[rows] >= sim_ratio_thresh
         rows = rows[good]
         best_j = best_j[good]
+        best_sim = best_sim[good]
         if rows.numel() == 0:
             return np.zeros((0, 2)), np.zeros((0, 2))
+
+    if max_matches is not None and rows.numel() > max_matches:
+        order = torch.argsort(best_sim, descending=True, stable=True)[:max_matches]
+        rows = rows[order]
+        best_j = best_j[order]
 
     mkpts0 = torch.stack([out_px1[rows], out_py1[rows]], dim=1).cpu().numpy()
     mkpts1 = torch.stack([out_px2[best_j], out_py2[best_j]], dim=1).cpu().numpy()
@@ -185,26 +228,36 @@ def run_dinov3_extractor(
     model,
     transform,
     feat_level,
+    target_long_edge=1120,
     cache_dir=None,
 ):
     """
     Extract a single DINOv3 feature map [C, H_feat, W_feat] for one image.
-    Loads the preprocessed image at its native resolution (no square resize).
-    Pads height/width to the nearest multiple of PATCH_SIZE if needed.
-    Returns the feature map and original image size (H, W) in pixel coordinates.
+    Loads the raw image, resizes its long edge to target_long_edge, then pads to
+    a PATCH_SIZE multiple for DINOv3. Returns the feature map, raw image size,
+    and preprocessing info for coordinate mapping.
     """
     img = Image.open(img_path).convert("RGB")
-    W, H = img.size  # PIL gives (W, H)
-    orig_size = (H, W)  # keep numpy convention (H, W) for downstream coordinate mapping
+    raw_W, raw_H = img.size  # PIL gives (W, H)
+    raw_size = (raw_H, raw_W)
+    img_proc, prep_info = preprocess_image(
+        img,
+        target_long_edge=target_long_edge,
+        divisibility=PATCH_SIZE,
+        return_info=True,
+    )
+    W, H = img_proc.size
 
     # Check cache — key encodes actual image dimensions
     cache_path = None
     if cache_dir is not None:
-        cache_path = Path(cache_dir) / f"{Path(img_path).stem}_dinov3_{W}x{H}_l{feat_level}.pt"
+        cache_path = Path(cache_dir) / (
+            f"{Path(img_path).stem}_dinov3_raw{raw_W}x{raw_H}_prep{W}x{H}_l{feat_level}.pt"
+        )
         if cache_path.exists():
-            return torch.load(cache_path), orig_size
+            return (torch.load(cache_path), raw_size, prep_info), True
 
-    x = transform(img).unsqueeze(0).to(next(model.parameters()).device)  # [1, 3, H, W]
+    x = transform(img_proc).unsqueeze(0).to(next(model.parameters()).device)  # [1, 3, H, W]
 
     # Pad to nearest multiple of patch size (preprocessed images are already div-by-16,
     # but guard against edge cases)
@@ -223,21 +276,42 @@ def run_dinov3_extractor(
         cache_path.parent.mkdir(parents=True, exist_ok=True)
         torch.save(ft, cache_path)
 
-    return ft, orig_size
+    return (ft, raw_size, prep_info), False
 
 
-def process_pair(img1_path, img2_path, model, transform, args, feature_cache=None):
+def process_pair(
+    img1_path,
+    img2_path,
+    model,
+    transform,
+    args,
+    feature_cache=None,
+    feature_timings=None,
+    seen_images=None,
+):
     """Process a single pair and return mkpts0, mkpts1."""
-    ft1, orig_size1 = run_dinov3_extractor(
-        img1_path, model, transform,
-        args.feat_level,
-        cache_dir=feature_cache,
+    ft1, orig_size1, prep_info1 = timed_feature_load(
+        str(img1_path),
+        feature_timings,
+        seen_images,
+        lambda: run_dinov3_extractor(
+            img1_path, model, transform,
+            args.feat_level,
+            target_long_edge=args.img_size,
+            cache_dir=feature_cache,
+        ),
     )
 
-    ft2, orig_size2 = run_dinov3_extractor(
-        img2_path, model, transform,
-        args.feat_level,
-        cache_dir=feature_cache,
+    ft2, orig_size2, prep_info2 = timed_feature_load(
+        str(img2_path),
+        feature_timings,
+        seen_images,
+        lambda: run_dinov3_extractor(
+            img2_path, model, transform,
+            args.feat_level,
+            target_long_edge=args.img_size,
+            cache_dir=feature_cache,
+        ),
     )
     
 
@@ -249,16 +323,25 @@ def process_pair(img1_path, img2_path, model, transform, args, feature_cache=Non
     
     if args.snap_to_grid:
         # Mode A: Snap SuperPoint keypoints to nearest DINOv3 patch center
-        sp_cache = Path(feature_cache).parent / 'superpoint_kpts' if feature_cache else None
+        sp_cache = Path(args.sp_cache_dir) if args.sp_cache_dir else (Path(feature_cache).parent / 'superpoint_kpts' if feature_cache else None)
         kpts1_original = get_superpoint_keypoints(img1_path, device=device, max_keypoints=args.max_points, cache_dir=sp_cache)
         kpts2_original = get_superpoint_keypoints(img2_path, device=device, max_keypoints=args.max_points, cache_dir=sp_cache)
+        kpts1_prep = _map_keypoints_to_preprocessed(kpts1_original, prep_info1, device)
+        kpts2_prep = _map_keypoints_to_preprocessed(kpts2_original, prep_info2, device)
 
         hi1, wi1, px1_snap, py1_snap, px1_orig, py1_orig = _snap_to_grid_indices(
-            kpts1_original.cpu(), ft1.shape[1:], device
+            kpts1_prep.cpu(), ft1.shape[1:], device
         )
         hi2, wi2, px2_snap, py2_snap, px2_orig, py2_orig = _snap_to_grid_indices(
-            kpts2_original.cpu(), ft2.shape[1:], device
+            kpts2_prep.cpu(), ft2.shape[1:], device
         )
+
+        if args.snap_output_coords == "snapped":
+            out_px1, out_py1 = px1_snap, py1_snap
+            out_px2, out_py2 = px2_snap, py2_snap
+        else:
+            out_px1, out_py1 = px1_orig, py1_orig
+            out_px2, out_py2 = px2_orig, py2_orig
 
         mkpts0, mkpts1 = _match_at_grid_indices(
             ft1, ft2,
@@ -266,11 +349,14 @@ def process_pair(img1_path, img2_path, model, transform, args, feature_cache=Non
             hi2, wi2, px2_snap, py2_snap,
             use_mutual=args.use_mutual,
             ratio_thresh=args.ratio_thresh,
-            out_px1=px1_orig,
-            out_py1=py1_orig,
-            out_px2=px2_orig,
-            out_py2=py2_orig,
+            out_px1=out_px1,
+            out_py1=out_py1,
+            out_px2=out_px2,
+            out_py2=out_py2,
+            max_matches=args.max_points,
         )
+        mkpts0 = _map_points_to_original_np(mkpts0, prep_info1)
+        mkpts1 = _map_points_to_original_np(mkpts1, prep_info2)
     elif args.dense_grid:
         # Mode B: Use all DINOv3 patch centers as keypoints
         hi1, wi1, px1, py1 = _get_dense_grid_indices(ft1.shape[1:], device)
@@ -282,31 +368,40 @@ def process_pair(img1_path, img2_path, model, transform, args, feature_cache=Non
             hi2, wi2, px2, py2,
             use_mutual=args.use_mutual,
             ratio_thresh=args.ratio_thresh,
+            max_matches=args.max_points,
         )
+        mkpts0 = _map_points_to_original_np(mkpts0, prep_info1)
+        mkpts1 = _map_points_to_original_np(mkpts1, prep_info2)
     elif args.use_sp_keypoints:
         # Original SP mode: bilinear interpolation at SuperPoint keypoints
-        sp_cache = Path(feature_cache).parent / 'superpoint_kpts' if feature_cache else None
-        kpts1 = get_superpoint_keypoints(img1_path, device=device, max_keypoints=args.max_points, cache_dir=sp_cache)
-        kpts2 = get_superpoint_keypoints(img2_path, device=device, max_keypoints=args.max_points, cache_dir=sp_cache)
+        sp_cache = Path(args.sp_cache_dir) if args.sp_cache_dir else (Path(feature_cache).parent / 'superpoint_kpts' if feature_cache else None)
+        kpts1_raw = get_superpoint_keypoints(img1_path, device=device, max_keypoints=args.max_points, cache_dir=sp_cache)
+        kpts2_raw = get_superpoint_keypoints(img2_path, device=device, max_keypoints=args.max_points, cache_dir=sp_cache)
+        kpts1 = _map_keypoints_to_preprocessed(kpts1_raw, prep_info1, device)
+        kpts2 = _map_keypoints_to_preprocessed(kpts2_raw, prep_info2, device)
 
-        mkpts0, mkpts1 = match_at_keypoints(
+        mkpts0_prep, mkpts1_prep = match_at_keypoints(
             ft1, ft2,
             kpts1, kpts2,
-            img_size1=orig_size1,
-            img_size2=orig_size2,
+            img_size1=prep_info1.final_size,
+            img_size2=prep_info2.final_size,
             use_mutual=args.use_mutual,
             ratio_thresh=args.ratio_thresh,
         )
+        mkpts0 = _map_points_to_original_np(mkpts0_prep, prep_info1)
+        mkpts1 = _map_points_to_original_np(mkpts1_prep, prep_info2)
     else:
         # Original dense mode: random sampling with bilinear interpolation
-        mkpts0, mkpts1 = match_dense_features(
+        mkpts0_prep, mkpts1_prep = match_dense_features(
             ft1, ft2,
-            img_size1=orig_size1,
-            img_size2=orig_size2,
+            img_size1=prep_info1.final_size,
+            img_size2=prep_info2.final_size,
             max_points=args.max_points,
             use_mutual=args.use_mutual,
             ratio_thresh=args.ratio_thresh,
         )
+        mkpts0 = _map_points_to_original_np(mkpts0_prep, prep_info1)
+        mkpts1 = _map_points_to_original_np(mkpts1_prep, prep_info2)
     
     return mkpts0, mkpts1, orig_size1, orig_size2
 
@@ -322,8 +417,9 @@ def main():
     
     # Batch mode
     parser.add_argument("--pairs_file", type=str, help="Path to pairs.txt (batch mode)")
-    parser.add_argument("--images_dir", type=str, help="Base directory for images (batch mode)")
+    parser.add_argument("--images_dir", "--image_dir", dest="images_dir", type=str, help="Base directory for images (batch mode)")
     parser.add_argument("--output_dir", type=str, help="Output directory for matches (batch mode)")
+    parser.add_argument("--scene", type=str, default=None, help="Scene name for timing metadata")
     
     # Model parameters
     parser.add_argument("--img_size", type=int, default=1120, 
@@ -339,6 +435,8 @@ def main():
     parser.add_argument("--device", type=str, default="cuda")
     parser.add_argument("--feature_cache", type=str, default=None,
                         help="Directory to cache extracted features")
+    parser.add_argument("--sp_cache_dir", type=str, default=None,
+                        help="Directory containing/raw-writing SuperPoint keypoint cache")
     parser.add_argument("--limit", type=int, default=None,
                         help="Limit number of pairs to process")
     parser.add_argument("--visualize", action="store_true",
@@ -347,10 +445,16 @@ def main():
                         help="Use SuperPoint-detected keypoints with bilinear interpolation (original SP mode)")
     parser.add_argument("--snap_to_grid", action="store_true",
                         help="Mode A: snap SuperPoint keypoints to nearest DINOv3 patch center (no interpolation)")
+    parser.add_argument("--snap_output_coords", choices=["original", "snapped"], default="original",
+                        help="For --snap_to_grid, report either original SuperPoint coords or snapped patch-center coords")
     parser.add_argument("--dense_grid", action="store_true",
                         help="Mode B: use all DINOv3 patch centers as keypoints (no SuperPoint, no interpolation)")
     parser.add_argument("--print_config_key", action="store_true",
                         help="Print the config key for this configuration and exit")
+    parser.add_argument("--raw_images", action="store_true",
+                        help="Compatibility flag: input images are raw and internally resized for DINOv3")
+    parser.add_argument("--timing_output", type=str, default=None,
+                        help="Path to write per-pair and per-image timing JSON")
 
     args = parser.parse_args()
 
@@ -383,6 +487,7 @@ def main():
     )
     model.to(device)
     model.eval()
+    reset_peak_memory(device)
 
     # Use model-specific normalization (ImageNet stats for DINOv3)
     data_config = timm.data.resolve_model_data_config(model)
@@ -410,6 +515,11 @@ def main():
             pairs = pairs[:args.limit]
         
         print(f"[DINOv3] Processing {len(pairs)} pairs...")
+        pair_timings = []
+        feature_timings = []
+        seen_images = set()
+        skipped_existing = 0
+        skipped_missing = 0
         
         for img1_name, img2_name in tqdm(pairs, desc="Matching"):
             img1_path = images_dir / img1_name
@@ -420,31 +530,69 @@ def main():
             output_path = output_dir / f"{pair_name}.npz"
             
             if output_path.exists():
+                skipped_existing += 1
                 continue
             
             if not img1_path.exists() or not img2_path.exists():
                 print(f"[DINOv3] Skipping pair: {img1_name}, {img2_name} (file not found)")
+                skipped_missing += 1
                 continue
             
+            t_start = time.time()
             mkpts0, mkpts1, _, _ = process_pair(
                 img1_path, img2_path, model, transform, args,
-                feature_cache=args.feature_cache
+                feature_cache=args.feature_cache,
+                feature_timings=feature_timings,
+                seen_images=seen_images,
             )
             
             # Save matches
             save_matches(output_path, mkpts0, mkpts1)
+            pair_timings.append(
+                {
+                    "img0": img1_name,
+                    "img1": img2_name,
+                    "time_ms": (time.time() - t_start) * 1000.0,
+                    "num_matches": int(len(mkpts0)),
+                }
+            )
         
         print(f"[DINOv3] Saved matches to {output_dir}")
+        save_timing_json(
+            args.timing_output,
+            config_key=get_config_key(args),
+            scene=args.scene or output_dir.name,
+            pair_timings=pair_timings,
+            feature_timings=feature_timings,
+            peak_mem_mb=current_peak_memory_mb(device),
+            extra={
+                "skipped_existing": skipped_existing,
+                "skipped_missing": skipped_missing,
+                "target_long_edge": args.img_size,
+                "coordinate_frame": "raw",
+            },
+        )
         
     elif args.img1 and args.img2:
         # Single-pair mode (backward compatible)
         img1_path = Path(args.img1)
         img2_path = Path(args.img2)
         
+        feature_timings = []
+        seen_images = set()
+        t_start = time.time()
         mkpts0, mkpts1, orig_size1, orig_size2 = process_pair(
             img1_path, img2_path, model, transform, args,
-            feature_cache=args.feature_cache
+            feature_cache=args.feature_cache,
+            feature_timings=feature_timings,
+            seen_images=seen_images,
         )
+        pair_timings = [{
+            "img0": img1_path.name,
+            "img1": img2_path.name,
+            "time_ms": (time.time() - t_start) * 1000.0,
+            "num_matches": int(len(mkpts0)),
+        }]
         
         print(f"[DINOv3] Found {len(mkpts0)} matches")
         
@@ -454,6 +602,15 @@ def main():
             output_dir.mkdir(parents=True, exist_ok=True)
             pair_name = f"{img1_path.stem}__{img2_path.stem}"
             save_matches(output_dir / f"{pair_name}.npz", mkpts0, mkpts1)
+        save_timing_json(
+            args.timing_output,
+            config_key=get_config_key(args),
+            scene=args.scene or "single_pair",
+            pair_timings=pair_timings,
+            feature_timings=feature_timings,
+            peak_mem_mb=current_peak_memory_mb(device),
+            extra={"target_long_edge": args.img_size, "coordinate_frame": "raw"},
+        )
         
         # Visualize if requested or in single-pair mode by default
         if args.visualize or not args.output_dir:

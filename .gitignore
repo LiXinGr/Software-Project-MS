@@ -1,13 +1,46 @@
+# Local environments
 .venv/
 .envrc
 
-# Python bytecode
+# Python caches
 __pycache__/
 *.py[cod]
 *$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
 
-# Large data files
-datasets/phototourism
+# Temporary and editor files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.nfs*
+res_*
+
+# Generated run outputs
+output/
+output_*/
+output_v2/
+cache/
+cache_*/
+logs/
+*.log
+benchmark*.log
+Pictures/
+backup_before_*/
+thesis_dirty_*
+figures/
+
+# Keep only final curated documentation visible by default
+docs/*
+!docs/.gitkeep
+!docs/final_artifacts.md
+
+# Large data and model artifacts
+datasets/phototourism/
 data/sparse_train/
 data/sparse_train_lora/
 data/sparse_train_lora_v3clean/
@@ -16,37 +49,47 @@ data/gf_cache_*/
 data/lightglue_training/
 data/revisitop1m_stage1/
 data/smoke_0046_image_names.txt
-*.tar.gz
-*.npy
-*.h5
+experiments/
 *.pt
+*.pth
+*.ckpt
+*.tar
+*.tar.gz
+*.h5
+*.npz
+*.npy
 
-# Ignore everything under output
-output/**
-output_1
+# External dependencies are mostly local checkouts.
+# Only track small local patches needed by the thesis evaluation pipeline.
+external/*
 
-# Re-include results and its subfolders
-!output/results/
-!output/results/**/
-!output/results/**/*.csv
-!output/results/**/*.txt
+!external/DIFT/
+external/DIFT/*
+!external/DIFT/src/
+external/DIFT/src/*
+!external/DIFT/src/models/
+external/DIFT/src/models/*
+!external/DIFT/src/models/dift_sd.py
 
-# Explicit large/generated files still ignored
-output/pairs_reichstag.txt
-output/pairs_sacre_coeur.txt
-output/pairs_st_peters_square.txt
+!external/RePoseD/
+external/RePoseD/*
+!external/RePoseD/eval.py
+!external/RePoseD/eval_shared_f.py
+!external/RePoseD/eval_varying_f.py
+!external/RePoseD/utils/
+external/RePoseD/utils/*
+!external/RePoseD/utils/result_summary.py
 
-cache*
-*.log
 
-# External dependencies
-external/
-
-benchmark*
-.nfs*
-
-docs
-figures
-
-res_*
-output/results/**/*.json
+chapter4_*_evidence_report.md
+rerun_config.json
+run_full_rerun.sh
+plots/
+scripts/ch4_missing_common.sh
+scripts/chapter5_finalize_screen.sh
+scripts/run_ch4_missing_*.sh
+scripts/run_ch5_ch6_eval_repair.sh
+scripts/wait_ch5_early_results.sh
+scripts/cache_gluefactory_features.py
+scripts/cache_revisitop1m_features.py
+scripts/cache_superpoint_raw.py
