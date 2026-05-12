@@ -54,7 +54,7 @@ from train_lora import (
     merge_lora_into_model,
 )
 from train_projection_head import ProjectionHead
-from util import get_superpoint_keypoints, save_matches, visualize_matches
+from util import get_superpoint_keypoints, preprocess_image, save_matches, visualize_matches
 
 
 # ---------------------------------------------------------------------------
@@ -64,6 +64,7 @@ from util import get_superpoint_keypoints, save_matches, visualize_matches
 def load_lora_checkpoint(
     checkpoint_path: Path,
     device: torch.device,
+    feat_level_override: Optional[int] = None,
 ) -> tuple:
     """Load DINOv3 with LoRA merged into base weights + projection head.
 
@@ -75,7 +76,7 @@ def load_lora_checkpoint(
     rank = int(cfg.get("lora_rank", 4))
     lora_alpha = float(cfg.get("lora_alpha", 8.0))
     lora_dropout = float(cfg.get("lora_dropout", 0.0))
-    feat_level = int(cfg.get("feat_level", DINOV3_FEAT_LEVEL))
+    feat_level = int(feat_level_override if feat_level_override is not None else cfg.get("feat_level", DINOV3_FEAT_LEVEL))
 
     out_idx = DINOV3_NUM_BLOCKS + feat_level if feat_level < 0 else feat_level
 
@@ -146,20 +147,30 @@ def run_lora_dinov3(
     feat_level: int,
     cache_dir: Optional[Path],
 ) -> tuple:
-    """Extract [C, H/16, W/16] feature map and original (H, W)."""
+    """Extract [C, H/16, W/16] feature map with raw-to-DINO preprocessing info."""
     img = Image.open(img_path).convert("RGB")
     W, H = img.size
     orig_size = (H, W)
+    target_long_edge = int(getattr(run_lora_dinov3, "target_long_edge", 1120))
+    img_proc, prep_info = preprocess_image(
+        img,
+        target_long_edge=target_long_edge,
+        divisibility=PATCH_SIZE,
+        return_info=True,
+    )
+    proc_W, proc_H = img_proc.size
 
     if cache_dir is not None:
-        cache_path = cache_dir / f"{img_path.stem}_lora_dinov3_{W}x{H}_l{feat_level}.pt"
+        cache_path = cache_dir / (
+            f"{img_path.stem}_lora_dinov3_raw{W}x{H}_prep{proc_W}x{proc_H}_l{feat_level}.pt"
+        )
         if cache_path.exists():
-            return torch.load(cache_path, map_location="cpu"), orig_size
+            return torch.load(cache_path, map_location="cpu"), orig_size, prep_info
 
     device = next(model.parameters()).device
-    x = transform(img).unsqueeze(0).to(device)
-    pad_h = (PATCH_SIZE - H % PATCH_SIZE) % PATCH_SIZE
-    pad_w = (PATCH_SIZE - W % PATCH_SIZE) % PATCH_SIZE
+    x = transform(img_proc).unsqueeze(0).to(device)
+    pad_h = (PATCH_SIZE - proc_H % PATCH_SIZE) % PATCH_SIZE
+    pad_w = (PATCH_SIZE - proc_W % PATCH_SIZE) % PATCH_SIZE
     if pad_h > 0 or pad_w > 0:
         x = F.pad(x, (0, pad_w, 0, pad_h))
     ft = model(x)[0].squeeze(0).cpu()  # (C, H_feat, W_feat)
@@ -168,7 +179,7 @@ def run_lora_dinov3(
         cache_dir.mkdir(parents=True, exist_ok=True)
         torch.save(ft, cache_path)
 
-    return ft, orig_size
+    return ft, orig_size, prep_info
 
 
 def load_dift_feature(img_path: Path, args: argparse.Namespace, dift_cache_dir: Path):
@@ -215,9 +226,15 @@ def _get_bundle(
     ).cpu().float()
 
     # LoRA DINOv3 features
-    dino_ft, orig_size = run_lora_dinov3(img_path, lora_model, transform, feat_level, dino_cache_dir)
+    run_lora_dinov3.target_long_edge = int(getattr(args, "dino_img_size", 1120))
+    dino_ft, orig_size, prep_info = run_lora_dinov3(
+        img_path, lora_model, transform, feat_level, dino_cache_dir
+    )
     dino_ft = dino_ft.to(device)
-    dino_desc = l2_normalize(fusion_sample(dino_ft, kpts, orig_size, device))  # (N, 1024)
+    kpts_dino = kpts.clone()
+    kpts_dino[:, 0] = kpts_dino[:, 0] * prep_info.scale + prep_info.pad_left
+    kpts_dino[:, 1] = kpts_dino[:, 1] * prep_info.scale + prep_info.pad_top
+    dino_desc = l2_normalize(fusion_sample(dino_ft, kpts_dino, prep_info.final_size, device))  # (N, 1024)
 
     if dinov3_only:
         # Stage 4: projection head operates on 1024-dim DINOv3 features only
@@ -287,6 +304,8 @@ def main() -> None:
     parser.add_argument("--no_mutual", dest="use_mutual", action="store_false")
     parser.add_argument("--ratio_thresh", type=float, default=None)
     parser.add_argument("--img_size", nargs="+", type=int, default=[768, 768])
+    parser.add_argument("--dino_img_size", type=int, default=1120)
+    parser.add_argument("--feat_level", type=int, default=None)
     parser.add_argument("--t", type=int, default=0)
     parser.add_argument("--up_ft_index", type=int, default=2)
     parser.add_argument("--ensemble_size", type=int, default=8)
@@ -309,11 +328,13 @@ def main() -> None:
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
     lora_ckpt_path = Path(args.lora_checkpoint)
 
-    lora_model, transform, proj_head, ckpt_cfg = load_lora_checkpoint(lora_ckpt_path, device)
+    lora_model, transform, proj_head, ckpt_cfg = load_lora_checkpoint(
+        lora_ckpt_path, device, feat_level_override=args.feat_level
+    )
     args.lora_rank_from_ckpt = int(ckpt_cfg.get("lora_rank", args.lora_rank_hint))
     args.dinov3_only = ckpt_cfg.get("dinov3_only", False)
 
-    feat_level = int(ckpt_cfg.get("feat_level", DINOV3_FEAT_LEVEL))
+    feat_level = int(args.feat_level if args.feat_level is not None else ckpt_cfg.get("feat_level", DINOV3_FEAT_LEVEL))
     scene_name = infer_scene_name(args)
 
     # Cache dirs

@@ -71,9 +71,15 @@ def _get_bundle(
     ).cpu().float()
 
     # LoRA-DINOv3 features
-    dino_ft, orig_size = run_lora_dinov3(img_path, lora_model, transform, feat_level, dino_cache_dir)
+    run_lora_dinov3.target_long_edge = int(getattr(args, "dino_img_size", 1120))
+    dino_ft, orig_size, prep_info = run_lora_dinov3(
+        img_path, lora_model, transform, feat_level, dino_cache_dir
+    )
     dino_ft = dino_ft.to(device)
-    dino_desc = l2_normalize(fusion_sample(dino_ft, kpts, orig_size, device))  # (N, 1024)
+    kpts_dino = kpts.clone()
+    kpts_dino[:, 0] = kpts_dino[:, 0] * prep_info.scale + prep_info.pad_left
+    kpts_dino[:, 1] = kpts_dino[:, 1] * prep_info.scale + prep_info.pad_top
+    dino_desc = l2_normalize(fusion_sample(dino_ft, kpts_dino, prep_info.final_size, device))  # (N, 1024)
 
     # Precomputed DIFT features
     dift_ft, _ = load_dift_feature(img_path, args, dift_cache_dir)
@@ -108,6 +114,8 @@ def main() -> None:
     parser.add_argument("--images_dir", type=str)
     parser.add_argument("--output_dir", type=str)
     parser.add_argument("--max_points", type=int, default=2000)
+    parser.add_argument("--dino_img_size", type=int, default=1120)
+    parser.add_argument("--feat_level", type=int, default=None)
     parser.add_argument("--alpha", type=float, default=DEFAULT_ALPHA)
     parser.add_argument("--use_mutual", action="store_true", default=True)
     parser.add_argument("--no_mutual", dest="use_mutual", action="store_false")
@@ -134,9 +142,11 @@ def main() -> None:
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
     lora_ckpt_path = Path(args.lora_checkpoint)
 
-    lora_model, transform, _, ckpt_cfg = load_lora_checkpoint(lora_ckpt_path, device)
+    lora_model, transform, _, ckpt_cfg = load_lora_checkpoint(
+        lora_ckpt_path, device, feat_level_override=args.feat_level
+    )
     args.lora_rank_from_ckpt = int(ckpt_cfg.get("lora_rank", args.lora_rank_hint))
-    feat_level = int(ckpt_cfg.get("feat_level", DINOV3_FEAT_LEVEL))
+    feat_level = int(args.feat_level if args.feat_level is not None else ckpt_cfg.get("feat_level", DINOV3_FEAT_LEVEL))
     scene_name = infer_scene_name(args)
 
     cache_root = Path(args.cache_root)
